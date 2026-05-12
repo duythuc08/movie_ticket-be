@@ -35,3 +35,4 @@ build/
 # YAML
 *.yaml
 *.yml
+*.md
