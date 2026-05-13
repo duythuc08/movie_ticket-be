@@ -27,66 +27,11 @@ public class SecurityConfig {
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
-    private final String[] PUBLIC_ENDPOINTS = {
-            "/auth/login",
-            "/auth/introspect",
-            "/auth/logout",
-            "/auth/refresh",
-            "/auth/register",
-            "/auth/verify",
-            "/auth/resendOTP",
-            "/auth/forgot-password",
-            "/auth/reset-password",
-            "/movies/*",
-            "/movies/showing",
-            "/movies/comingSoon",
-            "/movies/imax",
-            "/movies/getMovies",
-            "/banners/getBanners/**",
-            "/banners/getBannerByMovieId/*",
-            "/cinemas/getCinemas",
-            "/cinemas/getCinema/*",
-            "/rooms/getRooms/**",
-            "/showtimes/getShowTimes/**",
-            "/showtimes/getShowTimes/by-cinema/**",
-            "/showtimes/getShowTimes/active/by-movie/**",
-            "/showtimes/movies-by-cinema/**",
-            "/showtimes/cinemas-by-movie/**",
-            "/showtimes/now-showing-movies",
-            "/showtimes/dates",
-            "/showtimes/slots",
-            "/movies/showing/paged",
-            "/movies/comingSoon/paged",
-            "/movies/imax/paged",
-            "/payment/vnpay-callback",
-
-
-    };
-    private final String[] ADMIN_ENDPOINTS = {
-            "/users",
-            "/genre",
-            "/movies",
-            "/api/files/upload",
-            "/banners",
-            "/cinemas",
-            "/cinemas/bluk",
-            "/rooms",
-            "/rooms/bluk",
-            "/showtimes",
-            "/showtimes/bluk",
-
-    };
-
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        // Cấu hình quyền truy cập cho các endpoint
+        // Phân quyền hoàn toàn qua @PreAuthorize ở service layer
         httpSecurity.authorizeHttpRequests(request ->
-                request
-                        .requestMatchers( PUBLIC_ENDPOINTS).permitAll()
-                        .requestMatchers(ADMIN_ENDPOINTS).hasAuthority("ROLE_ADMIN")
-                        .anyRequest()
-                        .authenticated()
+                request.anyRequest().permitAll()
         );
 
         httpSecurity.oauth2ResourceServer(oauth2 ->
@@ -94,7 +39,6 @@ public class SecurityConfig {
                                 .decoder(customJwtDecoder)
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
-
         );
 
         httpSecurity
@@ -109,9 +53,7 @@ public class SecurityConfig {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
-
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
-
         return jwtAuthenticationConverter;
     }
 
@@ -128,6 +70,7 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
+
     @Bean
     PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder(10);
