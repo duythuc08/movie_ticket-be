@@ -63,7 +63,8 @@ public enum ErrorCode {
     INVALID_FOOD_SELECTION(1051,"Invalid food selection",HttpStatus.BAD_REQUEST),
     SEAT_ALREADY_BOOKED(1052,"Seat already booked",HttpStatus.BAD_REQUEST),
     INVALID_SEAT_DATA(1053,"Invalid seat data",HttpStatus.BAD_REQUEST),
-    PRICE_NOT_FOUND(1054,"Price not found",HttpStatus.NOT_FOUND),;
+    PRICE_NOT_FOUND(1054,"Price not found",HttpStatus.NOT_FOUND),
+    MEMBERSHIP_TIER_NOT_FOUND(1055,"Membership tier not found",HttpStatus.NOT_FOUND),;
     // Constructor để gán giá trị cho từng phần tử enum
     ErrorCode(int code, String message,HttpStatusCode statusCode) {
         this.code = code;
