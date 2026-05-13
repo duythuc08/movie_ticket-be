@@ -11,7 +11,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -25,10 +28,11 @@ import java.util.List;
 public class MovieController {
     MovieService movieService;
 
-    @PostMapping
-    ApiResponse<MovieResponse> createMovie(@RequestBody @Valid MovieCreationRequest request){
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<MovieResponse> createMovie(@RequestPart("request") @Valid MovieCreationRequest request,
+                                           @RequestPart(value = "poster", required = false) MultipartFile posterFile){
         return ApiResponse.<MovieResponse>builder()
-                .result(movieService.createMovie(request))
+                .result(movieService.createMovie(request, posterFile))
                 .message("Thêm phim mới thành công")
                 .build();
     }

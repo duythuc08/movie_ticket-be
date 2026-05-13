@@ -8,7 +8,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,10 +23,11 @@ import java.util.List;
 public class PersonController {
     private final PersonService personService;
 
-    @PostMapping
-    ApiResponse<PersonResponse> createPerson(@RequestBody PersonRequest personRequest) {
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    ApiResponse<PersonResponse> createPerson(@RequestPart("request") PersonRequest personRequest,
+                                             @RequestPart(value = "avatar", required = false) MultipartFile avatarFile) {
         return ApiResponse.<PersonResponse>builder()
-                .result(personService.createPerson(personRequest))
+                .result(personService.createPerson(personRequest, avatarFile))
                 .message("Thêm diễn viên thành công")
                 .build();
     }

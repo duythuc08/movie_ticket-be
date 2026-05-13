@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.movie.controller;
 
 import com.example.movie_ticket_be.movie.service.CloudinaryService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +19,7 @@ public class FileController {
         this.cloudinaryService = cloudinaryService;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/upload")
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         System.out.println("Received file: " + file.getOriginalFilename());
