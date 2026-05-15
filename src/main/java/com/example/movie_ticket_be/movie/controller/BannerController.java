@@ -9,11 +9,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.MediaType;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.bind.annotation.RequestPart;
 
 import java.util.List;
 
@@ -26,15 +23,20 @@ public class BannerController {
     BannerService bannerService;
 
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    ApiResponse<BannerResponse> createBanner(@RequestPart("request") @Valid BannerRequest bannerRequest,
-                                             @RequestPart(value = "image", required = false) MultipartFile imageFile){
+    @PostMapping
+    ApiResponse<BannerResponse> createBanner(@RequestBody @Valid BannerRequest bannerRequest){
         return ApiResponse.<BannerResponse>builder()
-                .result(bannerService.createBanner(bannerRequest, imageFile))
+                .result(bannerService.createBanner(bannerRequest))
                 .message("Thành công")
                 .build();
     }
 
+    @PostMapping("/postBanner")
+    public ApiResponse<BannerResponse> createBannerSingle(@RequestBody @Valid BannerRequest request) {
+        return ApiResponse.<BannerResponse>builder()
+                .result(bannerService.createBanner(request))
+                .build();
+    }
 
     @PostMapping("/postBanners")
     public ApiResponse<List<BannerResponse>> createBanners(@RequestBody List<BannerRequest> requests) {

@@ -23,9 +23,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -40,7 +38,6 @@ public class MovieService {
     MovieMapper movieMapper;
     private final GenreRepository genreRepository;
     private final PersonRepository personRepository;
-    private final CloudinaryService cloudinaryService;
 
     @PreAuthorize("hasRole('ADMIN')")
     public MovieResponse createMovie(MovieCreationRequest request){
@@ -68,46 +65,6 @@ public class MovieService {
         movie.setDirectors(directors);
 
         movie.setCreatedAt(LocalDateTime.now());
-
-        return movieMapper.toMovieResponse(movieRepository.save(movie));
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    public MovieResponse createMovie(MovieCreationRequest request, MultipartFile posterFile){
-        if(movieRepository.existsByTitle(request.getTitle())){
-            throw new AppException(ErrorCode.MOVIE_EXISTED);
-        }
-        Movies movie = movieMapper.toMovies(request);
-
-        Set<Genre> genres = request.getGenreName().stream()
-                .map(name -> genreRepository.findByName(name)
-                        .orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND)))
-                .collect(Collectors.toSet());
-        movie.setGenre(genres);
-
-        Set<Person> castPersons = request.getCastIds().stream()
-                .map(id -> personRepository.findById(id)
-                        .orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
-                .collect(Collectors.toSet());
-        movie.setCastPersons(castPersons);
-
-        Set<Person> directors = request.getDirectorIds().stream()
-                .map(id -> personRepository.findById(id)
-                        .orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
-                .collect(Collectors.toSet());
-        movie.setDirectors(directors);
-
-        movie.setCreatedAt(LocalDateTime.now());
-
-        if (posterFile != null && !posterFile.isEmpty()) {
-            try {
-                String url = cloudinaryService.uploadFile(posterFile);
-                movie.setPosterUrl(url);
-            } catch (IOException e) {
-                log.error("Failed to upload movie poster", e);
-                throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
-            }
-        }
 
         return movieMapper.toMovieResponse(movieRepository.save(movie));
     }
@@ -151,22 +108,22 @@ public class MovieService {
 
     public List<MovieResponse> getMoviesShowingPaged(int page, int size) {
         return movieRepository.findByMovieStatus(
-                MovieStatus.NOW_SHOWING,
-                PageRequest.of(page, size, Sort.by("movieId").descending()))
+                        MovieStatus.NOW_SHOWING,
+                        PageRequest.of(page, size, Sort.by("movieId").descending()))
                 .getContent().stream().map(movieMapper::toMovieResponse).toList();
     }
 
     public List<MovieResponse> getMoviesComingSoonPaged(int page, int size) {
         return movieRepository.findByMovieStatus(
-                MovieStatus.COMING_SOON,
-                PageRequest.of(page, size, Sort.by("movieId").descending()))
+                        MovieStatus.COMING_SOON,
+                        PageRequest.of(page, size, Sort.by("movieId").descending()))
                 .getContent().stream().map(movieMapper::toMovieResponse).toList();
     }
 
     public List<MovieResponse> getMoviesImaxPaged(int page, int size) {
         return movieRepository.findByMovieStatus(
-                MovieStatus.IMAX,
-                PageRequest.of(page, size, Sort.by("movieId").descending()))
+                        MovieStatus.IMAX,
+                        PageRequest.of(page, size, Sort.by("movieId").descending()))
                 .getContent().stream().map(movieMapper::toMovieResponse).toList();
     }
 

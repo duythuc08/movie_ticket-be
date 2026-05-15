@@ -1,3 +1,4 @@
+
 package com.example.movie_ticket_be.movie.service;
 
 import com.example.movie_ticket_be.core.exception.AppException;
@@ -18,9 +19,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -33,7 +32,6 @@ public class BannerService {
 
     final MovieRepository movieRepository;
     final EventRepository eventRepository;
-    final CloudinaryService cloudinaryService;
 
     @PreAuthorize("hasRole('ADMIN')")
     public BannerResponse createBanner(BannerRequest request) {
@@ -81,63 +79,6 @@ public class BannerService {
 
         return bannerMapper.toBannerResponse(bannerRepository.save(banner));
 
-    }
-
-    @PreAuthorize("hasRole('ADMIN')")
-    public BannerResponse createBanner(BannerRequest request, MultipartFile imageFile) {
-        if (bannerRepository.existsByTitle(request.getTitle())) {
-            throw new AppException(ErrorCode.BANNER_EXISTED);
-        }
-
-        if (request.getBannerType() == BannerType.MOVIE) {
-            if (request.getMovieId() == null) {
-                throw new AppException(ErrorCode.MOVIE_ID_REQUIRED);
-            }
-            if (!movieRepository.existsByMovieId(request.getMovieId())) {
-                throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
-            }
-            if (request.getEventId() != null) {
-                throw new AppException(ErrorCode.EVENT_ID_NOT_ALLOWED);
-            }
-        } else if (request.getBannerType() == BannerType.EVENT) {
-            if (request.getEventId() == null) {
-                throw new AppException(ErrorCode.EVENT_ID_REQUIRED);
-            }
-            if (!eventRepository.existsByEventId(request.getEventId())) {
-                throw new AppException(ErrorCode.EVENT_NOT_FOUND);
-            }
-            if (request.getMovieId() != null) {
-                throw new AppException(ErrorCode.MOVIE_ID_NOT_ALLOWED);
-            }
-        } else {
-            throw new AppException(ErrorCode.BANNER_TYPE_INVALID);
-        }
-
-
-        Banner banner = bannerMapper.toBanner(request);
-        if (request.getMovieId() != null) {
-            Movies movie = movieRepository.findByMovieId(request.getMovieId())
-                    .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-            banner.setMovies(movie);
-        }
-
-        if (request.getEventId() != null) {
-            Event event = eventRepository.findByEventId(request.getEventId())
-                    .orElseThrow(() -> new AppException(ErrorCode.EVENT_NOT_FOUND));
-            banner.setEvent(event);
-        }
-
-        if (imageFile != null && !imageFile.isEmpty()) {
-            try {
-                String url = cloudinaryService.uploadFile(imageFile);
-                banner.setImageUrl(url);
-            } catch (IOException e) {
-                log.error("Failed to upload banner image", e);
-                throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
-            }
-        }
-
-        return bannerMapper.toBannerResponse(bannerRepository.save(banner));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
