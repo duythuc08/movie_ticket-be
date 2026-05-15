@@ -64,7 +64,10 @@ public enum ErrorCode {
     SEAT_ALREADY_BOOKED(1052,"Seat already booked",HttpStatus.BAD_REQUEST),
     INVALID_SEAT_DATA(1053,"Invalid seat data",HttpStatus.BAD_REQUEST),
     PRICE_NOT_FOUND(1054,"Price not found",HttpStatus.NOT_FOUND),
-    MEMBERSHIP_TIER_NOT_FOUND(1055,"Membership tier not found",HttpStatus.NOT_FOUND),;
+    MEMBERSHIP_TIER_NOT_FOUND(1055,"Membership tier not found",HttpStatus.NOT_FOUND),
+    SHOWTIME_ALREADY_CANCELLED(1056,"Showtime is already cancelled",HttpStatus.BAD_REQUEST),
+    SHOWTIME_NOT_UPDATABLE(1057,"Showtime can only be updated when status is SCHEDULED",HttpStatus.BAD_REQUEST),
+    SHOWTIME_HAS_ACTIVE_SEATS(1058,"Showtime has reserved or sold seats, cannot update",HttpStatus.BAD_REQUEST),;
     // Constructor để gán giá trị cho từng phần tử enum
     ErrorCode(int code, String message,HttpStatusCode statusCode) {
         this.code = code;
