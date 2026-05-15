@@ -11,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,11 +23,13 @@ import java.util.List;
 public class MembershipTierService {
     MembershipTierRepository membershipTierRepository;
     MembershipTierMapper membershipTierMapper;
+    @PreAuthorize("isAuthenticated()")
     public MembershipTierResponse getMembershipTierByName(String name){
         MembershipTier tier = membershipTierRepository.findByName(name)
                 .orElseThrow(() -> new AppException(ErrorCode.MEMBERSHIP_TIER_NOT_FOUND));
         return membershipTierMapper.toMembershipTierResponse(tier);
     }
+    @PreAuthorize("isAuthenticated()")
     public List<MembershipTierResponse> getMembershipTierList(){
         return membershipTierRepository.findAll().stream()
                 .map(membershipTierMapper::toMembershipTierResponse)

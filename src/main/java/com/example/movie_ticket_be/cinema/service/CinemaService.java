@@ -61,6 +61,7 @@ public class CinemaService {
         return cinemaMapper.toCinemasResponse(cinemas);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<CinemaResponse> getCinemaStatus(CinemaStatus cinemaStatus){
         return cinemaRepository.findByCinemaStatus(cinemaStatus)
                 .stream()

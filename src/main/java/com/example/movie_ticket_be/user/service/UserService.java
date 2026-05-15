@@ -36,6 +36,7 @@ public class UserService {
     UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @PreAuthorize("hasRole('ADMIN')")
     public UsersRespone createUser(UsersCreationRequest request) {
         if (userRepository.existsByUsername(request.getUsername())){
             throw new AppException(ErrorCode.EMAIL_EXISTED);
