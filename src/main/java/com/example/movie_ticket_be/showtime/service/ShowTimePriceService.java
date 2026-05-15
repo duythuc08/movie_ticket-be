@@ -60,6 +60,7 @@ public class ShowTimePriceService {
                 .orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_PRICE_NOT_FOUND));
         return showTimePriceMapper.toShowTimePriceResponse(showTimePrice);
     }
+    @PreAuthorize("isAuthenticated()")
     public Map<SeatType, BigDecimal> getPriceMapByShowTime(Long showTimeId) {
         List<ShowTimePrice> priceList = showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId);
 

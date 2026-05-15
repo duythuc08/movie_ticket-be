@@ -24,7 +24,7 @@ public class GenreService {
     GenreRepository genreRepository;
     GenreMapper genreMapper;
 
-    @PreAuthorize("hasRole('ADMIN')")
+
     public List<GenreResponse> getGenres()
     {
         return genreRepository.findAll()

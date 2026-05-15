@@ -52,6 +52,7 @@ public class UserService {
         return  userMapper.toUsersRespone(userRepository.save(newUsers));
     }
 
+    @PreAuthorize("isAuthenticated()")
     public UserClientRespone getMyInfo() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -62,6 +63,7 @@ public class UserService {
         return userMapper.toUserClientRespone(user);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public UserMenuRespone getUserMenu() {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
@@ -70,6 +72,7 @@ public class UserService {
         return userMapper.toUserMenuRespone(user);
     }
 
+    @PreAuthorize("isAuthenticated()")
     public UserClientRespone updateMyInfo(UserUpdateRequest request) {
         var context = SecurityContextHolder.getContext();
         String name = context.getAuthentication().getName();
