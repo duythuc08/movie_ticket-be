@@ -22,28 +22,25 @@ public interface OrderMapper {
     @Mapping(target = "fullName", expression = "java(orders.getUsers().getFirstname() + \" \" + orders.getUsers().getLastname())")
     @Mapping(source = "orderTickets", target = "tickets")
     @Mapping(source = "orderFoods", target = "foods")
-    @Mapping(target = "movieTitle", ignore = true)
     @Mapping(target = "cinemaName", ignore = true)
     @Mapping(target = "cinemaAddress", ignore = true)
-    @Mapping(target = "showTime", ignore = true)
-    @Mapping(target = "roomName", ignore = true)
     OrderResponse toOrderResponse(Orders orders);
 
     @Mapping(target = "seatName",  expression = "java(orderTickets.getSeatShowTime().getSeats().getSeatRow() + String.valueOf(orderTickets.getSeatShowTime().getSeats().getSeatNumber()))")
-    @Mapping(source = "seatShowTime.seats.seatType",       target = "seatType")
-    @Mapping(source = "seatShowTime.showTimes.rooms.name", target = "roomName")
+    @Mapping(source = "seatShowTime.seats.seatType",        target = "seatType")
+    @Mapping(source = "seatShowTime.showTimes.rooms.name",  target = "roomName")
     @Mapping(source = "seatShowTime.showTimes.movies.title", target = "movieName")
     @Mapping(target = "showTime",  expression = "java(orderTickets.getSeatShowTime() != null && orderTickets.getSeatShowTime().getShowTimes() != null && orderTickets.getSeatShowTime().getShowTimes().getStartTime() != null ? orderTickets.getSeatShowTime().getShowTimes().getStartTime().toString() : null)")
     OrderTicketResponse toTicketResponse(OrderTickets orderTickets);
 
     @Mapping(source = "foods.foodId", target = "foodId")
-    @Mapping(source = "foods.name", target = "name")
+    @Mapping(source = "foods.name",   target = "name")
     OrderFoodResponse toFoodResponse(OrderFoods orderFoods);
 
     List<OrderResponse> toOrderResponseList(List<Orders> orders);
 
     @AfterMapping
-    default void populateShowtimeInfo(Orders orders, @MappingTarget OrderResponse response) {
+    default void populateCinemaInfo(Orders orders, @MappingTarget OrderResponse.OrderResponseBuilder response) {
         if (orders.getOrderTickets() == null || orders.getOrderTickets().isEmpty()) return;
 
         OrderTickets firstTicket = orders.getOrderTickets().iterator().next();
@@ -52,23 +49,13 @@ public interface OrderMapper {
         ShowTimes showTimes = firstTicket.getSeatShowTime().getShowTimes();
         if (showTimes == null) return;
 
-        if (showTimes.getMovies() != null) {
-            response.setMovieTitle(showTimes.getMovies().getTitle());
-        }
-
-        if (showTimes.getStartTime() != null) {
-            response.setShowTime(showTimes.getStartTime().toString());
-        }
-
         Rooms room = showTimes.getRooms();
-        if (room != null) {
-            response.setRoomName(room.getName());
+        if (room == null) return;
 
-            Cinemas cinema = room.getCinemas();
-            if (cinema != null) {
-                response.setCinemaName(cinema.getName());
-                response.setCinemaAddress(cinema.getAddress());
-            }
-        }
+        Cinemas cinema = room.getCinemas();
+        if (cinema == null) return;
+
+        response.cinemaName(cinema.getName());
+        response.cinemaAddress(cinema.getAddress());
     }
 }

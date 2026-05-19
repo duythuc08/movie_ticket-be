@@ -6,6 +6,7 @@ import com.example.movie_ticket_be.booking.dto.response.OrderTicketResponse;
 import com.example.movie_ticket_be.booking.entity.OrderFoods;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
+import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.mapper.OrderMapper;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
 import com.example.movie_ticket_be.cinema.entity.Cinemas;
@@ -13,6 +14,7 @@ import com.example.movie_ticket_be.cinema.entity.Rooms;
 import com.example.movie_ticket_be.cinema.entity.Seats;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
+import com.example.movie_ticket_be.payment.enums.PaymentType;
 import com.example.movie_ticket_be.showtime.entity.ShowTimes;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -85,23 +87,17 @@ public class OrderService {
                 }
             }
 
-            //ROOM, CINEMA, MOVIE, SHOWTIME INFO
-            String movieTitle = null;
+            //CINEMA INFO
             String cinemaName = null;
             String cinemaAddress = null;
-            String showTimeStr = null;
-            String roomName = null;
 
             if (order.getOrderTickets() != null && !order.getOrderTickets().isEmpty()) {
                 OrderTickets firstTicket = order.getOrderTickets().iterator().next();
                 if (firstTicket.getSeatShowTime() != null) {
                     ShowTimes st = firstTicket.getSeatShowTime().getShowTimes();
                     if (st != null) {
-                        if (st.getMovies() != null) movieTitle = st.getMovies().getTitle();
-                        if (st.getStartTime() != null) showTimeStr = st.getStartTime().toString();
                         Rooms room = st.getRooms();
                         if (room != null) {
-                            roomName = room.getName();
                             Cinemas cinema = room.getCinemas();
                             if (cinema != null) {
                                 cinemaName = cinema.getName();
@@ -132,11 +128,8 @@ public class OrderService {
                     .qrCode(order.getQrCode())
                     .tickets(ticketResponses)
                     .foods(foodResponses)
-                    .movieTitle(movieTitle)
                     .cinemaName(cinemaName)
                     .cinemaAddress(cinemaAddress)
-                    .showTime(showTimeStr)
-                    .roomName(roomName)
                     .build();
 
         } catch (AppException e) {
@@ -149,7 +142,7 @@ public class OrderService {
 
     @PreAuthorize("isAuthenticated()")
     public List<OrderResponse> getOrdersByUserId(String userId){
-        return orderRepository.findByUsers_UserId(userId)
+        return orderRepository.findByUsers_UserIdAndOrderStatus(userId, OrderStatus.PAID)
                 .stream()
                 .map(orderMapper::toOrderResponse)
                 .toList();

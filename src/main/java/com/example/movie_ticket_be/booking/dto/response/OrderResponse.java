@@ -37,9 +37,6 @@ public class OrderResponse {
     BigDecimal memberDiscountAmount;
     int pointsEarned;
 
-    String movieTitle;
     String cinemaName;
     String cinemaAddress;
-    String showTime;
-    String roomName;
 }
