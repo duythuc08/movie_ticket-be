@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.cinema.controller;
 
-import com.example.movie_ticket_be.cinema.dto.request.CinemaRequest;
 import com.example.movie_ticket_be.cinema.dto.response.CinemaResponse;
 import com.example.movie_ticket_be.cinema.service.CinemaService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
@@ -16,37 +15,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/cinemas")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CinemaController {
     CinemaService cinemaService;
 
-    @PostMapping
-    ApiResponse<CinemaResponse> createCinema(@RequestBody CinemaRequest cinemaRequest){
-        return ApiResponse.<CinemaResponse>builder()
-                .result(cinemaService.createCinema(cinemaRequest))
-                .message("Thêm cinema thành công !")
-                .build();
-    }
-    @PostMapping("bluk")
-    ApiResponse<List<CinemaResponse>> createCinema(@RequestBody List<CinemaRequest> cinemaRequest){
-        return ApiResponse.<List<CinemaResponse>>builder()
-                .result(cinemaService.createCinemas(cinemaRequest))
-                .message("Thêm cinema thành công !")
-                .build();
-    }
-
-    @GetMapping("getCinemas")
-    ApiResponse<List<CinemaResponse>> getCinemas() {
+    @GetMapping("/getCinemas")
+    public ApiResponse<List<CinemaResponse>> getCinemas() {
         return ApiResponse.<List<CinemaResponse>>builder()
                 .result(cinemaService.getCinemas())
                 .build();
     }
 
-    @GetMapping("getCinema/{id}")
-    ApiResponse<CinemaResponse> getCinemaById(@PathVariable Long id){
+    @GetMapping("/getCinema/{id}")
+    public ApiResponse<CinemaResponse> getCinemaById(@PathVariable Long id) {
         return ApiResponse.<CinemaResponse>builder()
                 .result(cinemaService.getCinemaById(id))
                 .build();
     }
-
 }

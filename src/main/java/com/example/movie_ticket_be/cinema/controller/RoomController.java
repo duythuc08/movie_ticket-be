@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.cinema.controller;
 
-import com.example.movie_ticket_be.cinema.dto.request.RoomRequest;
 import com.example.movie_ticket_be.cinema.dto.response.RoomResponse;
 import com.example.movie_ticket_be.cinema.enums.RoomStatus;
 import com.example.movie_ticket_be.cinema.enums.RoomType;
@@ -18,51 +17,35 @@ import java.util.List;
 @RestController
 @RequestMapping("/rooms")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoomController {
-
     RoomService roomService;
 
-    @PostMapping
-    ApiResponse<RoomResponse> createRoom(@RequestBody RoomRequest roomRequest) {
-        return ApiResponse.<RoomResponse>builder()
-                .result(roomService.createRoom(roomRequest))
-                .build();
-    }
-
-    @PostMapping("/bluk")
-    ApiResponse<List<RoomResponse>> createRooms(@RequestBody List<RoomRequest> roomRequests) {
-        return ApiResponse.<List<RoomResponse>>builder()
-                .result(roomService.createRooms(roomRequests))
-                .build();
-    }
-
     @GetMapping("/getRooms")
-    ApiResponse<List<RoomResponse>> getAllRooms(){
+    public ApiResponse<List<RoomResponse>> getAllRooms() {
         return ApiResponse.<List<RoomResponse>>builder()
                 .result(roomService.getRooms())
                 .build();
     }
 
     @GetMapping("/getRooms/by-cinema/{cinemaId}")
-    ApiResponse<List<RoomResponse>> getRoomByCinemaId(@PathVariable Long cinemaId){
+    public ApiResponse<List<RoomResponse>> getRoomByCinemaId(@PathVariable Long cinemaId) {
         return ApiResponse.<List<RoomResponse>>builder()
                 .result(roomService.getRoomsByCinemaId(cinemaId))
                 .build();
     }
-    //http://localhost:8080/duythuc/rooms/getRooms/by-cinema/1/status?status=ACTIVE
+
     @GetMapping("/getRooms/by-cinema/{cinemaId}/status")
-    ApiResponse<List<RoomResponse>> getRoomByCinemaIdAndStatus(@PathVariable Long cinemaId,@RequestParam RoomStatus status){
+    public ApiResponse<List<RoomResponse>> getRoomByCinemaIdAndStatus(@PathVariable Long cinemaId, @RequestParam RoomStatus status) {
         return ApiResponse.<List<RoomResponse>>builder()
-                .result(roomService.getRoomsByCinemaIdAndStatus(cinemaId,status))
+                .result(roomService.getRoomsByCinemaIdAndStatus(cinemaId, status))
                 .build();
     }
 
-    //http://localhost:8080/duythuc/rooms/getRooms/by-cinema/1/type?type=VIP
     @GetMapping("/getRooms/by-cinema/{cinemaId}/type")
-    ApiResponse<List<RoomResponse>> getRoomByCinemaIdAndType(@PathVariable Long cinemaId,@RequestParam RoomType type){
+    public ApiResponse<List<RoomResponse>> getRoomByCinemaIdAndType(@PathVariable Long cinemaId, @RequestParam RoomType type) {
         return ApiResponse.<List<RoomResponse>>builder()
-                .result(roomService.getRoomsByCinemaIdAndType(cinemaId,type))
+                .result(roomService.getRoomsByCinemaIdAndType(cinemaId, type))
                 .build();
     }
 }

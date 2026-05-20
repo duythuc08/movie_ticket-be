@@ -4,6 +4,7 @@ package com.example.movie_ticket_be.cinema.dto.response;
 import com.example.movie_ticket_be.cinema.entity.Cinemas;
 import com.example.movie_ticket_be.cinema.enums.RoomStatus;
 import com.example.movie_ticket_be.cinema.enums.RoomType;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
@@ -18,7 +19,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoomResponse {
     Long roomId;
-
     String name;
     Integer capacity;
 
@@ -31,4 +31,6 @@ public class RoomResponse {
 
     @Enumerated(EnumType.STRING)
     RoomStatus roomStatus;
+
+    EntityStatus entityStatus;
 }
