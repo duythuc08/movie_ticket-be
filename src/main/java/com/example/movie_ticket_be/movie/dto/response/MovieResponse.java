@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -22,9 +22,9 @@ public class MovieResponse {
     Integer duration;
     String posterUrl;
     String trailerUrl;
-    LocalDate releaseDate;
-    private Set<PersonResponse> castPersons;
-    private Set<PersonResponse> directors;
+    LocalDateTime releaseDate;
+    Set<PersonResponse> castPersons;
+    Set<PersonResponse> directors;
     String language;
     String subTitle;
 

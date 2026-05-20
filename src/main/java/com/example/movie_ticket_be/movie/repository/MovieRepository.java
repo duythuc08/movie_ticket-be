@@ -6,11 +6,12 @@ import com.example.movie_ticket_be.movie.enums.MovieStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface MovieRepository extends JpaRepository<Movies,Long> {
+public interface MovieRepository extends JpaRepository<Movies,Long>, JpaSpecificationExecutor<Movies> {
     boolean existsByTitle(String title);
 
     boolean existsByMovieId(Long movieId);

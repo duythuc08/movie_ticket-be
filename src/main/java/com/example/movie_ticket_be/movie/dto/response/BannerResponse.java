@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class BannerResponse {
-    private Long id;
-    private String imageUrl;
-    private String title;
-    private String description;
-    private String linkUrl;
-    private Integer priority;
-    private Boolean active;
+    Long id;
+    String imageUrl;
+    String title;
+    String description;
+    String linkUrl;
+    Integer priority;
+    Boolean active;
 
-    private BannerType bannerType;
+    BannerType bannerType;
 
     Movies movies;
     Event event;

@@ -1,12 +1,10 @@
 package com.example.movie_ticket_be.movie.controller;
 
 import com.example.movie_ticket_be.core.dto.ApiResponse;
-import com.example.movie_ticket_be.movie.dto.request.MovieCreationRequest;
-import com.example.movie_ticket_be.movie.dto.response.AdminMovieResponse;
 import com.example.movie_ticket_be.movie.dto.response.MovieResponse;
 import com.example.movie_ticket_be.movie.dto.response.PagedMovieResponse;
 import com.example.movie_ticket_be.movie.service.MovieService;
-import jakarta.validation.Valid;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,21 +22,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
 public class MovieController {
     MovieService movieService;
-
-    @PostMapping
-    ApiResponse<MovieResponse> createMovie(@RequestBody @Valid MovieCreationRequest request){
-        return ApiResponse.<MovieResponse>builder()
-                .result(movieService.createMovie(request))
-                .message("Thêm phim mới thành công")
-                .build();
-    }
-
-    @GetMapping
-    ApiResponse<List<AdminMovieResponse>> getAdminMovie(){
-        return ApiResponse.<List<AdminMovieResponse>>builder()
-                .result(movieService.getAdminMovies())
-                .build();
-    }
 
     @GetMapping("/getMovies")
     ApiResponse<List<MovieResponse>> getMovies(){
@@ -73,16 +56,6 @@ public class MovieController {
         return ApiResponse.<List<MovieResponse>>builder().result(result).build();
     }
 
-    @GetMapping("/imax")
-    ApiResponse<List<MovieResponse>> getImaxMovies(
-            @RequestParam(required = false) Integer page,
-            @RequestParam(required = false) Integer size) {
-        List<MovieResponse> result = (page != null && size != null)
-                ? movieService.getMoviesImaxPaged(page, size)
-                : movieService.getMoviesImax();
-        return ApiResponse.<List<MovieResponse>>builder().result(result).build();
-    }
-
     @GetMapping("/showing/paged")
     ApiResponse<PagedMovieResponse> getShowingMoviesPaged(
             @RequestParam(defaultValue = "0") int page,
@@ -101,12 +74,4 @@ public class MovieController {
                 .build();
     }
 
-    @GetMapping("/imax/paged")
-    ApiResponse<PagedMovieResponse> getImaxMoviesPaged(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "4") int size) {
-        return ApiResponse.<PagedMovieResponse>builder()
-                .result(movieService.getImaxMoviesPagedResponse(page, size))
-                .build();
-    }
 }

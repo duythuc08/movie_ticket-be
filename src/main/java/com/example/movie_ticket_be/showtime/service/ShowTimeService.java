@@ -192,7 +192,7 @@ public class ShowTimeService {
 
     public List<MovieResponse> getMoviesByCinema(Long cinemaId) {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
-        List<MovieStatus> activeStatuses = List.of(MovieStatus.NOW_SHOWING, MovieStatus.IMAX);
+        List<MovieStatus> activeStatuses = List.of(MovieStatus.NOW_SHOWING);
         return showTimeRepository.findDistinctMoviesByCinemaId(cinemaId, startOfToday, activeStatuses)
                 .stream()
                 .map(movieMapper::toMovieResponse)
@@ -227,7 +227,7 @@ public class ShowTimeService {
 
     public List<MovieResponse> getNowShowingMoviesForQuickBooking() {
         LocalDateTime now = LocalDateTime.now();
-        List<MovieStatus> activeStatuses = List.of(MovieStatus.NOW_SHOWING, MovieStatus.IMAX);
+        List<MovieStatus> activeStatuses = List.of(MovieStatus.NOW_SHOWING);
         return showTimeRepository.findNowShowingMoviesWithUpcomingSlots(now, activeStatuses)
                 .stream()
                 .map(movieMapper::toMovieResponse)
