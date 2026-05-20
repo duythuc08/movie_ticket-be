@@ -1,6 +1,7 @@
 
 package com.example.movie_ticket_be.movie.dto.response;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.enums.MovieRole;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
@@ -17,4 +18,5 @@ public class PersonResponse {
     private String name;
     private String avatarUrl;
     private MovieRole movieRole;
+    private EntityStatus entityStatus;
 }

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.dto.request.MovieCreationRequest;
@@ -122,9 +123,14 @@ public class AdminMovieService {
         }
 
         movie.setUpdatedAt(LocalDateTime.now());
-        
+
         return movieMapper.toAdminMovieResponse(movieRepository.save(movie));
     }
-        
-    
+
+    public void changeStatus(long id, EntityStatus entityStatus) {
+        Movies movie = movieRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+        movie.setEntityStatus(entityStatus);
+        movieRepository.save(movie);
+    }
 }

@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.movie.entity;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,4 +21,8 @@ public class Genre {
 
     @Lob
     String description;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    EntityStatus entityStatus = EntityStatus.ACTIVE;
 }

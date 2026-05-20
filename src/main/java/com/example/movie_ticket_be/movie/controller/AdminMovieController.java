@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.movie_ticket_be.core.dto.ApiResponse;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.dto.request.MovieCreationRequest;
 import com.example.movie_ticket_be.movie.dto.request.MovieUpdateRequest;
 import com.example.movie_ticket_be.movie.dto.response.AdminMovieResponse;
@@ -75,5 +76,19 @@ public class AdminMovieController {
                 .result(adminMovieService.updateAdminMovie(id, request))
                 .message("Cập nhật phim thành công")
                 .build();
+    }
+
+    @PutMapping("/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> activate(@PathVariable long id) {
+        adminMovieService.changeStatus(id, EntityStatus.ACTIVE);
+        return ApiResponse.<Void>builder().message("Kích hoạt phim thành công").build();
+    }
+
+    @PutMapping("/{id}/inactivate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> inactivate(@PathVariable long id) {
+        adminMovieService.changeStatus(id, EntityStatus.INACTIVE);
+        return ApiResponse.<Void>builder().message("Vô hiệu hóa phim thành công").build();
     }
 }

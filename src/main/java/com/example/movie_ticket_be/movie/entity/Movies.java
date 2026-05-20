@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.movie.entity;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.enums.AgeRating;
 import com.example.movie_ticket_be.movie.enums.MovieStatus;
 import jakarta.persistence.*;
@@ -62,6 +63,10 @@ public class Movies {
     @Enumerated(EnumType.STRING)
     @Column(name = "movie_status")
     MovieStatus movieStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    EntityStatus entityStatus = EntityStatus.ACTIVE;
 
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.movie.dto.response;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.enums.AgeRating;
 import com.example.movie_ticket_be.movie.enums.MovieStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -33,6 +34,7 @@ public class AdminMovieResponse {
 
     AgeRating ageRating;
     MovieStatus movieStatus;
+    EntityStatus entityStatus;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }
