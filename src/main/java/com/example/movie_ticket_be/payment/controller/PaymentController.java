@@ -122,16 +122,16 @@ public class PaymentController {
 
                 paymentService.processSuccess(confirmReq);
 
-                return new RedirectView("http://localhost:5173/payment-success/" + txnRef);
+                return new RedirectView("http://localhost:3000/payment-success/" + txnRef);
             } else {
                 // THANH TOÁN THẤT BẠI
                 Orders order = orderRepository.findByOrderId(Long.parseLong(txnRef)).orElse(null);
                 if(order != null) paymentService.processFail(order);
 
-                return new RedirectView("http://localhost:5173/payment-fail?vnp_ResponseCode=" + status + "&orderId=" + txnRef);
+                return new RedirectView("http://localhost:3000/payment-fail?vnp_ResponseCode=" + status + "&orderId=" + txnRef);
             }
         } else {
-            return new RedirectView("http://localhost:5173/payment-error");
+            return new RedirectView("http://localhost:3000/payment-error");
         }
     }
 
