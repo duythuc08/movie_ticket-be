@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.booking.dto.response;
 
 import com.example.movie_ticket_be.booking.enums.FoodStatus;
 import com.example.movie_ticket_be.booking.enums.FoodType;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,4 +23,5 @@ public class FoodResponse {
     Integer stockQuantity;
     FoodType foodType;
     FoodStatus foodStatus;
+    EntityStatus entityStatus;
 }

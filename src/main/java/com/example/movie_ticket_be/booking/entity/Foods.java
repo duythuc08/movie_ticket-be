@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.booking.entity;
 
 import com.example.movie_ticket_be.booking.enums.FoodStatus;
 import com.example.movie_ticket_be.booking.enums.FoodType;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -36,4 +37,8 @@ public class Foods {
 
     @Enumerated(EnumType.STRING)
     FoodStatus foodStatus;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    EntityStatus entityStatus = EntityStatus.ACTIVE;
 }
