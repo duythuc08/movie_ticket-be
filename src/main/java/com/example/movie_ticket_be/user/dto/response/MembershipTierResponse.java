@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.user.dto.response;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MembershipTierResponse {
+    Long tierId;
     String name;
     String description;
     Long pointsRequired;
@@ -19,4 +21,5 @@ public class MembershipTierResponse {
     BigDecimal birthdayDiscount;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
+    EntityStatus entityStatus;
 }

@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.user.entity;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -36,10 +37,13 @@ public class MembershipTier {
     @Column(precision = 5, scale = 2)
     BigDecimal birthdayDiscount;
 
-
     @CreationTimestamp
     LocalDateTime createdAt;
 
     @UpdateTimestamp
     LocalDateTime updatedAt;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    EntityStatus entityStatus = EntityStatus.ACTIVE;
 }
