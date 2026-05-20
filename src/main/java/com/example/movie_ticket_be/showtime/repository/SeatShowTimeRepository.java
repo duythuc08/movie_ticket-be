@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 
-public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, String> {
+public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long> {
 
     // --- API VẼ SƠ ĐỒ GHẾ ---
     @Modifying

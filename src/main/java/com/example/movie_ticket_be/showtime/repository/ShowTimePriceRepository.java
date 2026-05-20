@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ShowTimePriceRepository extends JpaRepository<ShowTimePrice, String> {
+public interface ShowTimePriceRepository extends JpaRepository<ShowTimePrice, Long> {
 
     boolean existsByShowtimes_ShowTimeIdAndSeatType(Long showtimesShowTimeId, SeatType seatType);
 

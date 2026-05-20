@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface OrderTicketRepository extends JpaRepository<OrderTickets,String> {
+public interface OrderTicketRepository extends JpaRepository<OrderTickets,Long> {
     List<OrderTickets> findByOrders_OrderId(Long ordersOrderId);
     Optional<OrderTickets> findBySeatShowTime_SeatShowTimeId(Long seatShowTimeId);
     void deleteByOrders_OrderId(Long ordersOrderId);

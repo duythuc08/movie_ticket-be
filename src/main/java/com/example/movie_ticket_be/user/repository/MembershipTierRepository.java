@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
-public interface MembershipTierRepository extends JpaRepository<MembershipTier, String> {
+public interface MembershipTierRepository extends JpaRepository<MembershipTier, Long> {
     @Query("SELECT m FROM MembershipTier m ORDER BY m.pointsRequired DESC")
     List<MembershipTier> findAllOrderByPointsRequiredDesc();
 

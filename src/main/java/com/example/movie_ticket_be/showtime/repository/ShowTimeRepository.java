@@ -13,7 +13,7 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public interface ShowTimeRepository extends JpaRepository<ShowTimes, String> {
+public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long> {
 
     @Query("SELECT s FROM ShowTimes s " +
             "LEFT JOIN FETCH s.movies " +

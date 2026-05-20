@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface CinemaRepository extends JpaRepository<Cinemas,String> {
+public interface CinemaRepository extends JpaRepository<Cinemas,Long> {
     boolean existsByName(String name);
 
     List<Cinemas> findByCinemaStatus(CinemaStatus status);

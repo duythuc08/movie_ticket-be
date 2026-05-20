@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface BannerRepository extends JpaRepository<Banner,String> {
+public interface BannerRepository extends JpaRepository<Banner,Long> {
     boolean existsByTitle(String name);
 
     Optional<Banner> findById(Long id);
