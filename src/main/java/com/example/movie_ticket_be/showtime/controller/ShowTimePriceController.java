@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,19 +17,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/showTimePrice")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ShowTimePriceController {
     ShowTimePriceService service;
 
     @GetMapping("/getPrice/by-showtime/{showTimeId}")
-    ApiResponse<List<ShowTimePriceResponse>> getAllPriceByShowTime(@PathVariable Long showTimeId){
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<List<ShowTimePriceResponse>> getAllPriceByShowTime(@PathVariable Long showTimeId) {
         return ApiResponse.<List<ShowTimePriceResponse>>builder()
                 .result(service.getAllPriceByShowTime(showTimeId))
                 .build();
     }
 
     @GetMapping("/getPrice/by-showtime/{showTimeId}/type")
-    ApiResponse<ShowTimePriceResponse> getPriceByShowTimeAndSeatType (@PathVariable Long showTimeId, @RequestParam SeatType seatType){
+    @PreAuthorize("isAuthenticated()")
+    public ApiResponse<ShowTimePriceResponse> getPriceByShowTimeAndSeatType(@PathVariable Long showTimeId, @RequestParam SeatType seatType) {
         return ApiResponse.<ShowTimePriceResponse>builder()
                 .result(service.getPriceByShowTimeAndSeatType(showTimeId, seatType))
                 .build();

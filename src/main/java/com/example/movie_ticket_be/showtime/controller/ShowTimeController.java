@@ -3,8 +3,6 @@ package com.example.movie_ticket_be.showtime.controller;
 import com.example.movie_ticket_be.cinema.dto.response.CinemaResponse;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.movie.dto.response.MovieResponse;
-import com.example.movie_ticket_be.showtime.dto.request.ShowTimeRequest;
-import com.example.movie_ticket_be.showtime.dto.request.UpdateShowTimeRequest;
 import com.example.movie_ticket_be.showtime.dto.response.QuickBookingSlotResponse;
 import com.example.movie_ticket_be.showtime.dto.response.ShowTimeResponse;
 import com.example.movie_ticket_be.showtime.service.ShowTimeService;
@@ -20,45 +18,10 @@ import java.util.List;
 @RequestMapping("/showtimes")
 @RequiredArgsConstructor
 public class ShowTimeController {
-
     private final ShowTimeService showTimeService;
 
-    @PostMapping
-    public ApiResponse<ShowTimeResponse> createShowTime(@RequestBody ShowTimeRequest request){
-        return ApiResponse.<ShowTimeResponse>builder()
-                .result(showTimeService.createShowTime(request))
-                .message("Them suat chieu moi thanh cong")
-                .build();
-    }
-    @PostMapping("/bluk")
-    public ApiResponse<List<ShowTimeResponse>> createShowTimes(@RequestBody List<ShowTimeRequest> requests){
-        return ApiResponse.<List<ShowTimeResponse>>builder()
-                .result(showTimeService.createShowTimes(requests))
-                .message("Them suat chieu moi thanh cong")
-                .build();
-    }
-
-
-    @PutMapping("/{id}")
-    public ApiResponse<ShowTimeResponse> updateShowTime(
-            @PathVariable Long id,
-            @RequestBody UpdateShowTimeRequest request) {
-        return ApiResponse.<ShowTimeResponse>builder()
-                .result(showTimeService.updateShowTime(id, request))
-                .message("Cap nhat suat chieu thanh cong")
-                .build();
-    }
-
-    @PutMapping("/{id}/cancel")
-    public ApiResponse<ShowTimeResponse> cancelShowTime(@PathVariable Long id) {
-        return ApiResponse.<ShowTimeResponse>builder()
-                .result(showTimeService.cancelShowTime(id))
-                .message("Huy suat chieu thanh cong")
-                .build();
-    }
-
     @GetMapping("/getShowTimes")
-    public ApiResponse<List<ShowTimeResponse>> getShowTimeAll(){
+    public ApiResponse<List<ShowTimeResponse>> getShowTimeAll() {
         return ApiResponse.<List<ShowTimeResponse>>builder()
                 .result(showTimeService.getAllShowTimes())
                 .build();
@@ -108,9 +71,7 @@ public class ShowTimeController {
     }
 
     @GetMapping("/dates")
-    public ApiResponse<List<String>> getAvailableDates(
-            @RequestParam Long cinemaId,
-            @RequestParam Long movieId) {
+    public ApiResponse<List<String>> getAvailableDates(@RequestParam Long cinemaId, @RequestParam Long movieId) {
         return ApiResponse.<List<String>>builder()
                 .result(showTimeService.getAvailableDatesByCinemaAndMovie(cinemaId, movieId))
                 .build();
@@ -140,4 +101,3 @@ public class ShowTimeController {
                 .build();
     }
 }
-
