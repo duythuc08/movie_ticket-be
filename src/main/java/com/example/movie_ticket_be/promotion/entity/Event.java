@@ -1,6 +1,8 @@
 package com.example.movie_ticket_be.promotion.entity;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.entity.Movies;
+import com.example.movie_ticket_be.promotion.enums.EventStatus;
 import com.example.movie_ticket_be.promotion.enums.EventType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +31,14 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     EventType eventType;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    EventStatus eventStatus = EventStatus.UPCOMING;
+
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    EntityStatus entityStatus = EntityStatus.ACTIVE;
 
     @ManyToOne
     @JoinColumn(name = "movie_id")
