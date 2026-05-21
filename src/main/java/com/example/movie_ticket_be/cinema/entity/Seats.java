@@ -3,8 +3,10 @@ package com.example.movie_ticket_be.cinema.entity;
 import com.example.movie_ticket_be.cinema.enums.SeatStatus;
 import com.example.movie_ticket_be.cinema.enums.SeatType;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 @Entity
@@ -13,10 +15,10 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Seats {
+public class Seats extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -34,7 +36,4 @@ public class Seats {
     @Enumerated(EnumType.STRING)
     SeatStatus seatStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    EntityStatus entityStatus = EntityStatus.ACTIVE;
 }
