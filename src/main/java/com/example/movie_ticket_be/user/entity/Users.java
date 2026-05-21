@@ -2,8 +2,10 @@ package com.example.movie_ticket_be.user.entity;
 
 import com.example.movie_ticket_be.user.enums.UserStatus;
 import com.example.movie_ticket_be.promotion.entity.UserPromotion;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
@@ -15,9 +17,9 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Users {
+public class Users extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String userId;
@@ -40,14 +42,6 @@ public class Users {
     UserStatus userStatus;
 
     boolean enabled = false;
-    LocalDateTime createdAt = LocalDateTime.now();
-
-    @PrePersist
-    public void prePersist() {
-        if (createdAt == null) {
-            createdAt = LocalDateTime.now();
-        }
-    }
 
     @Column(name = "loyalty_points")
     int loyaltyPoints = 0;

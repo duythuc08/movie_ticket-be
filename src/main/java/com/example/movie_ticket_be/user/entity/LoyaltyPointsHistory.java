@@ -3,8 +3,9 @@ package com.example.movie_ticket_be.user.entity;
 import com.example.movie_ticket_be.booking.entity.Orders;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -14,9 +15,9 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LoyaltyPointsHistory {
+public class LoyaltyPointsHistory extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long historyId;
@@ -37,6 +38,4 @@ public class LoyaltyPointsHistory {
 
     int newBalance;
 
-    @CreationTimestamp
-    LocalDateTime createdAt;
 }

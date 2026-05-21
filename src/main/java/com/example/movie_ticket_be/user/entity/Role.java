@@ -4,6 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import lombok.experimental.FieldDefaults;
 
 import java.util.Set;
@@ -12,9 +14,9 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Role {
+public class Role extends BaseEntity {
     @Id
     String name;
     String description;
