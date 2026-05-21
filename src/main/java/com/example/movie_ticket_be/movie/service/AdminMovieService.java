@@ -27,6 +27,7 @@ import com.example.movie_ticket_be.movie.repository.GenreRepository;
 import com.example.movie_ticket_be.movie.repository.MovieRepository;
 import com.example.movie_ticket_be.movie.repository.PersonRepository;
 
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,7 +42,8 @@ public class AdminMovieService {
     MovieMapper movieMapper;
     GenreRepository genreRepository;
     PersonRepository personRepository;
-
+    
+    @Transactional
     public MovieResponse createAdminMovie(MovieCreationRequest request) {
         if (movieRepository.existsByTitle(request.getTitle())) {
             throw new AppException(ErrorCode.MOVIE_EXISTED);
@@ -89,6 +91,7 @@ public class AdminMovieService {
         return movieMapper.toAdminMovieResponse(movie);
     }
 
+    @Transactional
     public AdminMovieResponse updateAdminMovie(long id, MovieUpdateRequest request){
         Movies movie = movieRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
@@ -127,6 +130,7 @@ public class AdminMovieService {
         return movieMapper.toAdminMovieResponse(movieRepository.save(movie));
     }
 
+    @Transactional
     public void changeStatus(long id, EntityStatus entityStatus) {
         Movies movie = movieRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));

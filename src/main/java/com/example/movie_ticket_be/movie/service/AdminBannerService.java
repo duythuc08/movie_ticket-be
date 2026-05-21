@@ -16,8 +16,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Slf4j
@@ -30,6 +35,7 @@ public class AdminBannerService {
     MovieRepository movieRepository;
     EventRepository eventRepository;
 
+    @Transactional
     public BannerResponse createBanner(BannerRequest request) {
         if (bannerRepository.existsByTitle(request.getTitle())) {
             throw new AppException(ErrorCode.BANNER_EXISTED);
@@ -40,9 +46,27 @@ public class AdminBannerService {
         return bannerMapper.toBannerResponse(bannerRepository.save(banner));
     }
 
+    @Transactional
     public List<BannerResponse> createBanners(List<BannerRequest> requests) {
-        return requests.stream().map(this::createBanner).toList();
+        List<Banner> banners = requests.stream().map(request -> {
+            if (bannerRepository.existsByTitle(request.getTitle())) {
+                throw new AppException(ErrorCode.BANNER_EXISTED);
+            }
+            validateBannerRequest(request);
+            Banner banner = bannerMapper.toBanner(request);
+            setRelations(banner, request);
+            return banner;
+        }).toList();
+        
+        return bannerRepository.saveAll(banners).stream()
+                .map(bannerMapper::toBannerResponse)
+                .toList();
     }
+
+    public Page<BannerResponse> getAllBanners(Specification<Banner> spec, Pageable pageable) {
+        return bannerRepository.findAll(spec, pageable).map(bannerMapper::toBannerResponse);
+    }
+
 
     private void validateBannerRequest(BannerRequest request) {
         if (request.getBannerType() == BannerType.MOVIE) {

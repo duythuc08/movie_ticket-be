@@ -28,4 +28,5 @@ public class GenreController {
                 .message("Lấy danh sách genre thành công")
                 .build();
     }
+    
 }
