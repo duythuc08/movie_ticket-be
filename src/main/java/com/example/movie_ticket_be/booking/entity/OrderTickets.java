@@ -2,8 +2,10 @@ package com.example.movie_ticket_be.booking.entity;
 
 import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
@@ -15,10 +17,10 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class OrderTickets {
+public class OrderTickets extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -29,8 +31,6 @@ public class OrderTickets {
 
     @Enumerated(EnumType.STRING)
     TicketStatus ticketStatus;
-
-    LocalDateTime createdAt;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

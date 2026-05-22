@@ -3,8 +3,10 @@ package com.example.movie_ticket_be.booking.entity;
 import com.example.movie_ticket_be.booking.enums.FoodStatus;
 import com.example.movie_ticket_be.booking.enums.FoodType;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
@@ -15,10 +17,10 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class Foods {
+public class Foods extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
@@ -38,7 +40,4 @@ public class Foods {
     @Enumerated(EnumType.STRING)
     FoodStatus foodStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    EntityStatus entityStatus = EntityStatus.ACTIVE;
 }
