@@ -4,8 +4,10 @@ import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.promotion.enums.EventStatus;
 import com.example.movie_ticket_be.promotion.enums.EventType;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
@@ -15,9 +17,9 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Event {
+public class Event extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long eventId;
@@ -36,9 +38,6 @@ public class Event {
     @Builder.Default
     EventStatus eventStatus = EventStatus.UPCOMING;
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    EntityStatus entityStatus = EntityStatus.ACTIVE;
 
     @ManyToOne
     @JoinColumn(name = "movie_id")
