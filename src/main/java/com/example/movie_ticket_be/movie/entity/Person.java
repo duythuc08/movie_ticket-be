@@ -2,8 +2,10 @@ package com.example.movie_ticket_be.movie.entity;
 
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.enums.MovieRole;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 @Entity
@@ -11,9 +13,9 @@ import lombok.experimental.FieldDefaults;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Person {
+public class Person extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -25,7 +27,4 @@ public class Person {
     @Column(name = "movie_role")
     private MovieRole movieRole;
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private EntityStatus entityStatus = EntityStatus.ACTIVE;
 }

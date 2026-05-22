@@ -39,7 +39,6 @@ public class AdminGenreService {
             throw new AppException(ErrorCode.GENRE_EXISTED);
         }
         Genre genre = genreMapper.toGenre(request);
-        genre.setEntityStatus(EntityStatus.ACTIVE);
         return genreMapper.toGenreRespone(genreRepository.save(genre));
     }
     

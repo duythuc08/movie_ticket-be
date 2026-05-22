@@ -3,8 +3,10 @@ package com.example.movie_ticket_be.movie.entity;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.enums.AgeRating;
 import com.example.movie_ticket_be.movie.enums.MovieStatus;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
@@ -16,9 +18,9 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Movies {
+public class Movies extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long movieId;
@@ -64,10 +66,4 @@ public class Movies {
     @Column(name = "movie_status")
     MovieStatus movieStatus;
 
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    EntityStatus entityStatus = EntityStatus.ACTIVE;
-
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
 }

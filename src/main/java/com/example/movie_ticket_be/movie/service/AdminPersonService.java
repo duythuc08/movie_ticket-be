@@ -36,7 +36,6 @@ public class AdminPersonService {
             throw new AppException(ErrorCode.PERSON_EXISTED);
         }
         Person person = personMapper.toPerson(request);
-        person.setEntityStatus(EntityStatus.ACTIVE);
         return personMapper.toPersonResponse(personRepository.save(person));
     }
 
@@ -47,7 +46,6 @@ public class AdminPersonService {
                 throw new AppException(ErrorCode.PERSON_EXISTED);
             }
             Person person = personMapper.toPerson(request);
-            person.setEntityStatus(EntityStatus.ACTIVE);
             return person;
         }).toList();
 

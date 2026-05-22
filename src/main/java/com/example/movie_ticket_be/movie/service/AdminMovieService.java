@@ -74,9 +74,6 @@ public class AdminMovieService {
                         .orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
                 .collect(Collectors.toSet());
         movie.setDirectors(directors);
-
-        movie.setCreatedAt(LocalDateTime.now());
-
         return movieMapper.toMovieResponse(movieRepository.save(movie));
     }
 
@@ -124,9 +121,6 @@ public class AdminMovieService {
                     .collect(Collectors.toSet());
             movie.setDirectors(directors);
         }
-
-        movie.setUpdatedAt(LocalDateTime.now());
-
         return movieMapper.toAdminMovieResponse(movieRepository.save(movie));
     }
 

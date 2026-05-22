@@ -2,8 +2,10 @@ package com.example.movie_ticket_be.movie.entity;
 
 import com.example.movie_ticket_be.movie.enums.ReviewStatus;
 import com.example.movie_ticket_be.user.entity.Users;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 @Entity
@@ -11,9 +13,9 @@ import lombok.experimental.FieldDefaults;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Reviews {
+public class Reviews extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long reviewId;
