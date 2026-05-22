@@ -5,6 +5,8 @@ import com.example.movie_ticket_be.payment.enums.PaymentStatus;
 import com.example.movie_ticket_be.payment.enums.PaymentType;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
@@ -15,9 +17,9 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Payments {
+public class Payments extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
