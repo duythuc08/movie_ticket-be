@@ -7,6 +7,8 @@ import com.example.movie_ticket_be.user.entity.Users;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
@@ -17,10 +19,10 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class SeatShowTime {
+public class SeatShowTime extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include

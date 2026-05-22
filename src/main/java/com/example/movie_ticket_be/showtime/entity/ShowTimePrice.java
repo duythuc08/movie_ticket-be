@@ -3,6 +3,8 @@ package com.example.movie_ticket_be.showtime.entity;
 import com.example.movie_ticket_be.cinema.enums.SeatType;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
@@ -11,9 +13,9 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ShowTimePrice {
+public class ShowTimePrice extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long showTimePriceId;

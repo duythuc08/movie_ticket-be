@@ -5,6 +5,8 @@ import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.showtime.enums.ShowTimeStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
@@ -16,10 +18,10 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class ShowTimes {
+public class ShowTimes extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
