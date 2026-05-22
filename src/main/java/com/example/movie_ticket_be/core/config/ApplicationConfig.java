@@ -41,7 +41,7 @@ public class ApplicationConfig {
 
                 Users user = Users.builder()
                         .username("admin@gmail.com")
-                        .password(passwordEncoder.encode("admin"))
+                        .password(passwordEncoder.encode("admin123"))
                         .enabled(true)
                         .role(roles)
                         .build();
