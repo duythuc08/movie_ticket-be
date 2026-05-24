@@ -57,26 +57,49 @@ public class AdminBannerService {
             setRelations(banner, request);
             return banner;
         }).toList();
-        
+
         return bannerRepository.saveAll(banners).stream()
                 .map(bannerMapper::toBannerResponse)
                 .toList();
+    }
+
+    @Transactional
+    public BannerResponse updateBanner(Long id, BannerRequest request) {
+        Banner banner = bannerRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BANNER_NOT_FOUND));
+        if (!banner.getTitle().equals(request.getTitle())) {
+            if (bannerRepository.existsByTitle(request.getTitle())) {
+                throw new AppException(ErrorCode.BANNER_EXISTED);
+            }
+        }
+        validateBannerRequest(request);
+        setRelations(banner, request);
+        return bannerMapper.toBannerResponse(bannerRepository.save(banner));
+    }
+
+    @Transactional
+    public void deleteBanner(Long id) {
+        bannerRepository.deleteById(id);
     }
 
     public Page<BannerResponse> getAllBanners(Specification<Banner> spec, Pageable pageable) {
         return bannerRepository.findAll(spec, pageable).map(bannerMapper::toBannerResponse);
     }
 
-
     private void validateBannerRequest(BannerRequest request) {
         if (request.getBannerType() == BannerType.MOVIE) {
-            if (request.getMovieId() == null) throw new AppException(ErrorCode.MOVIE_ID_REQUIRED);
-            if (!movieRepository.existsByMovieId(request.getMovieId())) throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
-            if (request.getEventId() != null) throw new AppException(ErrorCode.EVENT_ID_NOT_ALLOWED);
+            if (request.getMovieId() == null)
+                throw new AppException(ErrorCode.MOVIE_ID_REQUIRED);
+            if (!movieRepository.existsByMovieId(request.getMovieId()))
+                throw new AppException(ErrorCode.MOVIE_NOT_FOUND);
+            if (request.getEventId() != null)
+                throw new AppException(ErrorCode.EVENT_ID_NOT_ALLOWED);
         } else if (request.getBannerType() == BannerType.EVENT) {
-            if (request.getEventId() == null) throw new AppException(ErrorCode.EVENT_ID_REQUIRED);
-            if (!eventRepository.existsByEventId(request.getEventId())) throw new AppException(ErrorCode.EVENT_NOT_FOUND);
-            if (request.getMovieId() != null) throw new AppException(ErrorCode.MOVIE_ID_NOT_ALLOWED);
+            if (request.getEventId() == null)
+                throw new AppException(ErrorCode.EVENT_ID_REQUIRED);
+            if (!eventRepository.existsByEventId(request.getEventId()))
+                throw new AppException(ErrorCode.EVENT_NOT_FOUND);
+            if (request.getMovieId() != null)
+                throw new AppException(ErrorCode.MOVIE_ID_NOT_ALLOWED);
         } else {
             throw new AppException(ErrorCode.BANNER_TYPE_INVALID);
         }

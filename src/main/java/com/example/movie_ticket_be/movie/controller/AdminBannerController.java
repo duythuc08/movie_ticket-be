@@ -48,6 +48,24 @@ public class AdminBannerController {
                 .build();
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<BannerResponse> updateBanner(@PathVariable Long id, @RequestBody @Valid BannerRequest request) {
+        return ApiResponse.<BannerResponse>builder()
+                .result(adminBannerService.updateBanner(id, request))
+                .message("Cập nhật banner thành công")
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> deleteBanner(@PathVariable Long id) {
+        adminBannerService.deleteBanner(id);
+        return ApiResponse.<Void>builder()
+                .message("Xóa banner thành công")
+                .build();
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Page<BannerResponse>> getAllBanners(
