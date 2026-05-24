@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.movie.controller;
 
 import com.example.movie_ticket_be.core.dto.ApiResponse;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.movie.dto.request.BannerRequest;
 import com.example.movie_ticket_be.movie.dto.response.BannerResponse;
 import com.example.movie_ticket_be.movie.entity.Banner;
@@ -74,6 +75,33 @@ public class AdminBannerController {
         return ApiResponse.<Page<BannerResponse>>builder()
                 .result(adminBannerService.getAllBanners(spec, pageable))
                 .message("Lấy danh sách banner thành công")
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<BannerResponse> getBannerById(@PathVariable Long id) {
+        return ApiResponse.<BannerResponse>builder()
+                .result(adminBannerService.getBannerById(id))
+                .message("Lấy banner thành công")
+                .build();
+    }
+
+    @PutMapping("/{id}/active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> changeActive(@PathVariable Long id) {
+        adminBannerService.changeStatus(id, EntityStatus.ACTIVE);
+        return ApiResponse.<Void>builder()
+                .message("Kích hoạt banner thành công")
+                .build();
+    }
+
+    @PutMapping("/{id}/inactive")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Void> changeInactive(@PathVariable Long id) {
+        adminBannerService.changeStatus(id, EntityStatus.INACTIVE);
+        return ApiResponse.<Void>builder()
+                .message("Vô hiệu hóa banner thành công")
                 .build();
     }
 }

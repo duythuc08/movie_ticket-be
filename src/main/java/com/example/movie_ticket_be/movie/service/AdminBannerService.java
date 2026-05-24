@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.movie.service;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.dto.request.BannerRequest;
@@ -42,6 +43,11 @@ public class AdminBannerService {
         }
         validateBannerRequest(request);
         Banner banner = bannerMapper.toBanner(request);
+        if (banner.getActive() == true) {
+            banner.setEntityStatus(EntityStatus.ACTIVE);
+        } else {
+            banner.setEntityStatus(EntityStatus.INACTIVE);
+        }
         setRelations(banner, request);
         return bannerMapper.toBannerResponse(bannerRepository.save(banner));
     }
@@ -85,6 +91,10 @@ public class AdminBannerService {
         return bannerRepository.findAll(spec, pageable).map(bannerMapper::toBannerResponse);
     }
 
+    public BannerResponse getBannerById(Long id) {
+        return bannerMapper.toBannerResponse(bannerRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BANNER_NOT_FOUND)));
+    }
+
     private void validateBannerRequest(BannerRequest request) {
         if (request.getBannerType() == BannerType.MOVIE) {
             if (request.getMovieId() == null)
@@ -116,5 +126,17 @@ public class AdminBannerService {
                     .orElseThrow(() -> new AppException(ErrorCode.EVENT_NOT_FOUND));
             banner.setEvent(event);
         }
+    }
+
+    @Transactional
+    public void changeStatus(long id, EntityStatus entityStatus) {
+        Banner banner = bannerRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.BANNER_NOT_FOUND));
+        banner.setEntityStatus(entityStatus);
+        if (entityStatus == EntityStatus.ACTIVE) {
+            banner.setActive(true);
+        } else {
+            banner.setActive(false);
+        }
+        bannerRepository.save(banner);
     }
 }

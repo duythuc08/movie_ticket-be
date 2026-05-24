@@ -22,11 +22,11 @@ public class BannerController {
     @GetMapping("/getBanners")
     public ApiResponse<List<BannerResponse>> listBanners() {
         return ApiResponse.<List<BannerResponse>>builder()
-                .result(bannerService.getBanners())
+                .result(bannerService.getBannersActive())
                 .build();
     }
 
-    @GetMapping("/getBanners_active")
+    @GetMapping("/getBannerActive")
     public ApiResponse<List<BannerResponse>> listBannersActive() {
         return ApiResponse.<List<BannerResponse>>builder()
                 .result(bannerService.getBannersByActive())

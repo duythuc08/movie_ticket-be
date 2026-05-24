@@ -21,7 +21,7 @@ public class BannerService {
     BannerRepository bannerRepository;
     BannerMapper bannerMapper;
 
-    public List<BannerResponse> getBanners() {
+    public List<BannerResponse> getBannersActive() {
         return bannerRepository.findAllByOrderByPriorityAsc().stream()
                 .map(bannerMapper::toBannerResponse)
                 .toList();
