@@ -1,9 +1,13 @@
 package com.example.movie_ticket_be.cinema.controller;
 
 import com.example.movie_ticket_be.cinema.dto.request.AdminRoomRequest;
+import com.example.movie_ticket_be.cinema.dto.request.AdminSeatUpdate;
 import com.example.movie_ticket_be.cinema.dto.request.RoomRequest;
+import com.example.movie_ticket_be.cinema.dto.request.SeatSetupRequest;
 import com.example.movie_ticket_be.cinema.dto.response.RoomResponse;
+import com.example.movie_ticket_be.cinema.dto.response.SeatResponse;
 import com.example.movie_ticket_be.cinema.service.AdminRoomService;
+import com.example.movie_ticket_be.cinema.service.AdminSeatService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import lombok.AccessLevel;
@@ -20,6 +24,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminRoomController {
     AdminRoomService adminRoomService;
+    AdminSeatService adminSeatService;
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
@@ -44,6 +49,25 @@ public class AdminRoomController {
         return ApiResponse.<RoomResponse>builder()
                 .result(adminRoomService.updateRoom(id, request))
                 .message("Cập nhật phòng chiếu thành công")
+                .build();
+    }
+
+    @PostMapping("/{id}/seats/setup")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<SeatResponse>> setupSeats(@PathVariable long id, @RequestBody SeatSetupRequest request) {
+        return ApiResponse.<List<SeatResponse>>builder()
+                .result(adminSeatService.setUpSeatsForRoom(id, request))
+                .message("Thiết lập ghế phòng chiếu thành công")
+                .build();
+    }
+
+    @PutMapping("/{roomId}/seats/{seatId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<SeatResponse> updateSeatType(@PathVariable long roomId, @PathVariable long seatId,
+            @RequestBody AdminSeatUpdate request) {
+        return ApiResponse.<SeatResponse>builder()
+                .result(adminSeatService.updateSeatType(seatId, request))
+                .message("Cập nhật loại ghế thành công")
                 .build();
     }
 

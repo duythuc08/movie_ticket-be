@@ -1,9 +1,12 @@
 package com.example.movie_ticket_be.cinema.entity;
 
+import java.math.BigDecimal;
+
 import com.example.movie_ticket_be.cinema.enums.SeatStatus;
 import com.example.movie_ticket_be.cinema.enums.SeatType;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -25,7 +28,9 @@ public class Seats extends BaseEntity {
     Long seatId;
     String seatRow;
     Integer seatNumber;
-    Integer viewQuanlityScore;
+    
+    @Column(precision = 4, scale = 2)
+    BigDecimal viewQuanlityScore;
     @ManyToOne
     @JoinColumn(name = "room_id")
     Rooms rooms;
@@ -35,5 +40,4 @@ public class Seats extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     SeatStatus seatStatus;
-
 }
