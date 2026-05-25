@@ -71,7 +71,8 @@ public enum ErrorCode {
     SIZE_MISMATCH(1059, "Size of input data does not match expected size",HttpStatus.BAD_REQUEST),
     SEAT_TYPE_NOT_FOUND(1060, "Seat type not found",HttpStatus.NOT_FOUND),
     CREATE_QR_CODE_FAILED(1061, "Failed to create QR code",HttpStatus.INTERNAL_SERVER_ERROR),
-    MOVIE_RELEASE_DATE_NOT_VALID(1062,"Movie release date not valid",HttpStatus.BAD_REQUEST);
+    MOVIE_RELEASE_DATE_NOT_VALID(1062,"Movie release date not valid",HttpStatus.BAD_REQUEST),
+    ROOM_HAS_ACTIVE_SHOWTIME(1063,"Room has active showtimes, cannot change room type",HttpStatus.BAD_REQUEST);
     // Constructor để gán giá trị cho từng phần tử enum
     ErrorCode(int code, String message,HttpStatusCode statusCode) {
         this.code = code;

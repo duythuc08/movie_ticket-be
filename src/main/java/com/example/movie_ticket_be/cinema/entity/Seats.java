@@ -25,7 +25,7 @@ public class Seats extends BaseEntity {
     Long seatId;
     String seatRow;
     Integer seatNumber;
-
+    Integer viewQuanlityScore;
     @ManyToOne
     @JoinColumn(name = "room_id")
     Rooms rooms;

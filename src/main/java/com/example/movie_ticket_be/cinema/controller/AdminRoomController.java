@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.cinema.controller;
 
+import com.example.movie_ticket_be.cinema.dto.request.AdminRoomRequest;
 import com.example.movie_ticket_be.cinema.dto.request.RoomRequest;
 import com.example.movie_ticket_be.cinema.dto.response.RoomResponse;
 import com.example.movie_ticket_be.cinema.service.AdminRoomService;
@@ -34,6 +35,15 @@ public class AdminRoomController {
     public ApiResponse<List<RoomResponse>> createRooms(@RequestBody List<RoomRequest> requests) {
         return ApiResponse.<List<RoomResponse>>builder()
                 .result(adminRoomService.createRooms(requests))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<RoomResponse> updateRoom(@PathVariable long id, @RequestBody AdminRoomRequest request) {
+        return ApiResponse.<RoomResponse>builder()
+                .result(adminRoomService.updateRoom(id, request))
+                .message("Cập nhật phòng chiếu thành công")
                 .build();
     }
 

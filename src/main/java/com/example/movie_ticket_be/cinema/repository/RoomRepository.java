@@ -24,4 +24,6 @@ public interface RoomRepository extends JpaRepository<Rooms, Long> {
 
     Optional<Rooms> findByRoomId(Long roomId);
 
+    boolean existsByNameAndCinemas_CinemaIdAndRoomIdNot(String name, Long cinemaId, Long roomId);
+
 }

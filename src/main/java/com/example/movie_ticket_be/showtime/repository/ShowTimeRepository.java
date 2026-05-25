@@ -110,6 +110,8 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long> {
             @Param("now") LocalDateTime now,
             @Param("activeStatuses") List<MovieStatus> activeStatuses);
 
+    boolean existsByRooms_RoomIdAndShowTimeStatusIn(Long roomId, List<ShowTimeStatus> statuses);
+
     @Query("SELECT DISTINCT r.cinemas FROM ShowTimes s " +
             "JOIN s.rooms r JOIN r.cinemas c " +
             "WHERE s.movies.movieId = :movieId " +
