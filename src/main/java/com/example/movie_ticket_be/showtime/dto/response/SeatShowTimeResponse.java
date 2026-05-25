@@ -1,7 +1,10 @@
 package com.example.movie_ticket_be.showtime.dto.response;
 
+import java.math.BigDecimal;
+
 import com.example.movie_ticket_be.cinema.enums.RoomType;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
+
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,6 +24,7 @@ public class SeatShowTimeResponse {
     String seatRow;
     Integer seatNumber;
     String seatType;
+    BigDecimal viewQuanlityScore;
 
     Long showTimeId;
     Long roomId;

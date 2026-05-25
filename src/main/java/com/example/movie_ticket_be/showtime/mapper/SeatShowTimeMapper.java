@@ -18,7 +18,7 @@ public interface SeatShowTimeMapper {
     @Mapping(source = "seats.seatRow", target = "seatRow")
     @Mapping(source = "seats.seatNumber", target = "seatNumber")
     @Mapping(source = "seats.seatType", target = "seatType")
-
+    @Mapping(source = "seats.viewQuanlityScore", target = "viewQuanlityScore")
     @Mapping(source = "showTimes.showTimeId", target = "showTimeId")
     @Mapping(source = "showTimes.rooms.roomId", target = "roomId")
     @Mapping(source = "showTimes.rooms.name", target = "roomName")
