@@ -23,7 +23,8 @@ public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long
     @Transactional
     @Query(value = """
     INSERT INTO seat_show_time (seat_id, show_time_id, seat_show_time_status)
-    SELECT s.seat_id, :showTimeId, 'AVAILABLE'
+    SELECT s.seat_id, :showTimeId, 
+           CASE WHEN s.seat_status = 'NORMAL' AND s.entity_status = 'ACTIVE' THEN 'AVAILABLE' ELSE 'BLOCKED' END
     FROM seat s
     WHERE s.room_id = :roomId
     AND NOT EXISTS (
@@ -39,6 +40,8 @@ public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     List<SeatShowTime> findAllBySeatShowTimeIdIn(Collection<Long> seatShowTimeIds);
 
+    @Query("SELECT ss FROM SeatShowTime ss JOIN FETCH ss.showTimes st WHERE ss.seats.seatId = :seatId AND st.startTime > :now AND ss.seatShowTimeStatus = 'BLOCKED'")
+    List<SeatShowTime> findBlockedUpcomingBySeat(@Param("seatId") Long seatId, @Param("now") LocalDateTime now);
 
     @Query("SELECT COUNT(ss) > 0 FROM SeatShowTime ss " +
             "WHERE ss.seatShowTimeId IN :ids " +

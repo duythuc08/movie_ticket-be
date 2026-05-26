@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.cinema.service;
 
 import com.example.movie_ticket_be.cinema.dto.response.RoomResponse;
 import com.example.movie_ticket_be.cinema.enums.RoomStatus;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.cinema.enums.RoomType;
 import com.example.movie_ticket_be.cinema.mapper.RoomMapper;
 import com.example.movie_ticket_be.cinema.repository.RoomRepository;
@@ -23,24 +24,28 @@ public class RoomService {
 
     public List<RoomResponse> getRooms() {
         return roomRepository.findAll().stream()
+                .filter(r -> r.getEntityStatus() == EntityStatus.ACTIVE && r.getRoomStatus() == RoomStatus.OPERATIONAL)
                 .map(roomMapper::toRoomResponse)
                 .toList();
     }
 
     public List<RoomResponse> getRoomsByCinemaId(Long cinemaId) {
         return roomRepository.findByCinemas_CinemaId(cinemaId).stream()
+                .filter(r -> r.getEntityStatus() == EntityStatus.ACTIVE && r.getRoomStatus() == RoomStatus.OPERATIONAL)
                 .map(roomMapper::toRoomResponse)
                 .toList();
     }
 
     public List<RoomResponse> getRoomsByCinemaIdAndStatus(Long cinemaId, RoomStatus status) {
         return roomRepository.findByCinemas_CinemaIdAndRoomStatus(cinemaId, status).stream()
+                .filter(r -> r.getEntityStatus() == EntityStatus.ACTIVE)
                 .map(roomMapper::toRoomResponse)
                 .toList();
     }
 
     public List<RoomResponse> getRoomsByCinemaIdAndType(Long cinemaId, RoomType type) {
         return roomRepository.findByCinemas_CinemaIdAndRoomType(cinemaId, type).stream()
+                .filter(r -> r.getEntityStatus() == EntityStatus.ACTIVE && r.getRoomStatus() == RoomStatus.OPERATIONAL)
                 .map(roomMapper::toRoomResponse)
                 .toList();
     }

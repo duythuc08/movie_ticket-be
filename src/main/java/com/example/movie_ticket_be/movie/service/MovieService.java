@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.movie.service;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.dto.response.MovieResponse;
@@ -42,35 +43,32 @@ public class MovieService {
     }
 
     public List<MovieResponse> getMoviesShowing(){
-        return movieRepository.findByMovieStatus(MovieStatus.NOW_SHOWING)
+        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.NOW_SHOWING)
                 .stream()
                 .map(movieMapper::toMovieResponse)
                 .toList();
     }
     public List<MovieResponse> getMoviesComingSoon(){
-        return movieRepository.findByMovieStatus(MovieStatus.COMING_SOON)
+        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.COMING_SOON)
                 .stream()
                 .map(movieMapper::toMovieResponse)
                 .toList();
     }
 
     public List<MovieResponse> getMoviesShowingPaged(int page, int size) {
-        return movieRepository.findByMovieStatus(
-                        MovieStatus.NOW_SHOWING,
+        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.NOW_SHOWING,
                         PageRequest.of(page, size, Sort.by("movieId").descending()))
                 .getContent().stream().map(movieMapper::toMovieResponse).toList();
     }
 
     public List<MovieResponse> getMoviesComingSoonPaged(int page, int size) {
-        return movieRepository.findByMovieStatus(
-                        MovieStatus.COMING_SOON,
+        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.COMING_SOON,
                         PageRequest.of(page, size, Sort.by("movieId").descending()))
                 .getContent().stream().map(movieMapper::toMovieResponse).toList();
     }
 
     private PagedMovieResponse buildPagedResponse(MovieStatus status, int page, int size) {
-        Page<Movies> result = movieRepository.findByMovieStatus(
-                status, PageRequest.of(page, size, Sort.by("createdAt").descending()));
+        Page<Movies> result = movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, status, PageRequest.of(page, size, Sort.by("createdAt").descending()));
         return PagedMovieResponse.builder()
                 .content(result.getContent().stream().map(movieMapper::toMovieResponse).toList())
                 .currentPage(page)

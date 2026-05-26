@@ -1,5 +1,7 @@
 package com.example.movie_ticket_be.booking.service;
 
+import com.example.movie_ticket_be.booking.enums.FoodStatus;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.booking.dto.response.FoodResponse;
 import com.example.movie_ticket_be.booking.mapper.FoodMapper;
 import com.example.movie_ticket_be.booking.repository.FoodRepository;
@@ -22,7 +24,7 @@ public class FoodService {
     FoodMapper foodMapper;
 
     public List<FoodResponse> getAllFoods() {
-        return foodRepository.findAll().stream()
+        return foodRepository.findByEntityStatusAndFoodStatus(EntityStatus.ACTIVE, FoodStatus.IN_STOCK).stream()
                 .map(foodMapper::toFoodResponse)
                 .toList();
     }

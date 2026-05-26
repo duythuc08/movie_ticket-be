@@ -24,23 +24,44 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
     List<ShowTimes> findAllWithDetails();
 
 
-    List<ShowTimes> findByMovies_MovieIdAndStartTimeBetween(Long movieId, LocalDateTime startTime, LocalDateTime endTime);
+    @Query("SELECT s FROM ShowTimes s " +
+           "JOIN s.rooms r JOIN r.cinemas c " +
+           "WHERE s.movies.movieId = :movieId " +
+           "AND s.startTime BETWEEN :startTime AND :endTime " +
+           "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+           "AND s.movies.entityStatus = 'ACTIVE' " +
+           "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+           "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL'")
+    List<ShowTimes> findByMovies_MovieIdAndStartTimeBetween(@Param("movieId") Long movieId, @Param("startTime") LocalDateTime startTime, @Param("endTime") LocalDateTime endTime);
 
     @Query("SELECT s FROM ShowTimes s " +
-            "WHERE s.rooms.cinemas.cinemaId = :cinemaId " +
+            "JOIN s.rooms r JOIN r.cinemas c " +
+            "WHERE c.cinemaId = :cinemaId " +
             "AND s.movies.movieId = :movieId " +
-            "AND s.startTime > :now")
+            "AND s.startTime > :now " +
+            "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+            "AND s.movies.entityStatus = 'ACTIVE' " +
+            "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+            "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL'")
     List<ShowTimes> findByRooms_Cinemas_CinemaIdAndMovies_MovieIdAndStartTimeAfter(
             @Param("cinemaId") Long cinemaId,
             @Param("movieId") Long movieId,
             @Param("now") LocalDateTime now);
 
 
+    @Query("SELECT s FROM ShowTimes s " +
+           "JOIN s.rooms r JOIN r.cinemas c " +
+           "WHERE s.movies.movieId = :movieId " +
+           "AND s.startTime BETWEEN :start AND :end " +
+           "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+           "AND s.movies.entityStatus = 'ACTIVE' " +
+           "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+           "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL'")
     List<ShowTimes> findByMovies_MovieIdAndStartTimeBetweenAndShowTimeStatusNot(
-            Long movieId,
-            LocalDateTime start,
-            LocalDateTime end,
-            ShowTimeStatus status
+            @Param("movieId") Long movieId,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end,
+            @Param("status") ShowTimeStatus status
     );
 
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
@@ -52,7 +73,14 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
                                       @Param("newItemStart") LocalDateTime newItemStart,
                                       @Param("newItemEnd") LocalDateTime newItemEnd);
 
-    List<ShowTimes> findByMovies_MovieId(Long movieId);
+    @Query("SELECT s FROM ShowTimes s " +
+           "JOIN s.rooms r JOIN r.cinemas c " +
+           "WHERE s.movies.movieId = :movieId " +
+           "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+           "AND s.movies.entityStatus = 'ACTIVE' " +
+           "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+           "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL'")
+    List<ShowTimes> findByMovies_MovieId(@Param("movieId") Long movieId);
 
     boolean existsByShowTimeId(Long showTimeId);
 
@@ -70,7 +98,10 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
     @Query("SELECT DISTINCT s.movies FROM ShowTimes s " +
             "JOIN s.rooms r JOIN r.cinemas c " +
             "WHERE c.cinemaId = :cinemaId " +
-            "AND s.showTimeStatus != 'CANCELLED' " +
+            "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+            "AND s.movies.entityStatus = 'ACTIVE' " +
+            "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+            "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL' " +
             "AND (s.movies.movieStatus IN :activeStatuses OR s.startTime >= :startOfToday)")
     List<Movies> findDistinctMoviesByCinemaId(
             @Param("cinemaId") Long cinemaId,
@@ -83,7 +114,10 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
             "WHERE c.cinemaId = :cinemaId " +
             "AND s.movies.movieId = :movieId " +
             "AND s.startTime >= :startOfToday " +
-            "AND s.showTimeStatus != 'CANCELLED' " +
+            "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+            "AND s.movies.entityStatus = 'ACTIVE' " +
+            "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+            "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL' " +
             "ORDER BY s.startTime ASC")
     List<ShowTimes> findByCinemaIdAndMovieIdAfterNow(
             @Param("cinemaId") Long cinemaId,
@@ -96,7 +130,10 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
             "AND s.movies.movieId = :movieId " +
             "AND s.startTime >= :startOfDay " +
             "AND s.startTime <= :endOfDay " +
-            "AND s.showTimeStatus != 'CANCELLED' " +
+            "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+            "AND s.movies.entityStatus = 'ACTIVE' " +
+            "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+            "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL' " +
             "ORDER BY s.startTime ASC")
     List<ShowTimes> findByCinemaIdAndMovieIdOnDate(
             @Param("cinemaId") Long cinemaId,
@@ -105,7 +142,8 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
             @Param("endOfDay") LocalDateTime endOfDay);
 
     @Query("SELECT DISTINCT s.movies FROM ShowTimes s " +
-            "WHERE s.showTimeStatus != 'CANCELLED' " +
+            "WHERE s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+            "AND s.movies.entityStatus = 'ACTIVE' " +
             "AND s.startTime >= :now " +
             "AND s.movies.movieStatus IN :activeStatuses")
     List<Movies> findNowShowingMoviesWithUpcomingSlots(
@@ -117,7 +155,10 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
     @Query("SELECT DISTINCT r.cinemas FROM ShowTimes s " +
             "JOIN s.rooms r JOIN r.cinemas c " +
             "WHERE s.movies.movieId = :movieId " +
-            "AND s.showTimeStatus != 'CANCELLED' " +
+            "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+            "AND s.movies.entityStatus = 'ACTIVE' " +
+            "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
+            "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL' " +
             "AND s.startTime >= :now")
     List<Cinemas> findDistinctCinemasByMovieId(
             @Param("movieId") Long movieId,

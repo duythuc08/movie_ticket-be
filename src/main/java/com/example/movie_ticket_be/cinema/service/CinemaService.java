@@ -1,5 +1,7 @@
 package com.example.movie_ticket_be.cinema.service;
 
+import com.example.movie_ticket_be.cinema.enums.CinemaStatus;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.cinema.dto.response.CinemaResponse;
 import com.example.movie_ticket_be.cinema.mapper.CinemaMapper;
 import com.example.movie_ticket_be.cinema.repository.CinemaRepository;
@@ -22,7 +24,7 @@ public class CinemaService {
     CinemaMapper cinemaMapper;
 
     public List<CinemaResponse> getCinemas() {
-        return cinemaRepository.findAll().stream()
+        return cinemaRepository.findByEntityStatusAndCinemaStatus(EntityStatus.ACTIVE, CinemaStatus.OPERATIONAL).stream()
                 .map(cinemaMapper::toCinemasResponse)
                 .toList();
     }
