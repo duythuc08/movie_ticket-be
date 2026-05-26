@@ -15,6 +15,13 @@ import com.example.movie_ticket_be.cinema.entity.Seats;
 import com.example.movie_ticket_be.cinema.enums.SeatStatus;
 import com.example.movie_ticket_be.cinema.enums.SeatType;
 import com.example.movie_ticket_be.cinema.mapper.SeatMapper;
+import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
+import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
+import com.example.movie_ticket_be.showtime.mapper.ShowTimeMapper;
+import com.example.movie_ticket_be.showtime.dto.response.ShowTimeResponse;
+import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
+import com.example.movie_ticket_be.cinema.dto.request.AdminSeatStatusUpdateRequest;
+import java.time.LocalDateTime;
 import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.cinema.repository.SeatRepository;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
@@ -34,6 +41,8 @@ public class AdminSeatService {
     RoomRepository roomRepository;
     SeatRepository seatRepository;
     SeatMapper seatMapper;
+    SeatShowTimeRepository seatShowTimeRepository;
+    ShowTimeMapper showTimeMapper;
 
     public List<SeatResponse> getSeatsByRoom(Long roomId) {
         return seatRepository.findByRooms_RoomId(roomId).stream()
@@ -53,6 +62,33 @@ public class AdminSeatService {
                 .orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
         seat.setSeatType(request.getSeatTypes());
         return seatMapper.toSeatResponse(seatRepository.save(seat));
+    }
+
+    public List<ShowTimeResponse> getBlockedUpcomingShowTimesBySeat(Long seatId) {
+        return seatShowTimeRepository.findBlockedUpcomingBySeat(seatId, LocalDateTime.now())
+                .stream()
+                .map(ss -> showTimeMapper.toShowTimeResponse(ss.getShowTimes()))
+                .toList();
+    }
+
+    @Transactional
+    public SeatResponse updateSeatStatus(Long seatId, AdminSeatStatusUpdateRequest request) {
+        Seats seat = seatRepository.findBySeatId(seatId)
+                .orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
+        
+        seat.setSeatStatus(request.getSeatStatus());
+        seatRepository.save(seat);
+
+        if (request.getUnlockShowTimeIds() != null && !request.getUnlockShowTimeIds().isEmpty()) {
+            List<SeatShowTime> blockedSeats = seatShowTimeRepository.findBlockedUpcomingBySeat(seatId, LocalDateTime.now());
+            for (SeatShowTime ss : blockedSeats) {
+                if (request.getUnlockShowTimeIds().contains(ss.getShowTimes().getShowTimeId())) {
+                    ss.setSeatShowTimeStatus(SeatShowTimeStatus.AVAILABLE);
+                    seatShowTimeRepository.save(ss);
+                }
+            }
+        }
+        return seatMapper.toSeatResponse(seat);
     }
 
     @Transactional
@@ -91,7 +127,7 @@ public class AdminSeatService {
                         .seatNumber(c + 1)
                         .rooms(room)
                         .seatType(type)
-                        .seatStatus(SeatStatus.AVAILABLE)
+                        .seatStatus(SeatStatus.NORMAL)
                         .viewQuanlityScore(BigDecimal.valueOf(Math.round(viewScore * 100.0) / 100.0))
                         .build();
                 seat.setEntityStatus(EntityStatus.ACTIVE);

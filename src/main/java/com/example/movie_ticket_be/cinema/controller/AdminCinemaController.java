@@ -23,6 +23,7 @@ import com.example.movie_ticket_be.cinema.dto.request.CinemaRequest;
 import com.example.movie_ticket_be.cinema.dto.response.AdminCinemaResponse;
 import com.example.movie_ticket_be.cinema.dto.response.CinemaResponse;
 import com.example.movie_ticket_be.cinema.entity.Cinemas;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.cinema.enums.CinemaStatus;
 import com.example.movie_ticket_be.cinema.service.AdminCinemaService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
@@ -97,14 +98,14 @@ public class AdminCinemaController {
     @PutMapping("/{id}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> activate(@PathVariable long id) {
-        adminCinemaService.changeStatus(id, CinemaStatus.ACTIVE);
+        adminCinemaService.changeStatus(id, EntityStatus.ACTIVE);
         return ApiResponse.<Void>builder().message("Kích hoạt rạp chiếu thành công").build();
     }
 
     @PutMapping("/{id}/inactivate")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Void> inactivate(@PathVariable long id) {
-        adminCinemaService.changeStatus(id, CinemaStatus.INACTIVE);
+        adminCinemaService.changeStatus(id, EntityStatus.INACTIVE);
         return ApiResponse.<Void>builder().message("Vô hiệu hóa rạp chiếu thành công").build();
     }
 }

@@ -1,0 +1,15 @@
+package com.example.movie_ticket_be.cinema.dto.request;
+
+import com.example.movie_ticket_be.cinema.enums.SeatStatus;
+import lombok.AccessLevel;
+import lombok.Data;
+import lombok.experimental.FieldDefaults;
+
+import java.util.List;
+
+@Data
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class AdminSeatStatusUpdateRequest {
+    SeatStatus seatStatus;
+    List<Long> unlockShowTimeIds;
+}

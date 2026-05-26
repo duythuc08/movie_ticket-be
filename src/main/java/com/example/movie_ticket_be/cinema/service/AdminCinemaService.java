@@ -13,10 +13,11 @@ import com.example.movie_ticket_be.cinema.dto.request.AdminCinemaUpdateRequest;
 import com.example.movie_ticket_be.cinema.dto.request.CinemaRequest;
 import com.example.movie_ticket_be.cinema.dto.response.AdminCinemaResponse;
 import com.example.movie_ticket_be.cinema.dto.response.CinemaResponse;
+import com.example.movie_ticket_be.cinema.enums.CinemaStatus;
 import com.example.movie_ticket_be.cinema.entity.Cinemas;
 import com.example.movie_ticket_be.cinema.entity.Rooms;
-import com.example.movie_ticket_be.cinema.enums.CinemaStatus;
 import com.example.movie_ticket_be.cinema.mapper.CinemaMapper;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.cinema.repository.CinemaRepository;
 import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.core.exception.AppException;
@@ -91,10 +92,10 @@ public class AdminCinemaService {
         return response;
     }
 
-    public void changeStatus(long id, CinemaStatus cinemaStatus) {
+    public void changeStatus(long id, EntityStatus status) {
         Cinemas cinema = cinemaRepository.findByCinemaId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.CINEMA_NOT_FOUND));
-        cinema.setCinemaStatus(cinemaStatus);
+        cinema.setEntityStatus(status);
         cinemaRepository.save(cinema);
     }
 }

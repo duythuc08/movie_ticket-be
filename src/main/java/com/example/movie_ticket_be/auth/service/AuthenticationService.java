@@ -12,6 +12,7 @@ import com.example.movie_ticket_be.auth.repository.InvalidatedTokenRepository;
 import com.example.movie_ticket_be.auth.repository.VerificationTokenRepository;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.user.dto.response.UsersRespone;
 import com.example.movie_ticket_be.user.entity.MembershipTier;
 import com.example.movie_ticket_be.user.entity.Role;
@@ -118,7 +119,8 @@ public class AuthenticationService {
         Users user = userMapper.toRegisterUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(roles);
-        user.setUserStatus(UserStatus.ACTIVE);
+        user.setUserStatus(UserStatus.UNVERIFIED);
+        user.setEntityStatus(EntityStatus.ACTIVE);
         user.setEnabled(false); // mặc định chưa verify
         user.setLoyaltyPoints(0);
         user.setMembershipTier(defaultTier);
@@ -273,6 +275,7 @@ public class AuthenticationService {
 
         if (!user.isEnabled()) {
             user.setEnabled(true);
+            user.setUserStatus(UserStatus.VERIFIED);
             userRepository.save(user);
         }
 

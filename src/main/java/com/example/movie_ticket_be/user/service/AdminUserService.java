@@ -43,7 +43,7 @@ public class AdminUserService {
         Users newUsers = userMapper.toUsers(request);
         newUsers.setPassword(passwordEncoder.encode(newUsers.getPassword()));
         newUsers.setRole(roles);
-        newUsers.setUserStatus(UserStatus.ACTIVE);
+        newUsers.setUserStatus(UserStatus.UNVERIFIED);
         return userMapper.toUsersRespone(userRepository.save(newUsers));
     }
 
@@ -76,7 +76,7 @@ public class AdminUserService {
     public void changeStatus(String userId, EntityStatus entityStatus) {
         Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        user.setUserStatus(entityStatus == EntityStatus.ACTIVE ? UserStatus.ACTIVE : UserStatus.INACTIVE);
+        user.setEntityStatus(entityStatus);
         userRepository.save(user);
     }
 }
