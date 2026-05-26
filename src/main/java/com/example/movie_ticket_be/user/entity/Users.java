@@ -49,4 +49,13 @@ public class Users extends BaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tier_id")
     MembershipTier membershipTier;
+
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        if (this.userStatus == null) {
+            this.userStatus = UserStatus.UNVERIFIED;
+        }
+    }
 }

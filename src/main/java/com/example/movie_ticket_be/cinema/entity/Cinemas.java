@@ -28,4 +28,13 @@ public class Cinemas extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     CinemaStatus cinemaStatus;
+
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        if (this.cinemaStatus == null) {
+            this.cinemaStatus = CinemaStatus.OPERATIONAL;
+        }
+    }
 }

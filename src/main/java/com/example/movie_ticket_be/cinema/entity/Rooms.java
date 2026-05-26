@@ -34,4 +34,12 @@ public class Rooms extends BaseEntity {
     @Enumerated(EnumType.STRING)
     RoomStatus roomStatus;
 
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        if (this.roomStatus == null) {
+            this.roomStatus = RoomStatus.OPERATIONAL;
+        }
+    }
 }

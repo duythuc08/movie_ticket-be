@@ -40,4 +40,13 @@ public class Seats extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     SeatStatus seatStatus;
+
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        if (this.seatStatus == null) {
+            this.seatStatus = SeatStatus.NORMAL;
+        }
+    }
 }

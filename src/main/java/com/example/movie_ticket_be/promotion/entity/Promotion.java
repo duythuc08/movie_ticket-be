@@ -60,4 +60,13 @@ public class Promotion extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     PromotionType type;
+
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        if (this.status == null) {
+            this.status = PromotionStatus.DRAFT;
+        }
+    }
 }

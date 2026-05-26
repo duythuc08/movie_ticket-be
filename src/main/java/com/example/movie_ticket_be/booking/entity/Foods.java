@@ -40,4 +40,12 @@ public class Foods extends BaseEntity {
     @Enumerated(EnumType.STRING)
     FoodStatus foodStatus;
 
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        if (this.foodStatus == null) {
+            this.foodStatus = FoodStatus.IN_STOCK;
+        }
+    }
 }
