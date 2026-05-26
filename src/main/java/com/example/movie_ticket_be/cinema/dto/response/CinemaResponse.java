@@ -1,6 +1,8 @@
 package com.example.movie_ticket_be.cinema.dto.response;
 
 import com.example.movie_ticket_be.cinema.enums.CinemaStatus;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -23,4 +25,7 @@ public class CinemaResponse {
 
     @Enumerated(EnumType.STRING)
     CinemaStatus cinemaStatus;
+
+    @Enumerated(EnumType.STRING)
+    EntityStatus entityStatus;
 }
