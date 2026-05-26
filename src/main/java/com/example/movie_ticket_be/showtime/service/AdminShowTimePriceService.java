@@ -34,4 +34,10 @@ public class AdminShowTimePriceService {
     public List<ShowTimePriceResponse> createShowTimePrices(List<ShowTimePriceRequest> requests) {
         return requests.stream().map(this::createShowTimePrice).toList();
     }
+
+    public List<ShowTimePriceResponse> getPricesByShowTimeId(Long showTimeId) {
+        return showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId).stream()
+                .map(showTimePriceMapper::toShowTimePriceResponse)
+                .toList();
+    }
 }

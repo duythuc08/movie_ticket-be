@@ -22,6 +22,13 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import com.example.movie_ticket_be.showtime.dto.response.ShowTimeDetailResponse;
+import com.example.movie_ticket_be.showtime.dto.response.SeatSummaryResponse;
+import com.example.movie_ticket_be.showtime.dto.response.ShowTimePriceResponse;
+
 import java.util.List;
 
 @Slf4j
@@ -34,6 +41,8 @@ public class AdminShowTimeService {
     MovieRepository movieRepository;
     RoomRepository roomRepository;
     SeatShowTimeRepository seatShowTimeRepository;
+    SeatShowTimeService seatShowTimeService;
+    AdminShowTimePriceService adminShowTimePriceService;
 
     @Transactional
     public ShowTimeResponse createShowTime(ShowTimeRequest request) {
@@ -48,10 +57,15 @@ public class AdminShowTimeService {
         showTimes.setRooms(room);
         showTimes.setMovies(movie);
         ShowTimes saved = showTimeRepository.save(showTimes);
-        seatShowTimeRepository.bulkInsertSeatsForShowTime(saved.getShowTimeId(), request.getRoomId());
+        if (request.getPrices() != null && !request.getPrices().isEmpty()) {
+            request.getPrices().forEach(priceReq -> priceReq.setShowTimeId(saved.getShowTimeId()));
+            adminShowTimePriceService.createShowTimePrices(request.getPrices());
+        }
+        seatShowTimeService.generateSeatsForShowTime(saved.getShowTimeId(), request.getRoomId());
         return showTimeMapper.toShowTimeResponse(saved);
     }
-
+    
+    @Transactional
     public List<ShowTimeResponse> createShowTimes(List<ShowTimeRequest> requests) {
         return requests.stream().map(this::createShowTime).toList();
     }
@@ -91,5 +105,28 @@ public class AdminShowTimeService {
         seatShowTimeRepository.deleteNonSoldSeatsByShowTime(showTimeId);
         showTime.setShowTimeStatus(ShowTimeStatus.CANCELLED);
         return showTimeMapper.toShowTimeResponse(showTimeRepository.save(showTime));
+    }
+
+    public Page<ShowTimeResponse> getAdminShowTimes(Specification<ShowTimes> spec, Pageable pageable) {
+        return showTimeRepository.findAll(spec, pageable).map(showTimeMapper::toShowTimeResponse);
+    }
+
+    public ShowTimeDetailResponse getAdminShowTimeDetail(Long showTimeId) {
+        ShowTimes showTime = showTimeRepository.findByShowTimeId(showTimeId)
+                .orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_NOT_FOUND));
+        
+        List<ShowTimePriceResponse> prices = adminShowTimePriceService.getPricesByShowTimeId(showTimeId);
+        SeatSummaryResponse seatSummary = seatShowTimeService.getSeatSummaryForShowTime(showTimeId);
+        
+        return ShowTimeDetailResponse.builder()
+                .showTimeId(showTime.getShowTimeId())
+                .startTime(showTime.getStartTime())
+                .endTime(showTime.getEndTime())
+                .showTimeStatus(showTime.getShowTimeStatus() != null ? showTime.getShowTimeStatus().name() : null)
+                .movies(showTime.getMovies())
+                .rooms(showTime.getRooms())
+                .prices(prices)
+                .seatSummary(seatSummary)
+                .build();
     }
 }

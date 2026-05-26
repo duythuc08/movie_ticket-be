@@ -9,6 +9,17 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.movie_ticket_be.showtime.dto.response.ShowTimeDetailResponse;
+import com.turkraft.springfilter.boot.Filter;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
+import com.example.movie_ticket_be.showtime.entity.ShowTimes;
+import io.swagger.v3.oas.annotations.Parameter;
+
 import java.util.List;
 
 @RestController
@@ -49,6 +60,27 @@ public class AdminShowTimeController {
         return ApiResponse.<ShowTimeResponse>builder()
                 .result(adminShowTimeService.cancelShowTime(id))
                 .message("Hủy suất chiếu thành công")
+                .build();
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Page<ShowTimeResponse>> getAdminShowTimes(
+            @Parameter(name = "filter", required = false) @Filter Specification<ShowTimes> spec,
+            @ParameterObject @PageableDefault(sort = "startTime", direction = Direction.DESC) Pageable pageable
+    ) {
+        return ApiResponse.<Page<ShowTimeResponse>>builder()
+                .result(adminShowTimeService.getAdminShowTimes(spec, pageable))
+                .message("Lấy danh sách suất chiếu thành công")
+                .build();
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<ShowTimeDetailResponse> getAdminShowTimeDetail(@PathVariable Long id) {
+        return ApiResponse.<ShowTimeDetailResponse>builder()
+                .result(adminShowTimeService.getAdminShowTimeDetail(id))
+                .message("Lấy chi tiết suất chiếu thành công")
                 .build();
     }
 }
