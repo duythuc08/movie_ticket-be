@@ -36,3 +36,4 @@ build/
 *.yaml
 *.yml
 *.md
+!application.example.yaml
