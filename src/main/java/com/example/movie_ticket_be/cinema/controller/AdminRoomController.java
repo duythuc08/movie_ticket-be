@@ -1,22 +1,40 @@
 package com.example.movie_ticket_be.cinema.controller;
 
+import java.util.List;
+
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.movie_ticket_be.cinema.dto.request.AdminRoomRequest;
 import com.example.movie_ticket_be.cinema.dto.request.AdminSeatUpdate;
 import com.example.movie_ticket_be.cinema.dto.request.RoomRequest;
 import com.example.movie_ticket_be.cinema.dto.request.SeatSetupRequest;
 import com.example.movie_ticket_be.cinema.dto.response.RoomResponse;
 import com.example.movie_ticket_be.cinema.dto.response.SeatResponse;
+import com.example.movie_ticket_be.cinema.entity.Rooms;
 import com.example.movie_ticket_be.cinema.service.AdminRoomService;
 import com.example.movie_ticket_be.cinema.service.AdminSeatService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
+import com.turkraft.springfilter.boot.Filter;
+
+import io.swagger.v3.oas.annotations.Parameter;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/admin/rooms")
@@ -25,6 +43,16 @@ import java.util.List;
 public class AdminRoomController {
     AdminRoomService adminRoomService;
     AdminSeatService adminSeatService;
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Page<RoomResponse>> getRooms(
+            @Parameter(name = "filter", required = false) @Filter Specification<Rooms> spec,
+            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+        return ApiResponse.<Page<RoomResponse>>builder()
+                .result(adminRoomService.getRooms(spec, pageable))
+                .build();
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")

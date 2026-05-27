@@ -2,6 +2,9 @@ package com.example.movie_ticket_be.cinema.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,8 +14,8 @@ import com.example.movie_ticket_be.cinema.dto.response.RoomResponse;
 import com.example.movie_ticket_be.cinema.entity.Cinemas;
 import com.example.movie_ticket_be.cinema.entity.Rooms;
 import com.example.movie_ticket_be.cinema.mapper.RoomMapper;
-import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.cinema.repository.CinemaRepository;
+import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
@@ -73,6 +76,10 @@ public class AdminRoomService {
         room.setRoomStatus(request.getRoomStatus());
 
         return roomMapper.toRoomResponse(roomRepository.save(room));
+    }
+    
+    public Page<RoomResponse> getRooms(Specification<Rooms> spec, Pageable pageable) {
+        return roomRepository.findAll(spec, pageable).map(roomMapper::toRoomResponse);
     }
 
     @Transactional
