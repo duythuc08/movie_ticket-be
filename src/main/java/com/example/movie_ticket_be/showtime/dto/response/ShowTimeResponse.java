@@ -1,11 +1,13 @@
 package com.example.movie_ticket_be.showtime.dto.response;
 
-import com.example.movie_ticket_be.cinema.entity.Rooms;
-import com.example.movie_ticket_be.movie.entity.Movies;
+import com.example.movie_ticket_be.cinema.enums.RoomType;
+import com.example.movie_ticket_be.movie.enums.MovieStatus;
+import com.example.movie_ticket_be.showtime.enums.ShowTimeStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Builder
@@ -16,8 +18,20 @@ public class ShowTimeResponse {
     Long showTimeId;
     LocalDateTime startTime;
     LocalDateTime endTime;
-    String showTimeStatus;
+    ShowTimeStatus showTimeStatus;
 
-    Movies movies;
-    Rooms rooms;
+    Long movieId;
+    String movieTitle;
+    Integer movieDuration;
+    String moviePosterUrl;
+    MovieStatus movieStatus;
+
+    Long roomId;
+    String roomName;
+    RoomType roomType;
+
+    Long cinemaId;
+    String cinemaName;
+
+    List<ShowTimePriceResponse> prices;
 }

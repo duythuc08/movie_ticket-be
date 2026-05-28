@@ -28,7 +28,7 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
            "JOIN s.rooms r JOIN r.cinemas c " +
            "WHERE s.movies.movieId = :movieId " +
            "AND s.startTime BETWEEN :startTime AND :endTime " +
-           "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+           "AND s.showTimeStatus = 'SCHEDULED' " +
            "AND s.movies.entityStatus = 'ACTIVE' " +
            "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
            "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL'")
@@ -53,7 +53,7 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
            "JOIN s.rooms r JOIN r.cinemas c " +
            "WHERE s.movies.movieId = :movieId " +
            "AND s.startTime BETWEEN :start AND :end " +
-           "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " +
+           "AND s.showTimeStatus <> :status " +
            "AND s.movies.entityStatus = 'ACTIVE' " +
            "AND c.entityStatus = 'ACTIVE' AND c.cinemaStatus = 'OPERATIONAL' " +
            "AND r.entityStatus = 'ACTIVE' AND r.roomStatus = 'OPERATIONAL'")
@@ -67,11 +67,22 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
     @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
             "FROM ShowTimes s " +
             "WHERE s.rooms.roomId = :roomId " +
-            "AND s.showTimeStatus != 'CANCELLED' " +
+            "AND s.showTimeStatus NOT IN ('CANCELLED', 'COMPLETED') " +
             "AND (:newItemStart < s.endTime AND :newItemEnd > s.startTime)")
     boolean existsConflictingShowtime(@Param("roomId") Long roomId,
                                       @Param("newItemStart") LocalDateTime newItemStart,
                                       @Param("newItemEnd") LocalDateTime newItemEnd);
+
+    @Query("SELECT CASE WHEN COUNT(s) > 0 THEN true ELSE false END " +
+            "FROM ShowTimes s " +
+            "WHERE s.rooms.roomId = :roomId " +
+            "AND s.showTimeId <> :excludeId " +
+            "AND s.showTimeStatus NOT IN ('CANCELLED', 'COMPLETED') " +
+            "AND (:newItemStart < s.endTime AND :newItemEnd > s.startTime)")
+    boolean existsConflictingShowtimeExcluding(@Param("roomId") Long roomId,
+                                               @Param("newItemStart") LocalDateTime newItemStart,
+                                               @Param("newItemEnd") LocalDateTime newItemEnd,
+                                               @Param("excludeId") Long excludeId);
 
     @Query("SELECT s FROM ShowTimes s " +
            "JOIN s.rooms r JOIN r.cinemas c " +
@@ -91,7 +102,8 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
     List<ShowTimes> findByShowTimeStatusAndEndTimeLessThanEqual(ShowTimeStatus status, LocalDateTime time);
 
     @Query("SELECT s FROM ShowTimes s WHERE s.showTimeStatus IN ('SCHEDULED', 'ONGOING') " +
-            "AND NOT EXISTS (SELECT ss FROM SeatShowTime ss WHERE ss.showTimes = s AND ss.seatShowTimeStatus = 'AVAILABLE')")
+            "AND EXISTS (SELECT ss FROM SeatShowTime ss WHERE ss.showTimes = s) " +
+            "AND NOT EXISTS (SELECT ss FROM SeatShowTime ss WHERE ss.showTimes = s AND ss.seatShowTimeStatus <> 'SOLD')")
     List<ShowTimes> findFullyBookedCandidates();
 
 

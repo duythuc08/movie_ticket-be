@@ -2,25 +2,21 @@ package com.example.movie_ticket_be.showtime.service;
 
 import com.example.movie_ticket_be.cinema.dto.response.CinemaResponse;
 import com.example.movie_ticket_be.cinema.mapper.CinemaMapper;
-import com.example.movie_ticket_be.cinema.repository.RoomRepository;
-import com.example.movie_ticket_be.core.exception.AppException;
-import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.dto.response.MovieResponse;
 import com.example.movie_ticket_be.movie.enums.MovieStatus;
 import com.example.movie_ticket_be.movie.mapper.MovieMapper;
-import com.example.movie_ticket_be.movie.repository.MovieRepository;
 import com.example.movie_ticket_be.showtime.dto.response.QuickBookingSlotResponse;
 import com.example.movie_ticket_be.showtime.dto.response.ShowTimeResponse;
 import com.example.movie_ticket_be.showtime.entity.ShowTimes;
 import com.example.movie_ticket_be.showtime.enums.ShowTimeStatus;
 import com.example.movie_ticket_be.showtime.mapper.ShowTimeMapper;
 import com.example.movie_ticket_be.showtime.repository.ShowTimeRepository;
-import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -37,8 +33,6 @@ public class ShowTimeService {
     ShowTimeMapper showTimeMapper;
     MovieMapper movieMapper;
     CinemaMapper cinemaMapper;
-    MovieRepository movieRepository;
-    RoomRepository roomRepository;
 
     @Transactional
     public void autoUpdateShowTimeStatus() {
@@ -51,24 +45,28 @@ public class ShowTimeService {
                 .forEach(st -> st.setShowTimeStatus(ShowTimeStatus.FULLY_BOOKED));
     }
 
+    @Transactional(readOnly = true)
     public List<ShowTimeResponse> getAllShowTimes() {
         return showTimeRepository.findAllWithDetails().stream()
                 .map(showTimeMapper::toShowTimeResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ShowTimeResponse> getShowTimesByMovieAndTimeRange(Long movieId, LocalDateTime start, LocalDateTime end) {
         return showTimeRepository.findByMovies_MovieIdAndStartTimeBetween(movieId, start, end).stream()
                 .map(showTimeMapper::toShowTimeResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ShowTimeResponse> getShowTimesByCinemaAndMovie(Long cinemaId, Long movieId, LocalDateTime now) {
         return showTimeRepository.findByRooms_Cinemas_CinemaIdAndMovies_MovieIdAndStartTimeAfter(cinemaId, movieId, now).stream()
                 .map(showTimeMapper::toShowTimeResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ShowTimeResponse> getActiveShowTimesByMovieAndRange(Long movieId, LocalDateTime start, LocalDateTime end) {
         return showTimeRepository.findByMovies_MovieIdAndStartTimeBetweenAndShowTimeStatusNot(movieId, start, end, ShowTimeStatus.CANCELLED).stream()
                 .sorted(Comparator.comparing(ShowTimes::getStartTime))
@@ -76,12 +74,14 @@ public class ShowTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ShowTimeResponse> getShowTimesByMovie(Long movieId) {
         return showTimeRepository.findByMovies_MovieId(movieId).stream()
                 .map(showTimeMapper::toShowTimeResponse)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MovieResponse> getMoviesByCinema(Long cinemaId) {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
         return showTimeRepository.findDistinctMoviesByCinemaId(cinemaId, startOfToday, List.of(MovieStatus.NOW_SHOWING)).stream()
@@ -89,6 +89,7 @@ public class ShowTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<String> getAvailableDatesByCinemaAndMovie(Long cinemaId, Long movieId) {
         LocalDateTime startOfToday = LocalDate.now().atStartOfDay();
         return showTimeRepository.findByCinemaIdAndMovieIdAfterNow(cinemaId, movieId, startOfToday).stream()
@@ -96,6 +97,7 @@ public class ShowTimeService {
                 .distinct().sorted().toList();
     }
 
+    @Transactional(readOnly = true)
     public List<QuickBookingSlotResponse> getShowtimeSlotsByCinemaMovieDate(Long cinemaId, Long movieId, LocalDate date) {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfDay = date.equals(LocalDate.now()) ? now : date.atStartOfDay();
@@ -111,6 +113,7 @@ public class ShowTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MovieResponse> getNowShowingMoviesForQuickBooking() {
         LocalDateTime now = LocalDateTime.now();
         return showTimeRepository.findNowShowingMoviesWithUpcomingSlots(now, List.of(MovieStatus.NOW_SHOWING)).stream()
@@ -118,6 +121,7 @@ public class ShowTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<CinemaResponse> getCinemasByMovie(Long movieId) {
         LocalDateTime now = LocalDateTime.now();
         return showTimeRepository.findDistinctCinemasByMovieId(movieId, now).stream()

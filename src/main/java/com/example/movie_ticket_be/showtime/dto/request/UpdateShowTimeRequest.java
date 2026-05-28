@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateShowTimeRequest {
     LocalDateTime startTime;
-    LocalDateTime endTime;
     Long movieId;
     Long roomId;
 }

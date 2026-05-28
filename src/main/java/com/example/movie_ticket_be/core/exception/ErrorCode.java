@@ -73,7 +73,10 @@ public enum ErrorCode {
     CREATE_QR_CODE_FAILED(1061, "Failed to create QR code",HttpStatus.INTERNAL_SERVER_ERROR),
     MOVIE_RELEASE_DATE_NOT_VALID(1062,"Movie release date not valid",HttpStatus.BAD_REQUEST),
     ROOM_HAS_ACTIVE_SHOWTIME(1063,"Room has active showtimes, cannot change room type",HttpStatus.BAD_REQUEST),
-    SEATS_ALREADY_EXIST_FOR_ROOM(1064,"Seats already exist for room",HttpStatus.BAD_REQUEST);
+    SEATS_ALREADY_EXIST_FOR_ROOM(1064,"Seats already exist for room",HttpStatus.BAD_REQUEST),
+    MOVIE_STOPPED(1065,"Movie is no longer showing, cannot create showtime",HttpStatus.BAD_REQUEST),
+    SHOWTIME_TIME_OVERLAP(1066,"Showtime start or end time overlaps with an existing showtime",HttpStatus.BAD_REQUEST),
+    SHOWTIME_BUFFER_CONFLICT(1067,"Showtime must be at least 15 minutes apart from other showtimes",HttpStatus.BAD_REQUEST);
     // Constructor để gán giá trị cho từng phần tử enum
     ErrorCode(int code, String message,HttpStatusCode statusCode) {
         this.code = code;
