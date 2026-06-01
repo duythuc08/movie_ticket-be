@@ -70,6 +70,11 @@ public class SeatShowTimeService {
         seatShowTimeRepository.bulkInsertSeatsForShowTime(showTimeId, roomId);
     }
 
+    public boolean hasBookedSeats(Long showTimeId) {
+        return seatShowTimeRepository.existsByShowTimes_ShowTimeIdAndSeatShowTimeStatusIn(
+                showTimeId, List.of(SeatShowTimeStatus.RESERVED, SeatShowTimeStatus.SOLD));
+    }
+
     public SeatSummaryResponse getSeatSummaryForShowTime(Long showTimeId) {
         long available = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId, SeatShowTimeStatus.AVAILABLE);
         long sold = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId, SeatShowTimeStatus.SOLD);

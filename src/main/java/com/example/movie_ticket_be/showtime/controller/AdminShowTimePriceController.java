@@ -10,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -32,6 +33,17 @@ public class AdminShowTimePriceController {
     public ApiResponse<List<ShowTimePriceResponse>> createShowTimePrices(@RequestBody List<ShowTimePriceRequest> requests) {
         return ApiResponse.<List<ShowTimePriceResponse>>builder()
                 .result(adminShowTimePriceService.createShowTimePrices(requests))
+                .build();
+    }
+
+    @PutMapping("/{showTimePriceId}/showtime/{showTimeId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<ShowTimePriceResponse> updateShowTimePrice(
+            @PathVariable Long showTimePriceId,
+            @PathVariable Long showTimeId,
+            @RequestParam BigDecimal price) {
+        return ApiResponse.<ShowTimePriceResponse>builder()
+                .result(adminShowTimePriceService.updateShowTimePrice(showTimePriceId, showTimeId, price))
                 .build();
     }
 }

@@ -1,6 +1,8 @@
 package com.example.movie_ticket_be.showtime.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -9,6 +11,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.example.movie_ticket_be.cinema.entity.Rooms;
+import com.example.movie_ticket_be.cinema.repository.CinemaRepository;
 import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
@@ -46,6 +49,7 @@ public class AdminShowTimeService {
     ShowTimeMapper showTimeMapper;
     MovieRepository movieRepository;
     RoomRepository roomRepository;
+    CinemaRepository cinemaRepository;
     SeatShowTimeRepository seatShowTimeRepository;
     SeatShowTimeService seatShowTimeService;
     AdminShowTimePriceService adminShowTimePriceService;
@@ -158,6 +162,17 @@ public class AdminShowTimeService {
 
     public Page<ShowTimeResponse> getAdminShowTimes(Specification<ShowTimes> spec, Pageable pageable) {
         return showTimeRepository.findAll(spec, pageable).map(showTimeMapper::toShowTimeResponse);
+    }
+
+    public List<ShowTimeResponse> getShowTimeForGanttChart(Long cinemaId, LocalDate day){
+        if (!cinemaRepository.existsById(cinemaId)) {
+            throw new AppException(ErrorCode.CINEMA_NOT_FOUND);
+        }
+        LocalDateTime dayStart = day.atStartOfDay();
+        LocalDateTime dayEnd = day.atTime(LocalTime.MAX);
+        return showTimeRepository.findByRooms_Cinemas_CinemaIdAndStartTimeBetween(cinemaId, dayStart, dayEnd).stream()
+                .map(showTimeMapper::toShowTimeResponse)
+                .toList();
     }
 
     public ShowTimeDetailResponse getAdminShowTimeDetail(Long showTimeId) {

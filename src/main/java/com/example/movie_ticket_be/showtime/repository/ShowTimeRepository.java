@@ -175,4 +175,7 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
     List<Cinemas> findDistinctCinemasByMovieId(
             @Param("movieId") Long movieId,
             @Param("now") LocalDateTime now);
+
+    boolean existsByRooms_Cinemas_CinemaId(Long cinemaId);
+    List<ShowTimes> findByRooms_Cinemas_CinemaIdAndStartTimeBetween(Long cinemaId, LocalDateTime start, LocalDateTime end);
 }

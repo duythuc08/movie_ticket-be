@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.cinema.repository;
 
 import com.example.movie_ticket_be.cinema.entity.Seats;
+import com.example.movie_ticket_be.cinema.enums.SeatType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,9 @@ public interface SeatRepository extends JpaRepository<Seats, Long> {
     boolean existsBySeatRowAndSeatNumberAndRooms_RoomId(String seatRow, Integer seatNumber, Long roomId);
 
     Optional<Seats> findBySeatRowAndSeatNumberAndRooms_RoomId(String seatRow, Integer seatNumber, Long roomId);
+
+    @Query("SELECT DISTINCT s.seatType FROM Seats s WHERE s.rooms.roomId = :roomId AND s.entityStatus = 'ACTIVE'")
+    List<SeatType> findDistinctSeatTypeByRoomId(@Param("roomId") Long roomId);
 
     @Modifying
     @Query("DELETE FROM Seats s WHERE s.rooms.roomId = :roomId")

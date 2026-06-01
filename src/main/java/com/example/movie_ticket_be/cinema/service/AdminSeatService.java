@@ -2,7 +2,9 @@ package com.example.movie_ticket_be.cinema.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,10 @@ public class AdminSeatService {
         return seatRepository.findByRooms_RoomId(roomId).stream()
                 .map(seatMapper::toSeatResponse)
                 .toList();
+    }
+
+    public Set<SeatType> getDistinctSeatTypesByRoomId(Long roomId) {
+        return new HashSet<>(seatRepository.findDistinctSeatTypeByRoomId(roomId));
     }
 
     public void changeStatus(long id, EntityStatus entityStatus) {

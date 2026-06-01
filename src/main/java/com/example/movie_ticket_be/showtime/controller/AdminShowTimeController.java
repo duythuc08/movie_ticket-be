@@ -19,6 +19,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -72,6 +73,17 @@ public class AdminShowTimeController {
         return ApiResponse.<ShowTimeDetailResponse>builder()
                 .result(adminShowTimeService.getAdminShowTimeDetail(id))
                 .message("Lấy chi tiết suất chiếu thành công")
+                .build();
+    }
+
+    @GetMapping("/gantt")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<ShowTimeResponse>> getShowTimeForGanttChart(
+            @RequestParam Long cinemaId,
+            @RequestParam LocalDate day) {
+        return ApiResponse.<List<ShowTimeResponse>>builder()
+                .result(adminShowTimeService.getShowTimeForGanttChart(cinemaId, day))
+                .message("Lấy lịch chiếu Gantt thành công")
                 .build();
     }
 }
