@@ -1,10 +1,10 @@
-package com.example.movie_ticket_be.booking.service;
+package com.example.movie_ticket_be.cinema.service;
 
-import com.example.movie_ticket_be.booking.enums.FoodStatus;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
-import com.example.movie_ticket_be.booking.dto.response.FoodResponse;
-import com.example.movie_ticket_be.booking.mapper.FoodMapper;
-import com.example.movie_ticket_be.booking.repository.FoodRepository;
+import com.example.movie_ticket_be.cinema.dto.response.FoodResponse;
+import com.example.movie_ticket_be.cinema.mapper.FoodMapper;
+import com.example.movie_ticket_be.cinema.repository.FoodRepository;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import lombok.AccessLevel;
@@ -23,8 +23,10 @@ public class FoodService {
     FoodRepository foodRepository;
     FoodMapper foodMapper;
 
-    public List<FoodResponse> getAllFoods() {
-        return foodRepository.findByEntityStatusAndFoodStatus(EntityStatus.ACTIVE, FoodStatus.IN_STOCK).stream()
+    public List<FoodResponse> getAllFoodsByCinema(Long cinemaId) {
+        return foodRepository.findByCinema_CinemaIdAndEntityStatusAndFoodStatus(
+                        cinemaId, EntityStatus.ACTIVE, FoodStatus.IN_STOCK)
+                .stream()
                 .map(foodMapper::toFoodResponse)
                 .toList();
     }

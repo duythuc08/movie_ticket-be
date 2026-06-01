@@ -1,8 +1,7 @@
-package com.example.movie_ticket_be.booking.entity;
+package com.example.movie_ticket_be.cinema.entity;
 
-import com.example.movie_ticket_be.booking.enums.FoodStatus;
-import com.example.movie_ticket_be.booking.enums.FoodType;
-import com.example.movie_ticket_be.core.enums.EntityStatus;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
+import com.example.movie_ticket_be.cinema.enums.FoodType;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +18,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class Foods extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,6 +32,10 @@ public class Foods extends BaseEntity {
     String imageUrl;
     Boolean isCombo;
     Integer stockQuantity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cinema_id", nullable = false)
+    Cinemas cinema;
 
     @Enumerated(EnumType.STRING)
     FoodType foodType;

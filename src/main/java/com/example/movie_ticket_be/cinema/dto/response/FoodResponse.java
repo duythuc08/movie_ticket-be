@@ -1,7 +1,7 @@
-package com.example.movie_ticket_be.booking.dto.response;
+package com.example.movie_ticket_be.cinema.dto.response;
 
-import com.example.movie_ticket_be.booking.enums.FoodStatus;
-import com.example.movie_ticket_be.booking.enums.FoodType;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
+import com.example.movie_ticket_be.cinema.enums.FoodType;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FoodResponse {
     Long foodId;
+    Long cinemaId;
+    String cinemaName;
     String name;
     String description;
     BigDecimal price;

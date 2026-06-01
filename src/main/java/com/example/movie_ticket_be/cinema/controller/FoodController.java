@@ -1,7 +1,7 @@
-package com.example.movie_ticket_be.booking.controller;
+package com.example.movie_ticket_be.cinema.controller;
 
-import com.example.movie_ticket_be.booking.dto.response.FoodResponse;
-import com.example.movie_ticket_be.booking.service.FoodService;
+import com.example.movie_ticket_be.cinema.dto.response.FoodResponse;
+import com.example.movie_ticket_be.cinema.service.FoodService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -20,15 +20,15 @@ import java.util.List;
 public class FoodController {
     FoodService foodService;
 
-    @GetMapping("/getFoods")
+    @GetMapping
     @PreAuthorize("isAuthenticated()")
-    public ApiResponse<List<FoodResponse>> getFoods() {
+    public ApiResponse<List<FoodResponse>> getFoodsByCinema(@RequestParam Long cinemaId) {
         return ApiResponse.<List<FoodResponse>>builder()
-                .result(foodService.getAllFoods())
+                .result(foodService.getAllFoodsByCinema(cinemaId))
                 .build();
     }
 
-    @GetMapping("/getFood/{id}")
+    @GetMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ApiResponse<FoodResponse> getFood(@PathVariable Long id) {
         return ApiResponse.<FoodResponse>builder()

@@ -1,4 +1,4 @@
-package com.example.movie_ticket_be.booking.enums;
+package com.example.movie_ticket_be.cinema.enums;
 
 public enum FoodStatus {
     IN_STOCK,

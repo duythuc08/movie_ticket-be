@@ -1,13 +1,17 @@
-package com.example.movie_ticket_be.booking.controller;
+package com.example.movie_ticket_be.cinema.controller;
 
-import com.example.movie_ticket_be.booking.dto.request.FoodRequest;
-import com.example.movie_ticket_be.booking.dto.response.FoodResponse;
-import com.example.movie_ticket_be.booking.service.AdminFoodService;
+import com.example.movie_ticket_be.cinema.dto.request.FoodRequest;
+import com.example.movie_ticket_be.cinema.dto.response.FoodResponse;
+import com.example.movie_ticket_be.cinema.entity.Foods;
+import com.example.movie_ticket_be.cinema.service.AdminFoodService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +38,23 @@ public class AdminFoodController {
     public ApiResponse<List<FoodResponse>> createFoods(@RequestBody List<FoodRequest> requests) {
         return ApiResponse.<List<FoodResponse>>builder()
                 .result(adminFoodService.createFoods(requests))
+                .build();
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Page<FoodResponse>> getFoods(Specification<Foods> specification, Pageable pageable) {
+        return ApiResponse.<Page<FoodResponse>>builder()
+                .result(adminFoodService.getFoods(specification, pageable))
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<FoodResponse> updateFood(@PathVariable long id, @RequestBody FoodRequest request) {
+        return ApiResponse.<FoodResponse>builder()
+                .result(adminFoodService.updateFood(id, request))
+                .message("Cập nhật food thành công")
                 .build();
     }
 

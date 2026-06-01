@@ -1,7 +1,7 @@
-package com.example.movie_ticket_be.booking.dto.request;
+package com.example.movie_ticket_be.cinema.dto.request;
 
-import com.example.movie_ticket_be.booking.enums.FoodStatus;
-import com.example.movie_ticket_be.booking.enums.FoodType;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
+import com.example.movie_ticket_be.cinema.enums.FoodType;
 import jakarta.persistence.Lob;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FoodRequest {
+    Long cinemaId;
     String name;
     @Lob
     String description;
