@@ -2,8 +2,13 @@
 package com.example.movie_ticket_be.payment.service;
 
 import com.example.movie_ticket_be.auth.service.EmailService;
+import com.example.movie_ticket_be.booking.entity.OrderFoods;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
+import com.example.movie_ticket_be.cinema.entity.Foods;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
+import com.example.movie_ticket_be.cinema.repository.FoodRepository;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.booking.repository.OrderFoodRepository;
@@ -43,6 +48,7 @@ public class PaymentService {
     OrderRepository orderRepository;
     OrderTicketRepository orderTicketRepository;
     OrderFoodRepository orderFoodRepository;
+    FoodRepository foodRepository;
     PaymentRepository paymentRepository;
     QRCodeUtils qrCodeUtils;
     SeatShowTimeRepository seatShowTimeRepository;
@@ -109,11 +115,24 @@ public class PaymentService {
             ticket.setTicketStatus(TicketStatus.CANCELLED);
 
             SeatShowTime sst = ticket.getSeatShowTime();
-            sst.setSeatShowTimeStatus(SeatShowTimeStatus.AVAILABLE); // Nhả ghế về trạng thái trống
-            sst.setLockedUntil(null); // Xóa thời gian giữ ghế
+            sst.setSeatShowTimeStatus(SeatShowTimeStatus.AVAILABLE);
+            sst.setLockedUntil(null);
             seatShowTimeRepository.save(sst);
         }
         orderTicketRepository.saveAll(tickets);
+
+        //c. Hoàn tồn kho food
+        List<OrderFoods> orderFoods = orderFoodRepository.findByOrders_OrderId(order.getOrderId());
+        for (OrderFoods orderFood : orderFoods) {
+            Foods food = orderFood.getFoods();
+            int restoredStock = food.getStockQuantity() + orderFood.getQuantity();
+            food.setStockQuantity(restoredStock);
+            if (food.getFoodStatus() == FoodStatus.OUT_OF_STOCK) {
+                food.setFoodStatus(FoodStatus.IN_STOCK);
+                food.setEntityStatus(EntityStatus.ACTIVE);
+            }
+        }
+        foodRepository.saveAll(orderFoods.stream().map(OrderFoods::getFoods).toList());
     }
 
     private void handleUserLoyalty(Orders order) {
