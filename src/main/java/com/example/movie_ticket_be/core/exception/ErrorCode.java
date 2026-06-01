@@ -76,7 +76,8 @@ public enum ErrorCode {
     SEATS_ALREADY_EXIST_FOR_ROOM(1064,"Seats already exist for room",HttpStatus.BAD_REQUEST),
     MOVIE_STOPPED(1065,"Movie is no longer showing, cannot create showtime",HttpStatus.BAD_REQUEST),
     SHOWTIME_TIME_OVERLAP(1066,"Showtime start or end time overlaps with an existing showtime",HttpStatus.BAD_REQUEST),
-    SHOWTIME_BUFFER_CONFLICT(1067,"Showtime must be at least 15 minutes apart from other showtimes",HttpStatus.BAD_REQUEST);
+    SHOWTIME_BUFFER_CONFLICT(1067,"Showtime must be at least 15 minutes apart from other showtimes",HttpStatus.BAD_REQUEST),
+    FOOD_NOT_BELONG_TO_CINEMA(1068,"Food does not belong to the selected cinema",HttpStatus.BAD_REQUEST);
     // Constructor để gán giá trị cho từng phần tử enum
     ErrorCode(int code, String message,HttpStatusCode statusCode) {
         this.code = code;

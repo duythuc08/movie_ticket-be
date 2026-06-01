@@ -5,13 +5,13 @@ import com.example.movie_ticket_be.booking.dto.request.OrderFoodsRequest;
 import com.example.movie_ticket_be.booking.dto.response.OrderFoodResponse;
 import com.example.movie_ticket_be.booking.dto.response.OrderResponse;
 import com.example.movie_ticket_be.booking.dto.response.OrderTicketResponse;
-import com.example.movie_ticket_be.booking.entity.Foods;
+import com.example.movie_ticket_be.cinema.entity.Foods;
+import com.example.movie_ticket_be.cinema.repository.FoodRepository;
 import com.example.movie_ticket_be.booking.entity.OrderFoods;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.enums.TicketStatus;
-import com.example.movie_ticket_be.booking.repository.FoodRepository;
 import com.example.movie_ticket_be.booking.repository.OrderFoodRepository;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
@@ -125,12 +125,16 @@ public class BookingService {
         orderTicketRepository.saveAll(tickets);
 
         //ODER FOOD
+        Long cinemaId = seats.get(0).getShowTimes().getRooms().getCinemas().getCinemaId();
         List<OrderFoods> orderFoods = new ArrayList<>();
         BigDecimal totalFoodPrice = BigDecimal.ZERO;
         if (request.getFoods() != null) {
             for (OrderFoodsRequest foodReq : request.getFoods()) {
                 Foods food = foodRepository.findByFoodId(foodReq.getFoodId())
                         .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+                if (!food.getCinema().getCinemaId().equals(cinemaId)) {
+                    throw new AppException(ErrorCode.FOOD_NOT_BELONG_TO_CINEMA);
+                }
                 BigDecimal totalItem = food.getPrice().multiply(BigDecimal.valueOf(foodReq.getQuantity()));
 
                 OrderFoods item = OrderFoods.builder()

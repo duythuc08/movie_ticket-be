@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.booking.entity;
 
+import com.example.movie_ticket_be.cinema.entity.Foods;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
