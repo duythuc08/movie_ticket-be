@@ -6,7 +6,9 @@ import com.example.movie_ticket_be.booking.dto.response.OrderFoodResponse;
 import com.example.movie_ticket_be.booking.dto.response.OrderResponse;
 import com.example.movie_ticket_be.booking.dto.response.OrderTicketResponse;
 import com.example.movie_ticket_be.cinema.entity.Foods;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.cinema.repository.FoodRepository;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.booking.entity.OrderFoods;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
@@ -127,6 +129,7 @@ public class BookingService {
         //ODER FOOD
         Long cinemaId = seats.get(0).getShowTimes().getRooms().getCinemas().getCinemaId();
         List<OrderFoods> orderFoods = new ArrayList<>();
+        List<Foods> updatedFoods = new ArrayList<>();
         BigDecimal totalFoodPrice = BigDecimal.ZERO;
         if (request.getFoods() != null) {
             for (OrderFoodsRequest foodReq : request.getFoods()) {
@@ -135,8 +138,19 @@ public class BookingService {
                 if (!food.getCinema().getCinemaId().equals(cinemaId)) {
                     throw new AppException(ErrorCode.FOOD_NOT_BELONG_TO_CINEMA);
                 }
-                BigDecimal totalItem = food.getPrice().multiply(BigDecimal.valueOf(foodReq.getQuantity()));
+                if (food.getStockQuantity() < foodReq.getQuantity()) {
+                    throw new AppException(ErrorCode.FOOD_OUT_OF_STOCK);
+                }
 
+                int newStock = food.getStockQuantity() - foodReq.getQuantity();
+                food.setStockQuantity(newStock);
+                if (newStock == 0) {
+                    food.setFoodStatus(FoodStatus.OUT_OF_STOCK);
+                    food.setEntityStatus(EntityStatus.INACTIVE);
+                }
+                updatedFoods.add(food);
+
+                BigDecimal totalItem = food.getPrice().multiply(BigDecimal.valueOf(foodReq.getQuantity()));
                 OrderFoods item = OrderFoods.builder()
                         .orders(order)
                         .foods(food)
@@ -148,6 +162,7 @@ public class BookingService {
                 totalFoodPrice = totalFoodPrice.add(totalItem);
             }
         }
+        foodRepository.saveAll(updatedFoods);
         orderFoodRepository.saveAll(orderFoods);
 
         //ƯU ĐÃI (HẠNG THÀNH VIÊN & MÃ GIẢM GIÁ)
