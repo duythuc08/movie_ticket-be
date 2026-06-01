@@ -70,6 +70,10 @@ public class AdminFoodService {
     public void changeStatus(long id, EntityStatus entityStatus) {
         Foods food = foodRepository.findByFoodId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+        if (entityStatus == EntityStatus.ACTIVE
+                && (food.getStockQuantity() == null || food.getStockQuantity() <= 0)) {
+            throw new AppException(ErrorCode.FOOD_OUT_OF_STOCK);
+        }
         food.setEntityStatus(entityStatus);
         foodRepository.save(food);
     }
