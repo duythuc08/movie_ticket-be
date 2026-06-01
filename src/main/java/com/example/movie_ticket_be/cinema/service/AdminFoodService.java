@@ -32,10 +32,10 @@ public class AdminFoodService {
     FoodMapper foodMapper;
     CinemaRepository cinemaRepository;
 
-    public FoodResponse createFood(FoodRequest request) {
-        Cinemas cinema = cinemaRepository.findByCinemaId(request.getCinemaId())
+    public FoodResponse createFood(Long cinemaId, FoodRequest request) {
+        Cinemas cinema = cinemaRepository.findByCinemaId(cinemaId)
                 .orElseThrow(() -> new AppException(ErrorCode.CINEMA_NOT_FOUND));
-        if (foodRepository.existsByNameAndCinema_CinemaId(request.getName(), request.getCinemaId())) {
+        if (foodRepository.existsByNameAndCinema_CinemaId(request.getName(), cinemaId)) {
             throw new AppException(ErrorCode.FOOD_EXISTED);
         }
         Foods food = foodMapper.toFoods(request);
@@ -44,12 +44,15 @@ public class AdminFoodService {
         return foodMapper.toFoodResponse(foodRepository.save(food));
     }
 
-    public List<FoodResponse> createFoods(List<FoodRequest> requests) {
-        return requests.stream().map(this::createFood).toList();
+    public List<FoodResponse> createFoods(Long cinemaId, List<FoodRequest> requests) {
+        return requests.stream().map(req -> createFood(cinemaId, req)).toList();
     }
 
-    public Page<FoodResponse> getFoods(Specification<Foods> specification, Pageable pageable) {
-        return foodRepository.findAll(specification, pageable).map(foodMapper::toFoodResponse);
+    public Page<FoodResponse> getFoods(Long cinemaId, Specification<Foods> spec, Pageable pageable) {
+        Specification<Foods> cinemaSpec = (root, query, cb) ->
+                cb.equal(root.get("cinema").get("cinemaId"), cinemaId);
+        return foodRepository.findAll(Specification.where(cinemaSpec).and(spec), pageable)
+                .map(foodMapper::toFoodResponse);
     }
 
     public FoodResponse updateFood(long id, FoodRequest request) {

@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FoodRequest {
-    Long cinemaId;
     String name;
     @Lob
     String description;
