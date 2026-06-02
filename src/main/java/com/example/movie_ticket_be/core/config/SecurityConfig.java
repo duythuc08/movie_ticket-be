@@ -61,10 +61,11 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000"));
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000","http://192.168.7.99", "http://192.168.7.99:8081"));
         config.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setMaxAge(3600L);
+        config.setAllowCredentials(true);;
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
