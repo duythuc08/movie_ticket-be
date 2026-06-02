@@ -45,22 +45,20 @@ public class PaymentController {
 
         OrderResponse orderResponse = bookingService.createBooking(bookingRequest);
 
-        Orders order = orderRepository.findByOrderId(orderResponse.getOrderId())
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-
-        String paymentUrl = vnPayService.createPaymentUrl(request, order);
+        String paymentUrl = vnPayService.createPaymentUrl(request, orderResponse.getOrderId(), orderResponse.getFinalPrice());
 
         BookingResponse response = BookingResponse.builder()
                 .orderId(orderResponse.getOrderId())
                 .userId(orderResponse.getUserId())
                 .fullName(orderResponse.getFullName())
                 .orderStatus(orderResponse.getOrderStatus())
+                .showTimeInfo(orderResponse.getShowTimeInfo())
 
                 .totalTicketPrice(orderResponse.getTotalTicketPrice())
                 .totalFoodPrice(orderResponse.getTotalFoodPrice())
                 .discountAmount(orderResponse.getDiscountAmount())
                 .finalPrice(orderResponse.getFinalPrice())
-                .promotionCode(orderResponse. getPromotionCode())
+                .promotionCode(orderResponse.getPromotionCode())
 
                 .bookingTime(orderResponse.getBookingTime())
                 .expiredTime(orderResponse.getExpiredTime())
@@ -83,7 +81,7 @@ public class PaymentController {
         Orders order = orderRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        String paymentUrl = vnPayService.createPaymentUrl(request, order);
+        String paymentUrl = vnPayService.createPaymentUrl(request, order.getOrderId(), order.getFinalPrice());
 
         return ApiResponse.<String>builder()
                 .message("Tạo URL thanh toán thành công")

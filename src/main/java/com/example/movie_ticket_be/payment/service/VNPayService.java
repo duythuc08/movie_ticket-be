@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.payment.service;
 
-import com.example.movie_ticket_be.booking.entity.Orders;
 import com.example.movie_ticket_be.core.config.VNPayConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Service;
@@ -14,11 +13,10 @@ import java.util.*;
 @Service
 public class VNPayService {
 
-    public String createPaymentUrl(HttpServletRequest request, Orders order) {
-        // Lấy số tiền từ Order (nhân 100 theo yêu cầu VNPay)
-        long amount = order.getFinalPrice().multiply(BigDecimal.valueOf(100)).longValue();
+    public String createPaymentUrl(HttpServletRequest request, Long orderId, BigDecimal finalPrice) {
+        long amount = finalPrice.multiply(BigDecimal.valueOf(100)).longValue();
 
-        String vnp_TxnRef = String.valueOf(order.getOrderId()); // Dùng OrderID làm mã giao dịch
+        String vnp_TxnRef = String.valueOf(orderId);
         String vnp_IpAddr = VNPayConfig.getIpAddress(request);
         String vnp_TmnCode = VNPayConfig.vnp_TmnCode;
 
@@ -29,7 +27,7 @@ public class VNPayService {
         vnp_Params.put("vnp_Amount", String.valueOf(amount));
         vnp_Params.put("vnp_CurrCode", "VND");
         vnp_Params.put("vnp_TxnRef", vnp_TxnRef);
-        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang #" + order.getOrderId());
+        vnp_Params.put("vnp_OrderInfo", "Thanh toan don hang #" + orderId);
         vnp_Params.put("vnp_OrderType", "other");
         vnp_Params.put("vnp_Locale", "vn");
         vnp_Params.put("vnp_ReturnUrl", VNPayConfig.vnp_ReturnUrl);
