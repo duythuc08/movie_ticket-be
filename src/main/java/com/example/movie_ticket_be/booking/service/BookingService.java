@@ -5,6 +5,7 @@ import com.example.movie_ticket_be.booking.dto.request.OrderFoodsRequest;
 import com.example.movie_ticket_be.booking.dto.response.OrderFoodResponse;
 import com.example.movie_ticket_be.booking.dto.response.OrderResponse;
 import com.example.movie_ticket_be.booking.dto.response.OrderTicketResponse;
+import com.example.movie_ticket_be.booking.dto.response.ShowTimeInfo;
 import com.example.movie_ticket_be.cinema.entity.Foods;
 import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.cinema.repository.FoodRepository;
@@ -25,6 +26,7 @@ import com.example.movie_ticket_be.promotion.enums.PromotionType;
 import com.example.movie_ticket_be.promotion.repository.PromotionRepository;
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
+import com.example.movie_ticket_be.showtime.entity.ShowTimes;
 import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
 import com.example.movie_ticket_be.showtime.service.ShowTimePriceService;
 import com.example.movie_ticket_be.user.entity.Users;
@@ -240,7 +242,25 @@ public class BookingService {
 
         Orders savedOrder = orderRepository.save(order);
 
-        // 8.RESPONSE
+        // SHOWTIME INFO (built from in-memory seat data, no extra query)
+        ShowTimes showTimes = seats.get(0).getShowTimes();
+        String roomName = null, cinemaName = null, cinemaAddress = null;
+        if (showTimes.getRooms() != null) {
+            roomName = showTimes.getRooms().getName();
+            if (showTimes.getRooms().getCinemas() != null) {
+                cinemaName = showTimes.getRooms().getCinemas().getName();
+                cinemaAddress = showTimes.getRooms().getCinemas().getAddress();
+            }
+        }
+        ShowTimeInfo showTimeInfo = ShowTimeInfo.builder()
+                .movieName(showTimes.getMovies() != null ? showTimes.getMovies().getTitle() : null)
+                .roomName(roomName)
+                .showTime(showTimes.getStartTime())
+                .cinemaName(cinemaName)
+                .cinemaAddress(cinemaAddress)
+                .build();
+
+        // RESPONSE
         List<OrderTicketResponse> ticketResponses = tickets.stream()
                 .map(ticket -> OrderTicketResponse.builder()
                         .orderTicketId(ticket.getOrderTicketId())
@@ -264,6 +284,7 @@ public class BookingService {
                 .orderId(savedOrder.getOrderId())
                 .userId(savedOrder.getUsers().getUserId())
                 .fullName(savedOrder.getUsers().getFirstname() + " " + savedOrder.getUsers().getLastname())
+                .showTimeInfo(showTimeInfo)
                 .totalTicketPrice(savedOrder.getTotalTicketPrice())
                 .totalFoodPrice(savedOrder.getTotalFoodPrice())
                 .memberDiscountAmount(savedOrder.getMemberDiscountAmount())
