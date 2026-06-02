@@ -19,6 +19,8 @@ public class BookingResponse {
     String fullName;
     OrderStatus orderStatus;
 
+    ShowTimeInfo showTimeInfo;
+
     BigDecimal totalTicketPrice;
     BigDecimal totalFoodPrice;
     BigDecimal discountAmount;

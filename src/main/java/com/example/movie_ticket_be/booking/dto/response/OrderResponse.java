@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.booking.dto.response;
 
-
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -18,6 +17,8 @@ public class OrderResponse {
     Long orderId;
     String userId;
     String fullName;
+
+    ShowTimeInfo showTimeInfo;
 
     BigDecimal totalTicketPrice;
     BigDecimal totalFoodPrice;
@@ -37,6 +38,5 @@ public class OrderResponse {
     BigDecimal memberDiscountAmount;
     int pointsEarned;
 
-    String cinemaName;
-    String cinemaAddress;
+    PaymentResponse payment;
 }

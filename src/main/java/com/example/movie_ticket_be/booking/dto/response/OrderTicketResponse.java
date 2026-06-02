@@ -14,9 +14,6 @@ import java.math.BigDecimal;
 public class OrderTicketResponse {
     Long orderTicketId;
     String seatName;
-    String roomName;
-    String movieName;
-    String showTime;
-    BigDecimal price;
     SeatType seatType;
+    BigDecimal price;
 }
