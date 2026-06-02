@@ -1,20 +1,15 @@
 package com.example.movie_ticket_be.booking.service;
 
-import com.example.movie_ticket_be.booking.dto.response.OrderFoodResponse;
-import com.example.movie_ticket_be.booking.dto.response.OrderResponse;
-import com.example.movie_ticket_be.booking.dto.response.OrderTicketResponse;
+import com.example.movie_ticket_be.booking.dto.response.*;
 import com.example.movie_ticket_be.booking.entity.OrderFoods;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.mapper.OrderMapper;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
-import com.example.movie_ticket_be.cinema.entity.Cinemas;
-import com.example.movie_ticket_be.cinema.entity.Rooms;
-import com.example.movie_ticket_be.cinema.entity.Seats;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
-import com.example.movie_ticket_be.payment.enums.PaymentType;
+import com.example.movie_ticket_be.payment.repository.PaymentRepository;
 import com.example.movie_ticket_be.showtime.entity.ShowTimes;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -34,6 +29,7 @@ public class OrderService {
 
     OrderRepository orderRepository;
     OrderMapper orderMapper;
+    PaymentRepository paymentRepository;
 
     @PreAuthorize("isAuthenticated()")
     public OrderResponse getOrderById(Long orderId) {
@@ -48,32 +44,23 @@ public class OrderService {
                 fullName = order.getUsers().getFirstname() + " " + order.getUsers().getLastname();
             }
 
-            //LIST TICKET
+            // LIST TICKET
             List<OrderTicketResponse> ticketResponses = new ArrayList<>();
             if (order.getOrderTickets() != null) {
                 for (OrderTickets ticket : order.getOrderTickets()) {
                     if (ticket.getSeatShowTime() != null && ticket.getSeatShowTime().getSeats() != null) {
-                        Seats seat = ticket.getSeatShowTime().getSeats();
-                        ShowTimes st = ticket.getSeatShowTime().getShowTimes();
-
-                        String ticketRoomName   = (st != null && st.getRooms() != null)    ? st.getRooms().getName()           : null;
-                        String ticketMovieName  = (st != null && st.getMovies() != null)   ? st.getMovies().getTitle()         : null;
-                        String ticketShowTime   = (st != null && st.getStartTime() != null) ? st.getStartTime().toString()     : null;
-
+                        var seat = ticket.getSeatShowTime().getSeats();
                         ticketResponses.add(OrderTicketResponse.builder()
                                 .orderTicketId(ticket.getOrderTicketId())
                                 .seatName(seat.getSeatRow() + seat.getSeatNumber())
                                 .seatType(seat.getSeatType())
                                 .price(ticket.getPrice())
-                                .roomName(ticketRoomName)
-                                .movieName(ticketMovieName)
-                                .showTime(ticketShowTime)
                                 .build());
                     }
                 }
             }
 
-            //LIST FOOD
+            // LIST FOOD
             List<OrderFoodResponse> foodResponses = new ArrayList<>();
             if (order.getOrderFoods() != null) {
                 for (OrderFoods food : order.getOrderFoods()) {
@@ -87,32 +74,50 @@ public class OrderService {
                 }
             }
 
-            //CINEMA INFO
-            String cinemaName = null;
-            String cinemaAddress = null;
-
+            // SHOWTIME INFO
+            ShowTimeInfo showTimeInfo = null;
             if (order.getOrderTickets() != null && !order.getOrderTickets().isEmpty()) {
-                OrderTickets firstTicket = order.getOrderTickets().iterator().next();
-                if (firstTicket.getSeatShowTime() != null) {
-                    ShowTimes st = firstTicket.getSeatShowTime().getShowTimes();
+                OrderTickets first = order.getOrderTickets().iterator().next();
+                if (first.getSeatShowTime() != null) {
+                    ShowTimes st = first.getSeatShowTime().getShowTimes();
                     if (st != null) {
-                        Rooms room = st.getRooms();
-                        if (room != null) {
-                            Cinemas cinema = room.getCinemas();
-                            if (cinema != null) {
-                                cinemaName = cinema.getName();
-                                cinemaAddress = cinema.getAddress();
+                        String roomName = null, cinemaName = null, cinemaAddress = null;
+                        if (st.getRooms() != null) {
+                            roomName = st.getRooms().getName();
+                            if (st.getRooms().getCinemas() != null) {
+                                cinemaName = st.getRooms().getCinemas().getName();
+                                cinemaAddress = st.getRooms().getCinemas().getAddress();
                             }
                         }
+                        showTimeInfo = ShowTimeInfo.builder()
+                                .movieName(st.getMovies() != null ? st.getMovies().getTitle() : null)
+                                .roomName(roomName)
+                                .showTime(st.getStartTime())
+                                .cinemaName(cinemaName)
+                                .cinemaAddress(cinemaAddress)
+                                .build();
                     }
                 }
             }
 
-            //RESPONSE
+            // PAYMENT
+            PaymentResponse paymentResponse = paymentRepository.findByOrder_OrderId(orderId)
+                    .map(p -> PaymentResponse.builder()
+                            .paymentId(p.getPaymentId())
+                            .amount(p.getAmount())
+                            .transactionId(p.getTransactionId())
+                            .paymentInfo(p.getPaymentInfo())
+                            .paymentDate(p.getPaymentDate())
+                            .paymentType(p.getPaymentType())
+                            .paymentStatus(p.getPaymentStatus())
+                            .build())
+                    .orElse(null);
+
             return OrderResponse.builder()
                     .orderId(order.getOrderId())
                     .userId(userId)
                     .fullName(fullName)
+                    .showTimeInfo(showTimeInfo)
                     .totalTicketPrice(order.getTotalTicketPrice())
                     .totalFoodPrice(order.getTotalFoodPrice())
                     .memberDiscountAmount(order.getMemberDiscountAmount())
@@ -128,8 +133,7 @@ public class OrderService {
                     .qrCode(order.getQrCode())
                     .tickets(ticketResponses)
                     .foods(foodResponses)
-                    .cinemaName(cinemaName)
-                    .cinemaAddress(cinemaAddress)
+                    .payment(paymentResponse)
                     .build();
 
         } catch (AppException e) {
@@ -141,7 +145,7 @@ public class OrderService {
     }
 
     @PreAuthorize("isAuthenticated()")
-    public List<OrderResponse> getOrdersByUserId(String userId){
+    public List<OrderResponse> getOrdersByUserId(String userId) {
         return orderRepository.findByUsers_UserIdAndOrderStatus(userId, OrderStatus.PAID)
                 .stream()
                 .map(orderMapper::toOrderResponse)
