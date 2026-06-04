@@ -16,21 +16,21 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminPromotionResponse {
-    Long promotionId;
-    String code;
-    String name;
-    String description;
-    PromotionType type;
-    BigDecimal discountValue;
-    BigDecimal minOrderValue;
-    BigDecimal maxDiscountAmount;
-    Integer useLimit;
-    Integer usedCount;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    PromotionStatus status;
-    Set<Long> applicableMovieIds;
-    Set<DayOfWeek> dayOfWeek;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+	Long promotionId;
+	String code;
+	String name;
+	String description;
+	PromotionType type;
+	BigDecimal discountValue;
+	BigDecimal minOrderValue;
+	BigDecimal maxDiscountAmount;
+	Integer useLimit;
+	Integer usedCount;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	PromotionStatus status;
+	Set<Long> applicableMovieIds;
+	Set<DayOfWeek> dayOfWeek;
+	LocalDateTime createdAt;
+	LocalDateTime updatedAt;
 }

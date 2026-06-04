@@ -13,17 +13,17 @@ import com.example.movie_ticket_be.promotion.dto.response.EventResponse;
 @Mapper(componentModel = "spring")
 public interface EventMapper {
 
-    @Mapping(target = "movies", ignore = true)
-    @Mapping(target = "eventId", ignore = true)
-    @Mapping(target = "entityStatus", ignore = true)
-    @Mapping(target = "eventStatus", ignore = true)
-    Event toEvent(EventRequest request);
+	@Mapping(target = "movies", ignore = true)
+	@Mapping(target = "eventId", ignore = true)
+	@Mapping(target = "entityStatus", ignore = true)
+	@Mapping(target = "eventStatus", ignore = true)
+	Event toEvent(EventRequest request);
 
-    @Mapping(source = "movies.movieId", target = "movieId")
-    AdminEventResponse toAdminEventResponse(Event event);
+	@Mapping(source = "movies.movieId", target = "movieId")
+	AdminEventResponse toAdminEventResponse(Event event);
 
-    EventResponse toEventResponse(Event event);
+	EventResponse toEventResponse(Event event);
 
-    @Mapping(source = "movies.title", target = "movieTitle")
-    EventDetailrespone toEventDetailResponse(Event event);
+	@Mapping(source = "movies.title", target = "movieTitle")
+	EventDetailrespone toEventDetailResponse(Event event);
 }

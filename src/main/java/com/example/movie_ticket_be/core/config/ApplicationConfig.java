@@ -19,36 +19,27 @@ import java.util.HashSet;
 @Slf4j
 @Configuration
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ApplicationConfig {
-    private PasswordEncoder passwordEncoder;
+	private PasswordEncoder passwordEncoder;
 
-    @Bean
-    ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
-        return args -> {
-            if (userRepository.findByUsername("admin@gmail.com").isEmpty()){
-                roleRepository.save(Role.builder()
-                        .name(Roles.USER.name())
-                        .description("User_role")
-                        .build());
+	@Bean
+	ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
+		return args -> {
+			if (userRepository.findByUsername("admin@gmail.com").isEmpty()) {
+				roleRepository.save(Role.builder().name(Roles.USER.name()).description("User_role").build());
 
-                Role adminRole = roleRepository.save(Role.builder()
-                        .name(Roles.ADMIN.name())
-                        .description("Admin_role")
-                        .build());
-                var roles = new HashSet<Role>();
-                roles.add(adminRole);
+				Role adminRole = roleRepository
+						.save(Role.builder().name(Roles.ADMIN.name()).description("Admin_role").build());
+				var roles = new HashSet<Role>();
+				roles.add(adminRole);
 
-                Users user = Users.builder()
-                        .username("admin@gmail.com")
-                        .password(passwordEncoder.encode("admin123"))
-                        .enabled(true)
-                        .role(roles)
-                        .build();
-                userRepository.save(user);
-                log.warn("admin user has been created with default password: admin, please change it");
-            }
+				Users user = Users.builder().username("admin@gmail.com").password(passwordEncoder.encode("admin123"))
+						.enabled(true).role(roles).build();
+				userRepository.save(user);
+				log.warn("admin user has been created with default password: admin, please change it");
+			}
 
-        };
-    }
+		};
+	}
 }

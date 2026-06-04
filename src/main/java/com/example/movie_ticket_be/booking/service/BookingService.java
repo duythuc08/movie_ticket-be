@@ -48,258 +48,226 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BookingService {
-    OrderRepository orderRepository;
-    OrderTicketRepository orderTicketRepository;
-    OrderFoodRepository orderFoodRepository;
-    SeatShowTimeRepository seatShowTimeRepository;
-    FoodRepository foodRepository;
-    UserRepository userRepository;
-    ShowTimePriceService showTimePriceService;
-    PromotionRepository promotionRepository;
+	OrderRepository orderRepository;
+	OrderTicketRepository orderTicketRepository;
+	OrderFoodRepository orderFoodRepository;
+	SeatShowTimeRepository seatShowTimeRepository;
+	FoodRepository foodRepository;
+	UserRepository userRepository;
+	ShowTimePriceService showTimePriceService;
+	PromotionRepository promotionRepository;
 
-    private static final int HOLD_SEAT_MINUTES = 5;
+	private static final int HOLD_SEAT_MINUTES = 5;
 
-    @Transactional(rollbackOn = Exception.class)
-    public OrderResponse createBooking(BookingRequest request) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime expirationTime = now.plusMinutes(HOLD_SEAT_MINUTES);
+	@Transactional(rollbackOn = Exception.class)
+	public OrderResponse createBooking(BookingRequest request) {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime expirationTime = now.plusMinutes(HOLD_SEAT_MINUTES);
 
-        Users user = userRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+		Users user = userRepository.findByUserId(request.getUserId())
+				.orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-        //LOCK SEAT
-        List<SeatShowTime> seats = seatShowTimeRepository.findAllBySeatShowTimeIdIn(request.getSeatShowTimeIds());
-        if (seats.size() != request.getSeatShowTimeIds().size()) {
-            throw new AppException(ErrorCode.SIZE_MISMATCH);
-        }
-        for (SeatShowTime seat : seats) {
-            boolean isAvailable = false;
+		// LOCK SEAT
+		List<SeatShowTime> seats = seatShowTimeRepository.findAllBySeatShowTimeIdIn(request.getSeatShowTimeIds());
+		if (seats.size() != request.getSeatShowTimeIds().size()) {
+			throw new AppException(ErrorCode.SIZE_MISMATCH);
+		}
+		for (SeatShowTime seat : seats) {
+			boolean isAvailable = false;
 
-            if (seat.getSeatShowTimeStatus() == SeatShowTimeStatus.AVAILABLE) {
-                isAvailable = true;
-            } else if (seat.getSeatShowTimeStatus() == SeatShowTimeStatus.RESERVED) {
-                if (seat.getLockedUntil() != null && seat.getLockedUntil().isBefore(now)) {
-                    isAvailable = true;
-                }
-            }
+			if (seat.getSeatShowTimeStatus() == SeatShowTimeStatus.AVAILABLE) {
+				isAvailable = true;
+			} else if (seat.getSeatShowTimeStatus() == SeatShowTimeStatus.RESERVED) {
+				if (seat.getLockedUntil() != null && seat.getLockedUntil().isBefore(now)) {
+					isAvailable = true;
+				}
+			}
 
-            if (!isAvailable) {
-                throw new RuntimeException("Ghế " + seat.getSeats().getSeatRow() + seat.getSeats().getSeatNumber() + " đã có người đặt hoặc đang được giữ!");
-            }
+			if (!isAvailable) {
+				throw new RuntimeException("Ghế " + seat.getSeats().getSeatRow() + seat.getSeats().getSeatNumber()
+						+ " đã có người đặt hoặc đang được giữ!");
+			}
 
-            seat.setUsers(user);
-            seat.setSeatShowTimeStatus(SeatShowTimeStatus.RESERVED);
-            seat.setLockedUntil(expirationTime);
-        }
-        seatShowTimeRepository.saveAll(seats);
+			seat.setUsers(user);
+			seat.setSeatShowTimeStatus(SeatShowTimeStatus.RESERVED);
+			seat.setLockedUntil(expirationTime);
+		}
+		seatShowTimeRepository.saveAll(seats);
 
-        //ORDER
-        Orders order = Orders.builder()
-                .users(user)
-                .bookingTime(now)
-                .createdAt(now)
-                .expiredTime(expirationTime)
-                .orderStatus(OrderStatus.PENDING)
-                .build();
-        orderRepository.save(order);
+		// ORDER
+		Orders order = Orders.builder().users(user).bookingTime(now).createdAt(now).expiredTime(expirationTime)
+				.orderStatus(OrderStatus.PENDING).build();
+		orderRepository.save(order);
 
-        //ODER TICKET
-        BigDecimal totalTicketPrice = BigDecimal.ZERO;
-        List<OrderTickets> tickets = new ArrayList<>();
-        Long showTimeId = seats.get(0).getShowTimes().getShowTimeId();
-        Map<SeatType, BigDecimal> priceMap = showTimePriceService.getPriceMapByShowTime(showTimeId);
+		// ODER TICKET
+		BigDecimal totalTicketPrice = BigDecimal.ZERO;
+		List<OrderTickets> tickets = new ArrayList<>();
+		Long showTimeId = seats.get(0).getShowTimes().getShowTimeId();
+		Map<SeatType, BigDecimal> priceMap = showTimePriceService.getPriceMapByShowTime(showTimeId);
 
-        for (SeatShowTime seat : seats) {
-            SeatType currentSeatType = seat.getSeats().getSeatType();
-            BigDecimal price = priceMap.get(currentSeatType);
-            if (price == null) {
-                throw new AppException(ErrorCode.SEAT_TYPE_NOT_FOUND);
-            }
+		for (SeatShowTime seat : seats) {
+			SeatType currentSeatType = seat.getSeats().getSeatType();
+			BigDecimal price = priceMap.get(currentSeatType);
+			if (price == null) {
+				throw new AppException(ErrorCode.SEAT_TYPE_NOT_FOUND);
+			}
 
-            OrderTickets ticket = OrderTickets.builder()
-                    .orders(order)
-                    .seatShowTime(seat)
-                    .price(price)
-                    .ticketStatus(TicketStatus.RESERVED)
-                    .createdAt(now)
-                    .build();
-            tickets.add(ticket);
-            totalTicketPrice = totalTicketPrice.add(price);
-        }
-        orderTicketRepository.saveAll(tickets);
+			OrderTickets ticket = OrderTickets.builder().orders(order).seatShowTime(seat).price(price)
+					.ticketStatus(TicketStatus.RESERVED).createdAt(now).build();
+			tickets.add(ticket);
+			totalTicketPrice = totalTicketPrice.add(price);
+		}
+		orderTicketRepository.saveAll(tickets);
 
-        //ODER FOOD
-        Long cinemaId = seats.get(0).getShowTimes().getRooms().getCinemas().getCinemaId();
-        List<OrderFoods> orderFoods = new ArrayList<>();
-        List<Foods> updatedFoods = new ArrayList<>();
-        BigDecimal totalFoodPrice = BigDecimal.ZERO;
-        if (request.getFoods() != null) {
-            for (OrderFoodsRequest foodReq : request.getFoods()) {
-                Foods food = foodRepository.findByFoodId(foodReq.getFoodId())
-                        .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
-                if (!food.getCinema().getCinemaId().equals(cinemaId)) {
-                    throw new AppException(ErrorCode.FOOD_NOT_BELONG_TO_CINEMA);
-                }
-                if (food.getStockQuantity() < foodReq.getQuantity()) {
-                    throw new AppException(ErrorCode.FOOD_OUT_OF_STOCK);
-                }
+		// ODER FOOD
+		Long cinemaId = seats.get(0).getShowTimes().getRooms().getCinemas().getCinemaId();
+		List<OrderFoods> orderFoods = new ArrayList<>();
+		List<Foods> updatedFoods = new ArrayList<>();
+		BigDecimal totalFoodPrice = BigDecimal.ZERO;
+		if (request.getFoods() != null) {
+			for (OrderFoodsRequest foodReq : request.getFoods()) {
+				Foods food = foodRepository.findByFoodId(foodReq.getFoodId())
+						.orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND));
+				if (!food.getCinema().getCinemaId().equals(cinemaId)) {
+					throw new AppException(ErrorCode.FOOD_NOT_BELONG_TO_CINEMA);
+				}
+				if (food.getStockQuantity() < foodReq.getQuantity()) {
+					throw new AppException(ErrorCode.FOOD_OUT_OF_STOCK);
+				}
 
-                int newStock = food.getStockQuantity() - foodReq.getQuantity();
-                food.setStockQuantity(newStock);
-                if (newStock == 0) {
-                    food.setFoodStatus(FoodStatus.OUT_OF_STOCK);
-                    food.setEntityStatus(EntityStatus.INACTIVE);
-                }
-                updatedFoods.add(food);
+				int newStock = food.getStockQuantity() - foodReq.getQuantity();
+				food.setStockQuantity(newStock);
+				if (newStock == 0) {
+					food.setFoodStatus(FoodStatus.OUT_OF_STOCK);
+					food.setEntityStatus(EntityStatus.INACTIVE);
+				}
+				updatedFoods.add(food);
 
-                BigDecimal totalItem = food.getPrice().multiply(BigDecimal.valueOf(foodReq.getQuantity()));
-                OrderFoods item = OrderFoods.builder()
-                        .orders(order)
-                        .foods(food)
-                        .quantity(foodReq.getQuantity())
-                        .unitPrice(food.getPrice())
-                        .totalPrice(totalItem)
-                        .build();
-                orderFoods.add(item);
-                totalFoodPrice = totalFoodPrice.add(totalItem);
-            }
-        }
-        foodRepository.saveAll(updatedFoods);
-        orderFoodRepository.saveAll(orderFoods);
+				BigDecimal totalItem = food.getPrice().multiply(BigDecimal.valueOf(foodReq.getQuantity()));
+				OrderFoods item = OrderFoods.builder().orders(order).foods(food).quantity(foodReq.getQuantity())
+						.unitPrice(food.getPrice()).totalPrice(totalItem).build();
+				orderFoods.add(item);
+				totalFoodPrice = totalFoodPrice.add(totalItem);
+			}
+		}
+		foodRepository.saveAll(updatedFoods);
+		orderFoodRepository.saveAll(orderFoods);
 
-        //ƯU ĐÃI (HẠNG THÀNH VIÊN & MÃ GIẢM GIÁ)
-        BigDecimal provisionalTotal = totalTicketPrice.add(totalFoodPrice);
+		// ƯU ĐÃI (HẠNG THÀNH VIÊN & MÃ GIẢM GIÁ)
+		BigDecimal provisionalTotal = totalTicketPrice.add(totalFoodPrice);
 
-        BigDecimal memberDiscountAmount = BigDecimal.ZERO;
-        if (user.getMembershipTier() != null) {
-            BigDecimal applicablePercent = BigDecimal.ZERO;
+		BigDecimal memberDiscountAmount = BigDecimal.ZERO;
+		if (user.getMembershipTier() != null) {
+			BigDecimal applicablePercent = BigDecimal.ZERO;
 
-            if (user.getBirthday() != null && user.getBirthday().getMonth() == now.getMonth()) {
-                applicablePercent = user.getMembershipTier().getBirthdayDiscount();
-            } else {
-                applicablePercent = user.getMembershipTier().getDiscountPercent();
-            }
+			if (user.getBirthday() != null && user.getBirthday().getMonth() == now.getMonth()) {
+				applicablePercent = user.getMembershipTier().getBirthdayDiscount();
+			} else {
+				applicablePercent = user.getMembershipTier().getDiscountPercent();
+			}
 
-            if (applicablePercent.compareTo(BigDecimal.ZERO) > 0) {
-                memberDiscountAmount = provisionalTotal.multiply(applicablePercent)
-                        .divide(new BigDecimal(100), RoundingMode.HALF_UP);
-            }
-        }
+			if (applicablePercent.compareTo(BigDecimal.ZERO) > 0) {
+				memberDiscountAmount = provisionalTotal.multiply(applicablePercent).divide(new BigDecimal(100),
+						RoundingMode.HALF_UP);
+			}
+		}
 
-        BigDecimal amountAfterMemberDiscount = provisionalTotal.subtract(memberDiscountAmount);
+		BigDecimal amountAfterMemberDiscount = provisionalTotal.subtract(memberDiscountAmount);
 
-        //MÃ GIẢM GIÁ
-        BigDecimal promotionDiscount = BigDecimal.ZERO;
-        String appliedPromotionCode = null;
-        if (request.getPromotionCode() != null && !request.getPromotionCode().trim().isEmpty()) {
-            Promotion promotion = promotionRepository.findByCode(request.getPromotionCode())
-                    .orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+		// MÃ GIẢM GIÁ
+		BigDecimal promotionDiscount = BigDecimal.ZERO;
+		String appliedPromotionCode = null;
+		if (request.getPromotionCode() != null && !request.getPromotionCode().trim().isEmpty()) {
+			Promotion promotion = promotionRepository.findByCode(request.getPromotionCode())
+					.orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
 
-            if (promotion.getEndTime().isBefore(now) || promotion.getStartTime().isAfter(now)) {
-                throw new AppException(ErrorCode.PROMOTION_EXPIRED);
-            }
-            if (promotion.getUseLimit() <= 0) {
-                throw new AppException(ErrorCode.PROMOTION_OUT_OF_STOCK);
-            }
-            if (amountAfterMemberDiscount.compareTo(promotion.getMinOrderValue()) < 0) {
-                throw new AppException(ErrorCode.PROMOTION_CONDITION_NOT_MET);
-            }
+			if (promotion.getEndTime().isBefore(now) || promotion.getStartTime().isAfter(now)) {
+				throw new AppException(ErrorCode.PROMOTION_EXPIRED);
+			}
+			if (promotion.getUseLimit() <= 0) {
+				throw new AppException(ErrorCode.PROMOTION_OUT_OF_STOCK);
+			}
+			if (amountAfterMemberDiscount.compareTo(promotion.getMinOrderValue()) < 0) {
+				throw new AppException(ErrorCode.PROMOTION_CONDITION_NOT_MET);
+			}
 
-            if (promotion.getType().equals(PromotionType.PERCENTAGE)) {
-                BigDecimal percentage = promotion.getDiscountValue().divide(new BigDecimal(100));
-                promotionDiscount = amountAfterMemberDiscount.multiply(percentage);
-                if (promotion.getMaxDiscountAmount() != null && promotionDiscount.compareTo(promotion.getMaxDiscountAmount()) > 0) {
-                    promotionDiscount = promotion.getMaxDiscountAmount();
-                }
-            } else if (promotion.getType().equals(PromotionType.FIXED_AMOUNT)) {
-                promotionDiscount = promotion.getDiscountValue();
-            }
+			if (promotion.getType().equals(PromotionType.PERCENTAGE)) {
+				BigDecimal percentage = promotion.getDiscountValue().divide(new BigDecimal(100));
+				promotionDiscount = amountAfterMemberDiscount.multiply(percentage);
+				if (promotion.getMaxDiscountAmount() != null
+						&& promotionDiscount.compareTo(promotion.getMaxDiscountAmount()) > 0) {
+					promotionDiscount = promotion.getMaxDiscountAmount();
+				}
+			} else if (promotion.getType().equals(PromotionType.FIXED_AMOUNT)) {
+				promotionDiscount = promotion.getDiscountValue();
+			}
 
-            if (promotionDiscount.compareTo(amountAfterMemberDiscount) > 0) {
-                promotionDiscount = amountAfterMemberDiscount;
-            }
+			if (promotionDiscount.compareTo(amountAfterMemberDiscount) > 0) {
+				promotionDiscount = amountAfterMemberDiscount;
+			}
 
-            promotion.setUseLimit(promotion.getUseLimit() - 1);
-            promotionRepository.save(promotion);
-            appliedPromotionCode = promotion.getCode();
-        }
+			promotion.setUseLimit(promotion.getUseLimit() - 1);
+			promotionRepository.save(promotion);
+			appliedPromotionCode = promotion.getCode();
+		}
 
-        //CẬP NHẬT VÀ LƯU ORDER CUỐI CÙNG
-        BigDecimal finalPrice = amountAfterMemberDiscount.subtract(promotionDiscount);
-        if (finalPrice.compareTo(BigDecimal.ZERO) < 0) finalPrice = BigDecimal.ZERO;
+		// CẬP NHẬT VÀ LƯU ORDER CUỐI CÙNG
+		BigDecimal finalPrice = amountAfterMemberDiscount.subtract(promotionDiscount);
+		if (finalPrice.compareTo(BigDecimal.ZERO) < 0)
+			finalPrice = BigDecimal.ZERO;
 
-        // --- Tính điểm tích lũyd
-        int pointsEarned = finalPrice.divide(new BigDecimal(1000), 0, RoundingMode.FLOOR).intValue();
+		// --- Tính điểm tích lũyd
+		int pointsEarned = finalPrice.divide(new BigDecimal(1000), 0, RoundingMode.FLOOR).intValue();
 
-        order.setTotalFoodPrice(totalFoodPrice);
-        order.setTotalTicketPrice(totalTicketPrice);
-        order.setMemberDiscountAmount(memberDiscountAmount);
-        order.setDiscountAmount(promotionDiscount);
-        order.setPromotionCode(appliedPromotionCode);
-        order.setFinalPrice(finalPrice);
-        order.setPointsEarned(pointsEarned);
-        order.setUpdatedAt(now);
+		order.setTotalFoodPrice(totalFoodPrice);
+		order.setTotalTicketPrice(totalTicketPrice);
+		order.setMemberDiscountAmount(memberDiscountAmount);
+		order.setDiscountAmount(promotionDiscount);
+		order.setPromotionCode(appliedPromotionCode);
+		order.setFinalPrice(finalPrice);
+		order.setPointsEarned(pointsEarned);
+		order.setUpdatedAt(now);
 
-        Orders savedOrder = orderRepository.save(order);
+		Orders savedOrder = orderRepository.save(order);
 
-        // SHOWTIME INFO (built from in-memory seat data, no extra query)
-        ShowTimes showTimes = seats.get(0).getShowTimes();
-        String roomName = null, cinemaName = null, cinemaAddress = null;
-        if (showTimes.getRooms() != null) {
-            roomName = showTimes.getRooms().getName();
-            if (showTimes.getRooms().getCinemas() != null) {
-                cinemaName = showTimes.getRooms().getCinemas().getName();
-                cinemaAddress = showTimes.getRooms().getCinemas().getAddress();
-            }
-        }
-        ShowTimeInfo showTimeInfo = ShowTimeInfo.builder()
-                .movieName(showTimes.getMovies() != null ? showTimes.getMovies().getTitle() : null)
-                .roomName(roomName)
-                .showTime(showTimes.getStartTime())
-                .cinemaName(cinemaName)
-                .cinemaAddress(cinemaAddress)
-                .build();
+		// SHOWTIME INFO (built from in-memory seat data, no extra query)
+		ShowTimes showTimes = seats.get(0).getShowTimes();
+		String roomName = null, cinemaName = null, cinemaAddress = null;
+		if (showTimes.getRooms() != null) {
+			roomName = showTimes.getRooms().getName();
+			if (showTimes.getRooms().getCinemas() != null) {
+				cinemaName = showTimes.getRooms().getCinemas().getName();
+				cinemaAddress = showTimes.getRooms().getCinemas().getAddress();
+			}
+		}
+		ShowTimeInfo showTimeInfo = ShowTimeInfo.builder()
+				.movieName(showTimes.getMovies() != null ? showTimes.getMovies().getTitle() : null).roomName(roomName)
+				.showTime(showTimes.getStartTime()).cinemaName(cinemaName).cinemaAddress(cinemaAddress).build();
 
-        // RESPONSE
-        List<OrderTicketResponse> ticketResponses = tickets.stream()
-                .map(ticket -> OrderTicketResponse.builder()
-                        .orderTicketId(ticket.getOrderTicketId())
-                        .seatName(ticket.getSeatShowTime().getSeats().getSeatRow() + ticket.getSeatShowTime().getSeats().getSeatNumber())
-                        .price(ticket.getPrice())
-                        .seatType(ticket.getSeatShowTime().getSeats().getSeatType())
-                        .build())
-                .toList();
+		// RESPONSE
+		List<OrderTicketResponse> ticketResponses = tickets.stream()
+				.map(ticket -> OrderTicketResponse.builder().orderTicketId(ticket.getOrderTicketId())
+						.seatName(ticket.getSeatShowTime().getSeats().getSeatRow()
+								+ ticket.getSeatShowTime().getSeats().getSeatNumber())
+						.price(ticket.getPrice()).seatType(ticket.getSeatShowTime().getSeats().getSeatType()).build())
+				.toList();
 
-        List<OrderFoodResponse> foodResponses = orderFoods.stream()
-                .map(food -> OrderFoodResponse.builder()
-                        .foodId(food.getFoods().getFoodId())
-                        .name(food.getFoods().getName())
-                        .quantity(food.getQuantity())
-                        .unitPrice(food.getUnitPrice())
-                        .totalPrice(food.getTotalPrice())
-                        .build())
-                .toList();
+		List<OrderFoodResponse> foodResponses = orderFoods.stream()
+				.map(food -> OrderFoodResponse.builder().foodId(food.getFoods().getFoodId())
+						.name(food.getFoods().getName()).quantity(food.getQuantity()).unitPrice(food.getUnitPrice())
+						.totalPrice(food.getTotalPrice()).build())
+				.toList();
 
-        return OrderResponse.builder()
-                .orderId(savedOrder.getOrderId())
-                .userId(savedOrder.getUsers().getUserId())
-                .fullName(savedOrder.getUsers().getFirstname() + " " + savedOrder.getUsers().getLastname())
-                .showTimeInfo(showTimeInfo)
-                .totalTicketPrice(savedOrder.getTotalTicketPrice())
-                .totalFoodPrice(savedOrder.getTotalFoodPrice())
-                .memberDiscountAmount(savedOrder.getMemberDiscountAmount())
-                .discountAmount(savedOrder.getDiscountAmount())
-                .promotionCode(savedOrder.getPromotionCode())
-                .finalPrice(savedOrder.getFinalPrice())
-                .pointsEarned(savedOrder.getPointsEarned())
-                .bookingTime(savedOrder.getBookingTime())
-                .expiredTime(savedOrder.getExpiredTime())
-                .createdAt(savedOrder.getCreatedAt())
-                .updatedAt(savedOrder.getUpdatedAt())
-                .orderStatus(savedOrder.getOrderStatus())
-                .tickets(ticketResponses)
-                .foods(foodResponses)
-                .qrCode(savedOrder.getQrCode())
-                .build();
-    }
+		return OrderResponse.builder().orderId(savedOrder.getOrderId()).userId(savedOrder.getUsers().getUserId())
+				.fullName(savedOrder.getUsers().getFirstname() + " " + savedOrder.getUsers().getLastname())
+				.showTimeInfo(showTimeInfo).totalTicketPrice(savedOrder.getTotalTicketPrice())
+				.totalFoodPrice(savedOrder.getTotalFoodPrice())
+				.memberDiscountAmount(savedOrder.getMemberDiscountAmount())
+				.discountAmount(savedOrder.getDiscountAmount()).promotionCode(savedOrder.getPromotionCode())
+				.finalPrice(savedOrder.getFinalPrice()).pointsEarned(savedOrder.getPointsEarned())
+				.bookingTime(savedOrder.getBookingTime()).expiredTime(savedOrder.getExpiredTime())
+				.createdAt(savedOrder.getCreatedAt()).updatedAt(savedOrder.getUpdatedAt())
+				.orderStatus(savedOrder.getOrderStatus()).tickets(ticketResponses).foods(foodResponses)
+				.qrCode(savedOrder.getQrCode()).build();
+	}
 }

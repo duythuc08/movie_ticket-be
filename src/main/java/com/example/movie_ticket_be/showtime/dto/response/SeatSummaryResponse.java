@@ -9,9 +9,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatSummaryResponse {
-    long total;
-    long available;
-    long sold;
-    long reserved;
-    long blocked;
+	long total;
+	long available;
+	long sold;
+	long reserved;
+	long blocked;
 }

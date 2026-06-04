@@ -15,23 +15,23 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimeResponse {
-    Long showTimeId;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    ShowTimeStatus showTimeStatus;
+	Long showTimeId;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	ShowTimeStatus showTimeStatus;
 
-    Long movieId;
-    String movieTitle;
-    Integer movieDuration;
-    String moviePosterUrl;
-    MovieStatus movieStatus;
+	Long movieId;
+	String movieTitle;
+	Integer movieDuration;
+	String moviePosterUrl;
+	MovieStatus movieStatus;
 
-    Long roomId;
-    String roomName;
-    RoomType roomType;
+	Long roomId;
+	String roomName;
+	RoomType roomType;
 
-    Long cinemaId;
-    String cinemaName;
+	Long cinemaId;
+	String cinemaName;
 
-    List<ShowTimePriceResponse> prices;
+	List<ShowTimePriceResponse> prices;
 }

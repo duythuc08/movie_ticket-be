@@ -16,16 +16,16 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UsersCreationRequest {
-    @NotBlank(message = "USERNAME_REQUIRED")
-    @Size(min = 3, message = "USERNAME_INVALID")
-    @Email(message = "USERNAME_MUST_BE_EMAIL")
-    String username;
+	@NotBlank(message = "USERNAME_REQUIRED")
+	@Size(min = 3, message = "USERNAME_INVALID")
+	@Email(message = "USERNAME_MUST_BE_EMAIL")
+	String username;
 
-    @Size(min = 8, message = "INVALID_PASSWORD")
-    String password;
+	@Size(min = 8, message = "INVALID_PASSWORD")
+	String password;
 
-    String firstname;
-    String lastname;
-    String phoneNumber;
-    LocalDate birthday;
+	String firstname;
+	String lastname;
+	String phoneNumber;
+	LocalDate birthday;
 }

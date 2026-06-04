@@ -39,73 +39,63 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminCinemaController {
-    AdminCinemaService adminCinemaService;
+	AdminCinemaService adminCinemaService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<CinemaResponse> createCinema(@RequestBody CinemaRequest request) {
-        return ApiResponse.<CinemaResponse>builder()
-                .result(adminCinemaService.createCinema(request))
-                .message("Thêm rạp chiếu thành công")
-                .build();
-    }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<CinemaResponse> createCinema(@RequestBody CinemaRequest request) {
+		return ApiResponse.<CinemaResponse>builder().result(adminCinemaService.createCinema(request))
+				.message("Thêm rạp chiếu thành công").build();
+	}
 
-    @PostMapping("/bulk")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<CinemaResponse>> createCinemas(@RequestBody List<CinemaRequest> requests) {
-        return ApiResponse.<List<CinemaResponse>>builder()
-                .result(adminCinemaService.createCinemas(requests))
-                .build();
-    }
+	@PostMapping("/bulk")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<List<CinemaResponse>> createCinemas(@RequestBody List<CinemaRequest> requests) {
+		return ApiResponse.<List<CinemaResponse>>builder().result(adminCinemaService.createCinemas(requests)).build();
+	}
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminCinemaResponse> getAdminCinemaById(@PathVariable long id) {
-        return ApiResponse.<AdminCinemaResponse>builder()
-                .result(adminCinemaService.getAdminCinemaById(id))
-                .message("Lấy thông tin rạp chiếu thành công")
-                .build();
-    }
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminCinemaResponse> getAdminCinemaById(@PathVariable long id) {
+		return ApiResponse.<AdminCinemaResponse>builder().result(adminCinemaService.getAdminCinemaById(id))
+				.message("Lấy thông tin rạp chiếu thành công").build();
+	}
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<CinemaResponse>> getAllCinemas(
-        @Parameter(name = "filter", required = false) @Filter Specification<Cinemas> spec,
-        @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable
-    ) {
-        return ApiResponse.<Page<CinemaResponse>>builder()
-                .result(adminCinemaService.getCinemas(spec, pageable))
-                .build();
-    }
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Page<CinemaResponse>> getAllCinemas(
+			@Parameter(name = "filter", required = false) @Filter Specification<Cinemas> spec,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<CinemaResponse>>builder().result(adminCinemaService.getCinemas(spec, pageable))
+				.build();
+	}
 
-    @GetMapping("/by-status")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<CinemaResponse>> getCinemasByStatus(@RequestParam CinemaStatus status) {
-        return ApiResponse.<List<CinemaResponse>>builder()
-                .result(adminCinemaService.getCinemasByStatus(status))
-                .build();
-    }
+	@GetMapping("/by-status")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<List<CinemaResponse>> getCinemasByStatus(@RequestParam CinemaStatus status) {
+		return ApiResponse.<List<CinemaResponse>>builder().result(adminCinemaService.getCinemasByStatus(status))
+				.build();
+	}
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminCinemaResponse> updateCinema(@PathVariable long id, @RequestBody AdminCinemaUpdateRequest request) {
-        return ApiResponse.<AdminCinemaResponse>builder()
-                .result(adminCinemaService.updateCinema(id, request))
-                .message("Cập nhật rạp chiếu thành công")
-                .build();
-    }
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminCinemaResponse> updateCinema(@PathVariable long id,
+			@RequestBody AdminCinemaUpdateRequest request) {
+		return ApiResponse.<AdminCinemaResponse>builder().result(adminCinemaService.updateCinema(id, request))
+				.message("Cập nhật rạp chiếu thành công").build();
+	}
 
-    @PutMapping("/{id}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> activate(@PathVariable long id) {
-        adminCinemaService.changeStatus(id, EntityStatus.ACTIVE);
-        return ApiResponse.<Void>builder().message("Kích hoạt rạp chiếu thành công").build();
-    }
+	@PutMapping("/{id}/activate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> activate(@PathVariable long id) {
+		adminCinemaService.changeStatus(id, EntityStatus.ACTIVE);
+		return ApiResponse.<Void>builder().message("Kích hoạt rạp chiếu thành công").build();
+	}
 
-    @PutMapping("/{id}/inactivate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> inactivate(@PathVariable long id) {
-        adminCinemaService.changeStatus(id, EntityStatus.INACTIVE);
-        return ApiResponse.<Void>builder().message("Vô hiệu hóa rạp chiếu thành công").build();
-    }
+	@PutMapping("/{id}/inactivate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> inactivate(@PathVariable long id) {
+		adminCinemaService.changeStatus(id, EntityStatus.INACTIVE);
+		return ApiResponse.<Void>builder().message("Vô hiệu hóa rạp chiếu thành công").build();
+	}
 }

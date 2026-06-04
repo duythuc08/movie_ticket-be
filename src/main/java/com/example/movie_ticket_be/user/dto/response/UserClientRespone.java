@@ -19,12 +19,12 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserClientRespone {
 
-    String userId;
-    String username;
-    String firstname;
-    String lastname;
-    String phoneNumber;
-    LocalDate birthday;
-    int loyaltyPoints;
-    String memberShipTierName;
+	String userId;
+	String username;
+	String firstname;
+	String lastname;
+	String phoneNumber;
+	LocalDate birthday;
+	int loyaltyPoints;
+	String memberShipTierName;
 }

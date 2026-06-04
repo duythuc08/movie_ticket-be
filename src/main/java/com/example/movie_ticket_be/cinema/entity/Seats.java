@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 
 import com.example.movie_ticket_be.cinema.enums.SeatStatus;
 import com.example.movie_ticket_be.cinema.enums.SeatType;
-import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
 
 import jakarta.persistence.*;
@@ -22,31 +21,31 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Seats extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    Long seatId;
-    String seatRow;
-    Integer seatNumber;
-    
-    @Column(precision = 4, scale = 2)
-    BigDecimal viewQuanlityScore;
-    @ManyToOne
-    @JoinColumn(name = "room_id")
-    Rooms rooms;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@EqualsAndHashCode.Include
+	Long seatId;
+	String seatRow;
+	Integer seatNumber;
 
-    @Enumerated(EnumType.STRING)
-    SeatType seatType;
+	@Column(precision = 4, scale = 2)
+	BigDecimal viewQuanlityScore;
+	@ManyToOne
+	@JoinColumn(name = "room_id")
+	Rooms rooms;
 
-    @Enumerated(EnumType.STRING)
-    SeatStatus seatStatus;
+	@Enumerated(EnumType.STRING)
+	SeatType seatType;
 
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (this.seatStatus == null) {
-            this.seatStatus = SeatStatus.NORMAL;
-        }
-    }
+	@Enumerated(EnumType.STRING)
+	SeatStatus seatStatus;
+
+	@PrePersist
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		if (this.seatStatus == null) {
+			this.seatStatus = SeatStatus.NORMAL;
+		}
+	}
 }

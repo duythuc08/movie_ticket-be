@@ -19,18 +19,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MembershipTierService {
-    MembershipTierRepository membershipTierRepository;
-    MembershipTierMapper membershipTierMapper;
+	MembershipTierRepository membershipTierRepository;
+	MembershipTierMapper membershipTierMapper;
 
-    public MembershipTierResponse getMembershipTierByName(String name) {
-        MembershipTier tier = membershipTierRepository.findByName(name)
-                .orElseThrow(() -> new AppException(ErrorCode.MEMBERSHIP_TIER_NOT_FOUND));
-        return membershipTierMapper.toMembershipTierResponse(tier);
-    }
+	public MembershipTierResponse getMembershipTierByName(String name) {
+		MembershipTier tier = membershipTierRepository.findByName(name)
+				.orElseThrow(() -> new AppException(ErrorCode.MEMBERSHIP_TIER_NOT_FOUND));
+		return membershipTierMapper.toMembershipTierResponse(tier);
+	}
 
-    public List<MembershipTierResponse> getMembershipTierList() {
-        return membershipTierRepository.findAll().stream()
-                .map(membershipTierMapper::toMembershipTierResponse)
-                .toList();
-    }
+	public List<MembershipTierResponse> getMembershipTierList() {
+		return membershipTierRepository.findAll().stream().map(membershipTierMapper::toMembershipTierResponse).toList();
+	}
 }

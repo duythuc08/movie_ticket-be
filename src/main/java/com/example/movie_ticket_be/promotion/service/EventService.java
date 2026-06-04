@@ -23,16 +23,15 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventService {
-    EventRepository eventRepository;
-    EventMapper eventMapper;
+	EventRepository eventRepository;
+	EventMapper eventMapper;
 
-    public Page<EventResponse> getActiveEvents(Specification<Event> spec, Pageable pageable) {
-        return eventRepository.findAll(spec, pageable).map(eventMapper::toEventResponse);
-    }
+	public Page<EventResponse> getActiveEvents(Specification<Event> spec, Pageable pageable) {
+		return eventRepository.findAll(spec, pageable).map(eventMapper::toEventResponse);
+	}
 
-    public EventDetailrespone getEventById(long id) {
-        return eventMapper.toEventDetailResponse(
-                eventRepository.findByEventId(id)
-                        .orElseThrow(() -> new AppException(ErrorCode.EVENT_NOT_FOUND)));
-    }
+	public EventDetailrespone getEventById(long id) {
+		return eventMapper.toEventDetailResponse(
+				eventRepository.findByEventId(id).orElseThrow(() -> new AppException(ErrorCode.EVENT_NOT_FOUND)));
+	}
 }

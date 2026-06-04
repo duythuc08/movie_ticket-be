@@ -12,11 +12,12 @@ import com.example.movie_ticket_be.core.enums.EntityStatus;
 
 public interface FoodRepository extends JpaRepository<Foods, Long>, JpaSpecificationExecutor<Foods> {
 
-    boolean existsByNameAndCinema_CinemaId(String name, Long cinemaId);
+	boolean existsByNameAndCinema_CinemaId(String name, Long cinemaId);
 
-    boolean existsByNameAndCinema_CinemaIdAndFoodIdNot(String name, Long cinemaId, Long foodId);
+	boolean existsByNameAndCinema_CinemaIdAndFoodIdNot(String name, Long cinemaId, Long foodId);
 
-    Optional<Foods> findByFoodId(Long foodId);
+	Optional<Foods> findByFoodId(Long foodId);
 
-    List<Foods> findByCinema_CinemaIdAndEntityStatusAndFoodStatus(Long cinemaId, EntityStatus entityStatus, FoodStatus foodStatus);
+	List<Foods> findByCinema_CinemaIdAndEntityStatusAndFoodStatus(Long cinemaId, EntityStatus entityStatus,
+			FoodStatus foodStatus);
 }

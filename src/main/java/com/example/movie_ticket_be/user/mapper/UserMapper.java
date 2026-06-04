@@ -1,7 +1,5 @@
 package com.example.movie_ticket_be.user.mapper;
 
-
-
 import com.example.movie_ticket_be.auth.dto.request.RegisterRequest;
 import com.example.movie_ticket_be.user.dto.request.UserUpdateRequest;
 import com.example.movie_ticket_be.user.dto.request.UsersCreationRequest;
@@ -15,19 +13,19 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-    Users toUsers(UsersCreationRequest request);
+	Users toUsers(UsersCreationRequest request);
 
-    @Mapping(source = "membershipTier.name", target = "memberShipTierName")
-    @Mapping(source = "role", target = "roles")
-    UsersRespone toUsersRespone(Users users);
+	@Mapping(source = "membershipTier.name", target = "memberShipTierName")
+	@Mapping(source = "role", target = "roles")
+	UsersRespone toUsersRespone(Users users);
 
-    UserMenuRespone toUserMenuRespone(Users users);
+	UserMenuRespone toUserMenuRespone(Users users);
 
-    @Mapping(source = "membershipTier.name", target = "memberShipTierName")
-    UserClientRespone toUserClientRespone(Users users);
+	@Mapping(source = "membershipTier.name", target = "memberShipTierName")
+	UserClientRespone toUserClientRespone(Users users);
 
-    @Mapping(target = "role", ignore = true)
-    void updateUser(@MappingTarget Users user, UserUpdateRequest request);
+	@Mapping(target = "role", ignore = true)
+	void updateUser(@MappingTarget Users user, UserUpdateRequest request);
 
-    Users toRegisterUser(RegisterRequest request);
+	Users toRegisterUser(RegisterRequest request);
 }

@@ -2,7 +2,6 @@ package com.example.movie_ticket_be.cinema.entity;
 
 import com.example.movie_ticket_be.cinema.enums.RoomStatus;
 import com.example.movie_ticket_be.cinema.enums.RoomType;
-import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,29 +16,29 @@ import lombok.experimental.FieldDefaults;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Rooms extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long roomId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long roomId;
 
-    String name;
-    Integer capacity;
+	String name;
+	Integer capacity;
 
-    @ManyToOne
-    @JoinColumn(name = "cinema_id")
-    Cinemas cinemas;
+	@ManyToOne
+	@JoinColumn(name = "cinema_id")
+	Cinemas cinemas;
 
-    @Enumerated(EnumType.STRING)
-    RoomType roomType;
+	@Enumerated(EnumType.STRING)
+	RoomType roomType;
 
-    @Enumerated(EnumType.STRING)
-    RoomStatus roomStatus;
+	@Enumerated(EnumType.STRING)
+	RoomStatus roomStatus;
 
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (this.roomStatus == null) {
-            this.roomStatus = RoomStatus.OPERATIONAL;
-        }
-    }
+	@PrePersist
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		if (this.roomStatus == null) {
+			this.roomStatus = RoomStatus.OPERATIONAL;
+		}
+	}
 }

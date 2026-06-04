@@ -16,21 +16,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatShowTimeResponse {
-    Long seatShowTimeId;
+	Long seatShowTimeId;
 
-    String userId;
+	String userId;
 
-    Long seatId;
-    String seatRow;
-    Integer seatNumber;
-    String seatType;
-    BigDecimal viewQuanlityScore;
+	Long seatId;
+	String seatRow;
+	Integer seatNumber;
+	String seatType;
+	BigDecimal viewQuanlityScore;
 
-    Long showTimeId;
-    Long roomId;
-    String roomName;
-    RoomType roomType;
+	Long showTimeId;
+	Long roomId;
+	String roomName;
+	RoomType roomType;
 
-    LocalDateTime lockedUntil;
-    SeatShowTimeStatus seatShowTimeStatus;
+	LocalDateTime lockedUntil;
+	SeatShowTimeStatus seatShowTimeStatus;
 }

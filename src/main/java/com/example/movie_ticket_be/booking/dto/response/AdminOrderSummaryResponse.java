@@ -13,14 +13,14 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminOrderSummaryResponse {
-    Long orderId;
-    String userId;
-    String fullName;
-    String movieName;
-    String cinemaName;
-    LocalDateTime showTime;
-    int ticketCount;
-    BigDecimal finalPrice;
-    OrderStatus orderStatus;
-    LocalDateTime bookingTime;
+	Long orderId;
+	String userId;
+	String fullName;
+	String movieName;
+	String cinemaName;
+	LocalDateTime showTime;
+	int ticketCount;
+	BigDecimal finalPrice;
+	OrderStatus orderStatus;
+	LocalDateTime bookingTime;
 }

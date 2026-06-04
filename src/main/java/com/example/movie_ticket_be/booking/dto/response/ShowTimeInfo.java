@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimeInfo {
-    String movieName;
-    String roomName;
-    LocalDateTime showTime;
-    String cinemaName;
-    String cinemaAddress;
+	String movieName;
+	String roomName;
+	LocalDateTime showTime;
+	String cinemaName;
+	String cinemaAddress;
 }

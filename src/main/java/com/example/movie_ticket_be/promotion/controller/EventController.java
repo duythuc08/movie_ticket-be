@@ -28,21 +28,17 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EventController {
-    EventService eventService;
+	EventService eventService;
 
-    @GetMapping
-    public ApiResponse<Page<EventResponse>> getActiveEvents(
-            @Parameter(name = "filter", required = false) @Filter Specification<Event> spec,
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<EventResponse>>builder()
-                .result(eventService.getActiveEvents(spec, pageable))
-                .build();
-    }
+	@GetMapping
+	public ApiResponse<Page<EventResponse>> getActiveEvents(
+			@Parameter(name = "filter", required = false) @Filter Specification<Event> spec,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<EventResponse>>builder().result(eventService.getActiveEvents(spec, pageable)).build();
+	}
 
-    @GetMapping("/{id}")
-    public ApiResponse<EventDetailrespone> getEventById(@PathVariable long id) {
-        return ApiResponse.<EventDetailrespone>builder()
-                .result(eventService.getEventById(id))
-                .build();
-    }
+	@GetMapping("/{id}")
+	public ApiResponse<EventDetailrespone> getEventById(@PathVariable long id) {
+		return ApiResponse.<EventDetailrespone>builder().result(eventService.getEventById(id)).build();
+	}
 }

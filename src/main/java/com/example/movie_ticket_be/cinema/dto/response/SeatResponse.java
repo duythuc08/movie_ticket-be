@@ -15,12 +15,12 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatResponse {
-    Long seatId;
-    String seatRow;
-    Integer seatNumber;
-    Long roomId;
-    SeatType seatType;
-    SeatStatus seatStatus;
-    EntityStatus entityStatus;
-    BigDecimal viewQuanlityScore; 
+	Long seatId;
+	String seatRow;
+	Integer seatNumber;
+	Long roomId;
+	SeatType seatType;
+	SeatStatus seatStatus;
+	EntityStatus entityStatus;
+	BigDecimal viewQuanlityScore;
 }

@@ -16,16 +16,16 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoomRequest {
-    String name;
-    Integer capacity;
+	String name;
+	Integer capacity;
 
-    @ManyToOne
-    @JoinColumn(name = "cinema_id")
-    Cinemas cinemas;
+	@ManyToOne
+	@JoinColumn(name = "cinema_id")
+	Cinemas cinemas;
 
-    @Enumerated(EnumType.STRING)
-    RoomType roomType;
+	@Enumerated(EnumType.STRING)
+	RoomType roomType;
 
-    @Enumerated(EnumType.STRING)
-    RoomStatus roomStatus;
+	@Enumerated(EnumType.STRING)
+	RoomStatus roomStatus;
 }

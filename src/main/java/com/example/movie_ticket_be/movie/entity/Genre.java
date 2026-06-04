@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.movie.entity;
 
-import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,14 +13,14 @@ import lombok.experimental.FieldDefaults;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Genre extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long genreId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long genreId;
 
-    @Column(unique = true)
-    String name;
+	@Column(unique = true)
+	String name;
 
-    @Lob
-    String description;
+	@Lob
+	String description;
 
 }

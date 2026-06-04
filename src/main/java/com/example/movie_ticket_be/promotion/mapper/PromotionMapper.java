@@ -16,32 +16,33 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface PromotionMapper {
 
-    @Mapping(target = "promotionId", ignore = true)
-    @Mapping(target = "applicableMovies", ignore = true)
-    @Mapping(target = "userPromotion", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "usedCount", ignore = true)
-    @Mapping(target = "entityStatus", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    Promotion toPromotion(PromotionRequest request);
+	@Mapping(target = "promotionId", ignore = true)
+	@Mapping(target = "applicableMovies", ignore = true)
+	@Mapping(target = "userPromotion", ignore = true)
+	@Mapping(target = "status", ignore = true)
+	@Mapping(target = "usedCount", ignore = true)
+	@Mapping(target = "entityStatus", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	Promotion toPromotion(PromotionRequest request);
 
-    @Mapping(target = "applicableMovieIds", source = "applicableMovies", qualifiedByName = "moviesToIds")
-    AdminPromotionResponse toAdminResponse(Promotion promotion);
+	@Mapping(target = "applicableMovieIds", source = "applicableMovies", qualifiedByName = "moviesToIds")
+	AdminPromotionResponse toAdminResponse(Promotion promotion);
 
-    @Mapping(target = "promotionId", ignore = true)
-    @Mapping(target = "applicableMovies", ignore = true)
-    @Mapping(target = "userPromotion", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "usedCount", ignore = true)
-    @Mapping(target = "entityStatus", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void updatePromotion(@MappingTarget Promotion promotion, PromotionRequest request);
+	@Mapping(target = "promotionId", ignore = true)
+	@Mapping(target = "applicableMovies", ignore = true)
+	@Mapping(target = "userPromotion", ignore = true)
+	@Mapping(target = "status", ignore = true)
+	@Mapping(target = "usedCount", ignore = true)
+	@Mapping(target = "entityStatus", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	void updatePromotion(@MappingTarget Promotion promotion, PromotionRequest request);
 
-    @Named("moviesToIds")
-    default Set<Long> moviesToIds(Set<Movies> movies) {
-        if (movies == null) return Collections.emptySet();
-        return movies.stream().map(Movies::getMovieId).collect(Collectors.toSet());
-    }
+	@Named("moviesToIds")
+	default Set<Long> moviesToIds(Set<Movies> movies) {
+		if (movies == null)
+			return Collections.emptySet();
+		return movies.stream().map(Movies::getMovieId).collect(Collectors.toSet());
+	}
 }

@@ -22,51 +22,47 @@ import java.util.Set;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Promotion extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long promotionId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long promotionId;
 
-    @Column(unique = true, nullable = false)
-    String code;
-    String name;
-    @Lob
-    String description;
-    BigDecimal discountValue;
-    BigDecimal minOrderValue;
-    BigDecimal maxDiscountAmount;
-    Integer useLimit;
-    Integer usedCount;
+	@Column(unique = true, nullable = false)
+	String code;
+	String name;
+	@Lob
+	String description;
+	BigDecimal discountValue;
+	BigDecimal minOrderValue;
+	BigDecimal maxDiscountAmount;
+	Integer useLimit;
+	Integer usedCount;
 
-    LocalDateTime startTime;
-    LocalDateTime endTime;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
 
-    @OneToMany(mappedBy = "promotion")
-    Set<UserPromotion> userPromotion;
+	@OneToMany(mappedBy = "promotion")
+	Set<UserPromotion> userPromotion;
 
-    @ManyToMany
-    @JoinTable(
-            name = "promotion_movies",
-            joinColumns = @JoinColumn(name = "promotion_id"),
-            inverseJoinColumns = @JoinColumn(name = "movie_id")
-    )
-    Set<Movies> applicableMovies;
+	@ManyToMany
+	@JoinTable(name = "promotion_movies", joinColumns = @JoinColumn(name = "promotion_id"), inverseJoinColumns = @JoinColumn(name = "movie_id"))
+	Set<Movies> applicableMovies;
 
-    @ElementCollection(targetClass = DayOfWeek.class)
-    @Enumerated(EnumType.STRING)
-    Set<DayOfWeek> dayOfWeek;
+	@ElementCollection(targetClass = DayOfWeek.class)
+	@Enumerated(EnumType.STRING)
+	Set<DayOfWeek> dayOfWeek;
 
-    @Enumerated(EnumType.STRING)
-    PromotionStatus status;
+	@Enumerated(EnumType.STRING)
+	PromotionStatus status;
 
-    @Enumerated(EnumType.STRING)
-    PromotionType type;
+	@Enumerated(EnumType.STRING)
+	PromotionType type;
 
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (this.status == null) {
-            this.status = PromotionStatus.DRAFT;
-        }
-    }
+	@PrePersist
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		if (this.status == null) {
+			this.status = PromotionStatus.DRAFT;
+		}
+	}
 }

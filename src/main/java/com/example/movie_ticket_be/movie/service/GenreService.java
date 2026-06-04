@@ -16,12 +16,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GenreService {
-    GenreRepository genreRepository;
-    GenreMapper genreMapper;
+	GenreRepository genreRepository;
+	GenreMapper genreMapper;
 
-    public List<GenreResponse> getGenres() {
-        return genreRepository.findAll().stream()
-                .map(genreMapper::toGenreRespone)
-                .toList();
-    }
+	public List<GenreResponse> getGenres() {
+		return genreRepository.findAll().stream().map(genreMapper::toGenreRespone).toList();
+	}
 }

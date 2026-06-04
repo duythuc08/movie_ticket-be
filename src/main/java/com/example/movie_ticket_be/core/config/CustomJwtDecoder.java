@@ -19,38 +19,35 @@ import java.util.Objects;
 
 @Component
 public class CustomJwtDecoder implements JwtDecoder {
-    @Value("${jwt.signerKey}")
-    private String signerKey;
+	@Value("${jwt.signerKey}")
+	private String signerKey;
 
-    private final AuthenticationService authenticationService;
+	private final AuthenticationService authenticationService;
 
-    private NimbusJwtDecoder nimbusJwtDecoder = null;
+	private NimbusJwtDecoder nimbusJwtDecoder = null;
 
-    public CustomJwtDecoder( @Lazy AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
-    }
+	public CustomJwtDecoder(@Lazy AuthenticationService authenticationService) {
+		this.authenticationService = authenticationService;
+	}
 
-    @Override
-    public Jwt decode(String token) throws JwtException {
+	@Override
+	public Jwt decode(String token) throws JwtException {
 
-        IntrospectResponse response = null;
-        try {
-            response = authenticationService.introspect(
-                    IntrospectResquest.builder().token(token).build());
-        } catch (JOSEException | ParseException e) {
-            throw new RuntimeException(e);
-        }
+		IntrospectResponse response = null;
+		try {
+			response = authenticationService.introspect(IntrospectResquest.builder().token(token).build());
+		} catch (JOSEException | ParseException e) {
+			throw new RuntimeException(e);
+		}
 
-        if (!response.isValid()) throw new JwtException("Token invalid");
+		if (!response.isValid())
+			throw new JwtException("Token invalid");
 
+		if (Objects.isNull(nimbusJwtDecoder)) {
+			SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
+			nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec).macAlgorithm(MacAlgorithm.HS512).build();
+		}
 
-        if (Objects.isNull(nimbusJwtDecoder)) {
-            SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-            nimbusJwtDecoder = NimbusJwtDecoder.withSecretKey(secretKeySpec)
-                    .macAlgorithm(MacAlgorithm.HS512)
-                    .build();
-        }
-
-        return nimbusJwtDecoder.decode(token);
-    }
+		return nimbusJwtDecoder.decode(token);
+	}
 }

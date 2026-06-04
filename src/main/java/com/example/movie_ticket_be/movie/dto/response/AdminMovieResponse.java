@@ -17,24 +17,24 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AdminMovieResponse {
-    Long movieId;
-    String title;
-    String description;
-    Integer duration;
-    String posterUrl;
-    String trailerUrl;
-    LocalDateTime releaseDate;
+	Long movieId;
+	String title;
+	String description;
+	Integer duration;
+	String posterUrl;
+	String trailerUrl;
+	LocalDateTime releaseDate;
 
-    Set<PersonResponse> castPersons;
-    Set<PersonResponse> directors;
-    String language;
-    String subTitle;
+	Set<PersonResponse> castPersons;
+	Set<PersonResponse> directors;
+	String language;
+	String subTitle;
 
-    Set<GenreResponse> genre;
+	Set<GenreResponse> genre;
 
-    AgeRating ageRating;
-    MovieStatus movieStatus;
-    EntityStatus entityStatus;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+	AgeRating ageRating;
+	MovieStatus movieStatus;
+	EntityStatus entityStatus;
+	LocalDateTime createdAt;
+	LocalDateTime updatedAt;
 }

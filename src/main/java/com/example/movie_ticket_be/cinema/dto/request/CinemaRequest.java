@@ -13,13 +13,13 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CinemaRequest {
-    String name;
-    String address;
-    @Column(unique = true)
-    String phoneNumber;
-    @Column(unique = true)
-    String email;
+	String name;
+	String address;
+	@Column(unique = true)
+	String phoneNumber;
+	@Column(unique = true)
+	String email;
 
-    @Enumerated(EnumType.STRING)
-    CinemaStatus cinemaStatus;
+	@Enumerated(EnumType.STRING)
+	CinemaStatus cinemaStatus;
 }

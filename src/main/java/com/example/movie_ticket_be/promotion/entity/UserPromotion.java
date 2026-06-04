@@ -18,32 +18,32 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UserPromotion extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    Users users;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id", nullable = false)
+	Users users;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "promotion_id", nullable = false)
-    Promotion promotion;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "promotion_id", nullable = false)
+	Promotion promotion;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    Orders order;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "order_id")
+	Orders order;
 
-    boolean isUsed;
-    LocalDateTime claimedAt;
-    LocalDateTime usedAt;
+	boolean isUsed;
+	LocalDateTime claimedAt;
+	LocalDateTime usedAt;
 
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (this.claimedAt == null) {
-            this.claimedAt = LocalDateTime.now();
-        }
-    }
+	@PrePersist
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		if (this.claimedAt == null) {
+			this.claimedAt = LocalDateTime.now();
+		}
+	}
 }

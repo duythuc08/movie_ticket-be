@@ -32,129 +32,119 @@ import java.util.*;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PaymentController {
-    PaymentService paymentService;
-    VNPayService vnPayService;
-    OrderRepository orderRepository;
-    BookingService bookingService;
+	PaymentService paymentService;
+	VNPayService vnPayService;
+	OrderRepository orderRepository;
+	BookingService bookingService;
 
-    // API MỚI:  Tạo Order + URL Thanh toán VNPay trong 1 request
-    @PostMapping("/create-vnpay-booking")
-    public ApiResponse<BookingResponse> createVnPayBooking(
-            HttpServletRequest request,
-            @RequestBody BookingRequest bookingRequest) {
+	// API MỚI: Tạo Order + URL Thanh toán VNPay trong 1 request
+	@PostMapping("/create-vnpay-booking")
+	public ApiResponse<BookingResponse> createVnPayBooking(HttpServletRequest request,
+			@RequestBody BookingRequest bookingRequest) {
 
-        OrderResponse orderResponse = bookingService.createBooking(bookingRequest);
+		OrderResponse orderResponse = bookingService.createBooking(bookingRequest);
 
-        String paymentUrl = vnPayService.createPaymentUrl(request, orderResponse.getOrderId(), orderResponse.getFinalPrice());
+		String paymentUrl = vnPayService.createPaymentUrl(request, orderResponse.getOrderId(),
+				orderResponse.getFinalPrice());
 
-        BookingResponse response = BookingResponse.builder()
-                .orderId(orderResponse.getOrderId())
-                .userId(orderResponse.getUserId())
-                .fullName(orderResponse.getFullName())
-                .orderStatus(orderResponse.getOrderStatus())
-                .showTimeInfo(orderResponse.getShowTimeInfo())
+		BookingResponse response = BookingResponse.builder().orderId(orderResponse.getOrderId())
+				.userId(orderResponse.getUserId()).fullName(orderResponse.getFullName())
+				.orderStatus(orderResponse.getOrderStatus()).showTimeInfo(orderResponse.getShowTimeInfo())
 
-                .totalTicketPrice(orderResponse.getTotalTicketPrice())
-                .totalFoodPrice(orderResponse.getTotalFoodPrice())
-                .discountAmount(orderResponse.getDiscountAmount())
-                .finalPrice(orderResponse.getFinalPrice())
-                .promotionCode(orderResponse.getPromotionCode())
+				.totalTicketPrice(orderResponse.getTotalTicketPrice()).totalFoodPrice(orderResponse.getTotalFoodPrice())
+				.discountAmount(orderResponse.getDiscountAmount()).finalPrice(orderResponse.getFinalPrice())
+				.promotionCode(orderResponse.getPromotionCode())
 
-                .bookingTime(orderResponse.getBookingTime())
-                .expiredTime(orderResponse.getExpiredTime())
+				.bookingTime(orderResponse.getBookingTime()).expiredTime(orderResponse.getExpiredTime())
 
-                .tickets(orderResponse.getTickets())
-                .foods(orderResponse.getFoods())
+				.tickets(orderResponse.getTickets()).foods(orderResponse.getFoods())
 
-                .paymentUrl(paymentUrl)
-                .build();
+				.paymentUrl(paymentUrl).build();
 
-        return ApiResponse.<BookingResponse>builder()
-                .code(1000)
-                .message("Tạo đơn hàng và URL thanh toán thành công")
-                .result(response)
-                .build();
-    }
+		return ApiResponse.<BookingResponse>builder().code(1000).message("Tạo đơn hàng và URL thanh toán thành công")
+				.result(response).build();
+	}
 
-    @GetMapping("/create-vnpay-url")
-    public ApiResponse<String> createVnPayUrl(HttpServletRequest request, @RequestParam Long orderId) {
-        Orders order = orderRepository.findByOrderId(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+	@GetMapping("/create-vnpay-url")
+	public ApiResponse<String> createVnPayUrl(HttpServletRequest request, @RequestParam Long orderId) {
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        String paymentUrl = vnPayService.createPaymentUrl(request, order.getOrderId(), order.getFinalPrice());
+		String paymentUrl = vnPayService.createPaymentUrl(request, order.getOrderId(), order.getFinalPrice());
 
-        return ApiResponse.<String>builder()
-                .message("Tạo URL thanh toán thành công")
-                .result(paymentUrl)
-                .build();
-    }
+		return ApiResponse.<String>builder().message("Tạo URL thanh toán thành công").result(paymentUrl).build();
+	}
 
-    // API Callback từ VNPay
-    @GetMapping("/vnpay-callback")
-    public RedirectView vnpayCallback(HttpServletRequest request) {
-        String status = request.getParameter("vnp_ResponseCode");
-        String txnRef = request.getParameter("vnp_TxnRef"); // Chính là OrderId mình gửi đi
+	// API Callback từ VNPay
+	@GetMapping("/vnpay-callback")
+	public RedirectView vnpayCallback(HttpServletRequest request) {
+		String status = request.getParameter("vnp_ResponseCode");
+		String txnRef = request.getParameter("vnp_TxnRef"); // Chính là OrderId mình gửi đi
 
-        Map<String, String> fields = new HashMap<>();
-        for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
-            String fieldName = params.nextElement();
-            String fieldValue = request.getParameter(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                fields.put(fieldName, fieldValue);
-            }
-        }
-        String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-        if (fields.containsKey("vnp_SecureHashType")) fields.remove("vnp_SecureHashType");
-        if (fields.containsKey("vnp_SecureHash")) fields.remove("vnp_SecureHash");
+		Map<String, String> fields = new HashMap<>();
+		for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
+			String fieldName = params.nextElement();
+			String fieldValue = request.getParameter(fieldName);
+			if ((fieldValue != null) && (fieldValue.length() > 0)) {
+				fields.put(fieldName, fieldValue);
+			}
+		}
+		String vnp_SecureHash = request.getParameter("vnp_SecureHash");
+		if (fields.containsKey("vnp_SecureHashType"))
+			fields.remove("vnp_SecureHashType");
+		if (fields.containsKey("vnp_SecureHash"))
+			fields.remove("vnp_SecureHash");
 
-        String signValue = VNPayConfig.hmacSHA512(VNPayConfig.secretKey, hashAllFields(fields));
+		String signValue = VNPayConfig.hmacSHA512(VNPayConfig.secretKey, hashAllFields(fields));
 
-        if (signValue.equals(vnp_SecureHash)) {
-            if ("00".equals(status)) {
-                // THANH TOÁN THÀNH CÔNG
-                PaymentConfirmRequest confirmReq = new PaymentConfirmRequest();
-                confirmReq.setOrderId(Long.parseLong(txnRef));
-                confirmReq.setTransactionId(request.getParameter("vnp_TransactionNo"));
-                confirmReq.setPaymentInfo(request.getParameter("vnp_OrderInfo"));
-                confirmReq.setPaymentType(PaymentType.VNPAY);
+		if (signValue.equals(vnp_SecureHash)) {
+			if ("00".equals(status)) {
+				// THANH TOÁN THÀNH CÔNG
+				PaymentConfirmRequest confirmReq = new PaymentConfirmRequest();
+				confirmReq.setOrderId(Long.parseLong(txnRef));
+				confirmReq.setTransactionId(request.getParameter("vnp_TransactionNo"));
+				confirmReq.setPaymentInfo(request.getParameter("vnp_OrderInfo"));
+				confirmReq.setPaymentType(PaymentType.VNPAY);
 
-                paymentService.processSuccess(confirmReq);
+				paymentService.processSuccess(confirmReq);
 
-                return new RedirectView("http://localhost:3000/payment-success/" + txnRef);
-            } else {
-                // THANH TOÁN THẤT BẠI
-                Orders order = orderRepository.findByOrderId(Long.parseLong(txnRef)).orElse(null);
-                if(order != null) paymentService.processFail(order);
+				return new RedirectView("http://localhost:3000/payment-success/" + txnRef);
+			} else {
+				// THANH TOÁN THẤT BẠI
+				Orders order = orderRepository.findByOrderId(Long.parseLong(txnRef)).orElse(null);
+				if (order != null)
+					paymentService.processFail(order);
 
-                return new RedirectView("http://localhost:3000/payment-fail?vnp_ResponseCode=" + status + "&orderId=" + txnRef);
-            }
-        } else {
-            return new RedirectView("http://localhost:3000/payment-error");
-        }
-    }
+				return new RedirectView(
+						"http://localhost:3000/payment-fail?vnp_ResponseCode=" + status + "&orderId=" + txnRef);
+			}
+		} else {
+			return new RedirectView("http://localhost:3000/payment-error");
+		}
+	}
 
-    // Helper function hash
-    private String hashAllFields(Map<String, String> fields) {
-        List<String> fieldNames = new ArrayList<>(fields.keySet());
-        Collections.sort(fieldNames);
-        StringBuilder sb = new StringBuilder();
-        Iterator<String> itr = fieldNames.iterator();
-        while (itr.hasNext()) {
-            String fieldName = itr.next();
-            String fieldValue = fields.get(fieldName);
-            if ((fieldValue != null) && (fieldValue.length() > 0)) {
-                sb.append(fieldName);
-                sb.append("=");
-                try {
-                    sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                if (itr.hasNext()) {
-                    sb.append("&");
-                }
-            }
-        }
-        return sb.toString();
-    }
+	// Helper function hash
+	private String hashAllFields(Map<String, String> fields) {
+		List<String> fieldNames = new ArrayList<>(fields.keySet());
+		Collections.sort(fieldNames);
+		StringBuilder sb = new StringBuilder();
+		Iterator<String> itr = fieldNames.iterator();
+		while (itr.hasNext()) {
+			String fieldName = itr.next();
+			String fieldValue = fields.get(fieldName);
+			if ((fieldValue != null) && (fieldValue.length() > 0)) {
+				sb.append(fieldName);
+				sb.append("=");
+				try {
+					sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				if (itr.hasNext()) {
+					sb.append("&");
+				}
+			}
+		}
+		return sb.toString();
+	}
 }

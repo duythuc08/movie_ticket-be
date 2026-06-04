@@ -16,20 +16,20 @@ import java.util.Set;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class MovieResponse {
-    Long movieId;
-    String title;
-    String description;
-    Integer duration;
-    String posterUrl;
-    String trailerUrl;
-    LocalDateTime releaseDate;
-    Set<PersonResponse> castPersons;
-    Set<PersonResponse> directors;
-    String language;
-    String subTitle;
+	Long movieId;
+	String title;
+	String description;
+	Integer duration;
+	String posterUrl;
+	String trailerUrl;
+	LocalDateTime releaseDate;
+	Set<PersonResponse> castPersons;
+	Set<PersonResponse> directors;
+	String language;
+	String subTitle;
 
-    Set<GenreResponse> genre;
+	Set<GenreResponse> genre;
 
-    AgeRating ageRating;
-    MovieStatus movieStatus;
+	AgeRating ageRating;
+	MovieStatus movieStatus;
 }

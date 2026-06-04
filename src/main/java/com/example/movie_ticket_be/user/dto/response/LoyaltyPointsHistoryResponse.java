@@ -15,11 +15,11 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LoyaltyPointsHistoryResponse {
-    Long historyId;
-    int pointsChange;
-    String description;
-    int oldBalance;
-    int newBalance;
-    LocalDateTime createdAt;
-    Long orderId;
+	Long historyId;
+	int pointsChange;
+	String description;
+	int oldBalance;
+	int newBalance;
+	LocalDateTime createdAt;
+	Long orderId;
 }

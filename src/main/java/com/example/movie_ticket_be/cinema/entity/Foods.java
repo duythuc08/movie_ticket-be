@@ -20,35 +20,35 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(callSuper = false, onlyExplicitlyIncluded = true)
 public class Foods extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    Long foodId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@EqualsAndHashCode.Include
+	Long foodId;
 
-    String name;
-    @Lob
-    String description;
-    BigDecimal price;
-    String imageUrl;
-    Boolean isCombo;
-    Integer stockQuantity;
+	String name;
+	@Lob
+	String description;
+	BigDecimal price;
+	String imageUrl;
+	Boolean isCombo;
+	Integer stockQuantity;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cinema_id", nullable = false)
-    Cinemas cinema;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "cinema_id", nullable = false)
+	Cinemas cinema;
 
-    @Enumerated(EnumType.STRING)
-    FoodType foodType;
+	@Enumerated(EnumType.STRING)
+	FoodType foodType;
 
-    @Enumerated(EnumType.STRING)
-    FoodStatus foodStatus;
+	@Enumerated(EnumType.STRING)
+	FoodStatus foodStatus;
 
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (this.foodStatus == null) {
-            this.foodStatus = FoodStatus.IN_STOCK;
-        }
-    }
+	@PrePersist
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		if (this.foodStatus == null) {
+			this.foodStatus = FoodStatus.IN_STOCK;
+		}
+	}
 }

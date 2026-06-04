@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SuggestedSeatResponse {
-    Long seatShowTimeId;
-    String seatRow;
-    Integer seatNumber;
-    String seatType;
-    BigDecimal viewQuanlityScore;
+	Long seatShowTimeId;
+	String seatRow;
+	Integer seatNumber;
+	String seatType;
+	BigDecimal viewQuanlityScore;
 }

@@ -18,21 +18,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FoodController {
-    FoodService foodService;
+	FoodService foodService;
 
-    @GetMapping
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<List<FoodResponse>> getFoodsByCinema(@RequestParam Long cinemaId) {
-        return ApiResponse.<List<FoodResponse>>builder()
-                .result(foodService.getAllFoodsByCinema(cinemaId))
-                .build();
-    }
+	@GetMapping
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<List<FoodResponse>> getFoodsByCinema(@RequestParam Long cinemaId) {
+		return ApiResponse.<List<FoodResponse>>builder().result(foodService.getAllFoodsByCinema(cinemaId)).build();
+	}
 
-    @GetMapping("/{id}")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<FoodResponse> getFood(@PathVariable Long id) {
-        return ApiResponse.<FoodResponse>builder()
-                .result(foodService.getFoodById(id))
-                .build();
-    }
+	@GetMapping("/{id}")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<FoodResponse> getFood(@PathVariable Long id) {
+		return ApiResponse.<FoodResponse>builder().result(foodService.getFoodById(id)).build();
+	}
 }

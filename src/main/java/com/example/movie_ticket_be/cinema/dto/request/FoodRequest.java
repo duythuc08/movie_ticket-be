@@ -14,13 +14,13 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FoodRequest {
-    String name;
-    @Lob
-    String description;
-    BigDecimal price;
-    String imageUrl;
-    Boolean isCombo;
-    Integer stockQuantity;
-    FoodType foodType;
-    FoodStatus foodStatus;
+	String name;
+	@Lob
+	String description;
+	BigDecimal price;
+	String imageUrl;
+	Boolean isCombo;
+	Integer stockQuantity;
+	FoodType foodType;
+	FoodStatus foodStatus;
 }

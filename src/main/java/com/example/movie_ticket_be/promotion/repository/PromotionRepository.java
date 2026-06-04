@@ -11,13 +11,13 @@ import java.util.Optional;
 
 public interface PromotionRepository extends JpaRepository<Promotion, Long>, JpaSpecificationExecutor<Promotion> {
 
-    Optional<Promotion> findByPromotionId(Long promotionId);
+	Optional<Promotion> findByPromotionId(Long promotionId);
 
-    Optional<Promotion> findByCode(String code);
+	Optional<Promotion> findByCode(String code);
 
-    boolean existsByCode(String code);
+	boolean existsByCode(String code);
 
-    List<Promotion> findByStatusAndEndTimeBefore(PromotionStatus status, LocalDateTime now);
+	List<Promotion> findByStatusAndEndTimeBefore(PromotionStatus status, LocalDateTime now);
 
-    List<Promotion> findByStatus(PromotionStatus status);
+	List<Promotion> findByStatus(PromotionStatus status);
 }

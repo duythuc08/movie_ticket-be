@@ -16,7 +16,7 @@ import java.util.Date;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class InvalidatedToken extends BaseEntity {
-    @Id
-    String id;
-    Date expiryTime;
+	@Id
+	String id;
+	Date expiryTime;
 }

@@ -25,70 +25,63 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminPromotionController {
 
-    AdminPromotionService adminPromotionService;
+	AdminPromotionService adminPromotionService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminPromotionResponse> createPromotion(@RequestBody PromotionRequest request) {
-        return ApiResponse.<AdminPromotionResponse>builder()
-                .result(adminPromotionService.createPromotion(request))
-                .message("Tạo khuyến mãi thành công")
-                .build();
-    }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminPromotionResponse> createPromotion(@RequestBody PromotionRequest request) {
+		return ApiResponse.<AdminPromotionResponse>builder().result(adminPromotionService.createPromotion(request))
+				.message("Tạo khuyến mãi thành công").build();
+	}
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<AdminPromotionResponse>> getAllPromotions(
-            @Parameter(name = "filter", required = false) @Filter Specification<Promotion> spec,
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<AdminPromotionResponse>>builder()
-                .result(adminPromotionService.getAllPromotions(spec, pageable))
-                .build();
-    }
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Page<AdminPromotionResponse>> getAllPromotions(
+			@Parameter(name = "filter", required = false) @Filter Specification<Promotion> spec,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<AdminPromotionResponse>>builder()
+				.result(adminPromotionService.getAllPromotions(spec, pageable)).build();
+	}
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminPromotionResponse> getPromotion(@PathVariable Long id) {
-        return ApiResponse.<AdminPromotionResponse>builder()
-                .result(adminPromotionService.getPromotion(id))
-                .build();
-    }
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminPromotionResponse> getPromotion(@PathVariable Long id) {
+		return ApiResponse.<AdminPromotionResponse>builder().result(adminPromotionService.getPromotion(id)).build();
+	}
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminPromotionResponse> updatePromotion(@PathVariable Long id,
-            @RequestBody PromotionRequest request) {
-        return ApiResponse.<AdminPromotionResponse>builder()
-                .result(adminPromotionService.updatePromotion(id, request))
-                .message("Cập nhật khuyến mãi thành công")
-                .build();
-    }
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminPromotionResponse> updatePromotion(@PathVariable Long id,
+			@RequestBody PromotionRequest request) {
+		return ApiResponse.<AdminPromotionResponse>builder().result(adminPromotionService.updatePromotion(id, request))
+				.message("Cập nhật khuyến mãi thành công").build();
+	}
 
-    @PutMapping("/{id}/submit")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> submit(@PathVariable Long id) {
-        adminPromotionService.submit(id);
-        return ApiResponse.<Void>builder().message("Gửi duyệt thành công").build();
-    }
+	@PutMapping("/{id}/submit")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> submit(@PathVariable Long id) {
+		adminPromotionService.submit(id);
+		return ApiResponse.<Void>builder().message("Gửi duyệt thành công").build();
+	}
 
-    @PutMapping("/{id}/approve")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> approve(@PathVariable Long id) {
-        adminPromotionService.approve(id);
-        return ApiResponse.<Void>builder().message("Phê duyệt và đăng khuyến mãi thành công").build();
-    }
+	@PutMapping("/{id}/approve")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> approve(@PathVariable Long id) {
+		adminPromotionService.approve(id);
+		return ApiResponse.<Void>builder().message("Phê duyệt và đăng khuyến mãi thành công").build();
+	}
 
-    @PutMapping("/{id}/pause")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> pause(@PathVariable Long id) {
-        adminPromotionService.pause(id);
-        return ApiResponse.<Void>builder().message("Tạm dừng khuyến mãi thành công").build();
-    }
+	@PutMapping("/{id}/pause")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> pause(@PathVariable Long id) {
+		adminPromotionService.pause(id);
+		return ApiResponse.<Void>builder().message("Tạm dừng khuyến mãi thành công").build();
+	}
 
-    @PutMapping("/{id}/resume")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> resume(@PathVariable Long id) {
-        adminPromotionService.resume(id);
-        return ApiResponse.<Void>builder().message("Kích hoạt lại khuyến mãi thành công").build();
-    }
+	@PutMapping("/{id}/resume")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> resume(@PathVariable Long id) {
+		adminPromotionService.resume(id);
+		return ApiResponse.<Void>builder().message("Kích hoạt lại khuyến mãi thành công").build();
+	}
 }

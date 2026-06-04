@@ -8,9 +8,9 @@ import java.util.Optional;
 
 public interface UserPromotionRepository extends JpaRepository<UserPromotion, Long> {
 
-    List<UserPromotion> findByUsers_UserIdAndIsUsedFalse(String userId);
+	List<UserPromotion> findByUsers_UserIdAndIsUsedFalse(String userId);
 
-    boolean existsByUsers_UserIdAndPromotion_PromotionId(String userId, Long promotionId);
+	boolean existsByUsers_UserIdAndPromotion_PromotionId(String userId, Long promotionId);
 
-    Optional<UserPromotion> findByUsers_UserIdAndPromotion_PromotionIdAndIsUsedFalse(String userId, Long promotionId);
+	Optional<UserPromotion> findByUsers_UserIdAndPromotion_PromotionIdAndIsUsedFalse(String userId, Long promotionId);
 }

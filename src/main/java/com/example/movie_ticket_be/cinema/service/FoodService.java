@@ -20,20 +20,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class FoodService {
-    FoodRepository foodRepository;
-    FoodMapper foodMapper;
+	FoodRepository foodRepository;
+	FoodMapper foodMapper;
 
-    public List<FoodResponse> getAllFoodsByCinema(Long cinemaId) {
-        return foodRepository.findByCinema_CinemaIdAndEntityStatusAndFoodStatus(
-                        cinemaId, EntityStatus.ACTIVE, FoodStatus.IN_STOCK)
-                .stream()
-                .map(foodMapper::toFoodResponse)
-                .toList();
-    }
+	public List<FoodResponse> getAllFoodsByCinema(Long cinemaId) {
+		return foodRepository
+				.findByCinema_CinemaIdAndEntityStatusAndFoodStatus(cinemaId, EntityStatus.ACTIVE, FoodStatus.IN_STOCK)
+				.stream().map(foodMapper::toFoodResponse).toList();
+	}
 
-    public FoodResponse getFoodById(Long foodId) {
-        return foodMapper.toFoodResponse(
-                foodRepository.findByFoodId(foodId)
-                        .orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND)));
-    }
+	public FoodResponse getFoodById(Long foodId) {
+		return foodMapper.toFoodResponse(
+				foodRepository.findByFoodId(foodId).orElseThrow(() -> new AppException(ErrorCode.FOOD_NOT_FOUND)));
+	}
 }

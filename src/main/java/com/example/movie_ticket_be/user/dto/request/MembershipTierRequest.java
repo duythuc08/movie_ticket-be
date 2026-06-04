@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MembershipTierRequest {
-    String name;
-    String description;
-    Long pointsRequired;
-    BigDecimal discountPercent;
-    BigDecimal birthdayDiscount;
+	String name;
+	String description;
+	Long pointsRequired;
+	BigDecimal discountPercent;
+	BigDecimal birthdayDiscount;
 }

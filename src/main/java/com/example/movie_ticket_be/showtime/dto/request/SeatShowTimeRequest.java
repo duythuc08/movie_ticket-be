@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatShowTimeRequest {
-    LocalDateTime lockedUntil;
-    String userId;
-    Long seatId;
-    Long showTimeId;
-    SeatShowTimeStatus seatShowTimeStatus;
+	LocalDateTime lockedUntil;
+	String userId;
+	Long seatId;
+	Long showTimeId;
+	SeatShowTimeStatus seatShowTimeStatus;
 }

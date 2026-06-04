@@ -14,16 +14,16 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FoodResponse {
-    Long foodId;
-    Long cinemaId;
-    String cinemaName;
-    String name;
-    String description;
-    BigDecimal price;
-    String imageUrl;
-    Boolean isCombo;
-    Integer stockQuantity;
-    FoodType foodType;
-    FoodStatus foodStatus;
-    EntityStatus entityStatus;
+	Long foodId;
+	Long cinemaId;
+	String cinemaName;
+	String name;
+	String description;
+	BigDecimal price;
+	String imageUrl;
+	Boolean isCombo;
+	Integer stockQuantity;
+	FoodType foodType;
+	FoodStatus foodStatus;
+	EntityStatus entityStatus;
 }

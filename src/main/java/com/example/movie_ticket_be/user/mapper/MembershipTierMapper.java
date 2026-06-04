@@ -6,5 +6,5 @@ import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring")
 public interface MembershipTierMapper {
-    MembershipTierResponse toMembershipTierResponse(MembershipTier membershipTier);
+	MembershipTierResponse toMembershipTierResponse(MembershipTier membershipTier);
 }

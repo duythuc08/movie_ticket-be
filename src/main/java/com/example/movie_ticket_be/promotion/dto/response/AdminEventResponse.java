@@ -19,14 +19,14 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminEventResponse {
-    Long eventId;
-    String title;
-    String description;
-    String posterUrl;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    EventType eventType;
-    EventStatus eventStatus;
-    EntityStatus entityStatus;
-    Long movieId;
+	Long eventId;
+	String title;
+	String description;
+	String posterUrl;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	EventType eventType;
+	EventStatus eventStatus;
+	EntityStatus entityStatus;
+	Long movieId;
 }

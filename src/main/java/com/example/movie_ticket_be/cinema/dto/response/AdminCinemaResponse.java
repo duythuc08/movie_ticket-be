@@ -15,24 +15,24 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminCinemaResponse {
-    Long cinemaId;
-    String name;
-    String address;
-    String phoneNumber;
-    String email;
-    CinemaStatus cinemaStatus;
-    List<AdminRoomResponse> rooms;
+	Long cinemaId;
+	String name;
+	String address;
+	String phoneNumber;
+	String email;
+	CinemaStatus cinemaStatus;
+	List<AdminRoomResponse> rooms;
 
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    @FieldDefaults(level = AccessLevel.PRIVATE)
-    public static class AdminRoomResponse {
-        Long roomId;
-        String name;
-        Integer capacity;
-        RoomType roomType;
-        RoomStatus roomStatus;
-    }
+	@Data
+	@NoArgsConstructor
+	@AllArgsConstructor
+	@Builder
+	@FieldDefaults(level = AccessLevel.PRIVATE)
+	public static class AdminRoomResponse {
+		Long roomId;
+		String name;
+		Integer capacity;
+		RoomType roomType;
+		RoomStatus roomStatus;
+	}
 }

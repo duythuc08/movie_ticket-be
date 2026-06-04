@@ -25,34 +25,31 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminGenreService {
-    GenreRepository genreRepository;
-    GenreMapper genreMapper;
+	GenreRepository genreRepository;
+	GenreMapper genreMapper;
 
-    public Page<GenreResponse> getAllGenre(Specification<Genre> spec, Pageable pageable) {
-        return genreRepository.findAll(spec, pageable)
-                .map(genreMapper::toGenreRespone);
-    }
+	public Page<GenreResponse> getAllGenre(Specification<Genre> spec, Pageable pageable) {
+		return genreRepository.findAll(spec, pageable).map(genreMapper::toGenreRespone);
+	}
 
-    @Transactional
-    public GenreResponse createGenre(GenreCreationRequest request) {
-        if (genreRepository.existsByName(request.getName())) {
-            throw new AppException(ErrorCode.GENRE_EXISTED);
-        }
-        Genre genre = genreMapper.toGenre(request);
-        return genreMapper.toGenreRespone(genreRepository.save(genre));
-    }
-    
-    public GenreResponse getGenreDetail(long id){
-        Genre genre = genreRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND));
-        return genreMapper.toGenreRespone(genre);
-    }
+	@Transactional
+	public GenreResponse createGenre(GenreCreationRequest request) {
+		if (genreRepository.existsByName(request.getName())) {
+			throw new AppException(ErrorCode.GENRE_EXISTED);
+		}
+		Genre genre = genreMapper.toGenre(request);
+		return genreMapper.toGenreRespone(genreRepository.save(genre));
+	}
 
-    @Transactional
-    public void changeStatus(long id, EntityStatus entityStatus) {
-        Genre genre = genreRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND));
-        genre.setEntityStatus(entityStatus);
-        genreRepository.save(genre);
-    }
+	public GenreResponse getGenreDetail(long id) {
+		Genre genre = genreRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND));
+		return genreMapper.toGenreRespone(genre);
+	}
+
+	@Transactional
+	public void changeStatus(long id, EntityStatus entityStatus) {
+		Genre genre = genreRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND));
+		genre.setEntityStatus(entityStatus);
+		genreRepository.save(genre);
+	}
 }

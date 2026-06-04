@@ -9,6 +9,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface SeatMapper {
 
-    @Mapping(source = "rooms.roomId", target = "roomId")
-    SeatResponse toSeatResponse(Seats seats);
+	@Mapping(source = "rooms.roomId", target = "roomId")
+	SeatResponse toSeatResponse(Seats seats);
 }

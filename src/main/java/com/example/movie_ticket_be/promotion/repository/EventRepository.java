@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.example.movie_ticket_be.promotion.entity.Event;
 
-public interface EventRepository extends JpaRepository<Event, Long>,JpaSpecificationExecutor<Event> {
-    boolean existsByEventId(Long eventId);
+public interface EventRepository extends JpaRepository<Event, Long>, JpaSpecificationExecutor<Event> {
+	boolean existsByEventId(Long eventId);
 
-    Optional<Event> findByEventId(Long id);
+	Optional<Event> findByEventId(Long id);
 }

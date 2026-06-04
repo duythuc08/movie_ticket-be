@@ -12,10 +12,10 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminCinemaUpdateRequest {
-    String name;
-    String address;
-    String phoneNumber;
-    String email;
-    CinemaStatus cinemaStatus;
-    List<AdminRoomRequest> rooms;
+	String name;
+	String address;
+	String phoneNumber;
+	String email;
+	CinemaStatus cinemaStatus;
+	List<AdminRoomRequest> rooms;
 }

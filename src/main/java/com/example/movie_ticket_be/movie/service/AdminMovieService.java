@@ -37,120 +37,111 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminMovieService {
-        MovieRepository movieRepository;
-        MovieMapper movieMapper;
-        GenreRepository genreRepository;
-        PersonRepository personRepository;
+	MovieRepository movieRepository;
+	MovieMapper movieMapper;
+	GenreRepository genreRepository;
+	PersonRepository personRepository;
 
-        @Transactional
-        public MovieResponse createAdminMovie(MovieCreationRequest request) {
-                if (movieRepository.existsByTitle(request.getTitle())) {
-                        throw new AppException(ErrorCode.MOVIE_EXISTED);
-                }
+	@Transactional
+	public MovieResponse createAdminMovie(MovieCreationRequest request) {
+		if (movieRepository.existsByTitle(request.getTitle())) {
+			throw new AppException(ErrorCode.MOVIE_EXISTED);
+		}
 
-                Movies movie = movieMapper.toMovies(request);
+		Movies movie = movieMapper.toMovies(request);
 
-                movie.setMovieStatus(determineInitialStatus(movie.getReleaseDate()));
+		movie.setMovieStatus(determineInitialStatus(movie.getReleaseDate()));
 
-                Set<Genre> genres = request.getGenreName().stream()
-                                .map(name -> genreRepository.findByName(name)
-                                                .orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND)))
-                                .collect(Collectors.toSet());
-                movie.setGenre(genres);
+		Set<Genre> genres = request.getGenreName().stream().map(
+				name -> genreRepository.findByName(name).orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND)))
+				.collect(Collectors.toSet());
+		movie.setGenre(genres);
 
-                Set<Person> castPersons = request.getCastIds().stream()
-                                .map(id -> personRepository.findById(id)
-                                                .orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
-                                .collect(Collectors.toSet());
-                movie.setCastPersons(castPersons);
+		Set<Person> castPersons = request.getCastIds().stream().map(
+				id -> personRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
+				.collect(Collectors.toSet());
+		movie.setCastPersons(castPersons);
 
-                Set<Person> directors = request.getDirectorIds().stream()
-                                .map(id -> personRepository.findById(id)
-                                                .orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
-                                .collect(Collectors.toSet());
-                movie.setDirectors(directors);
-                return movieMapper.toMovieResponse(movieRepository.save(movie));
-        }
+		Set<Person> directors = request.getDirectorIds().stream().map(
+				id -> personRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
+				.collect(Collectors.toSet());
+		movie.setDirectors(directors);
+		return movieMapper.toMovieResponse(movieRepository.save(movie));
+	}
 
-        public Page<AdminMovieResponse> getAdminMovies(Specification<Movies> spec, Pageable pageable) {
-                return movieRepository.findAll(spec, pageable)
-                                .map(movieMapper::toAdminMovieResponse);
-        }
+	public Page<AdminMovieResponse> getAdminMovies(Specification<Movies> spec, Pageable pageable) {
+		return movieRepository.findAll(spec, pageable).map(movieMapper::toAdminMovieResponse);
+	}
 
-        public AdminMovieResponse getAdminMovieDetail(long id) {
-                Movies movie = movieRepository.findById(id)
-                                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-                return movieMapper.toAdminMovieResponse(movie);
-        }
+	public AdminMovieResponse getAdminMovieDetail(long id) {
+		Movies movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+		return movieMapper.toAdminMovieResponse(movie);
+	}
 
-        @Transactional
-        public AdminMovieResponse updateAdminMovie(long id, MovieUpdateRequest request) {
-                Movies movie = movieRepository.findById(id)
-                                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+	@Transactional
+	public AdminMovieResponse updateAdminMovie(long id, MovieUpdateRequest request) {
+		Movies movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
 
-                movieMapper.updateMovies(movie, request);
+		movieMapper.updateMovies(movie, request);
 
-                if (request.getReleaseDate() != null && movie.getMovieStatus() != MovieStatus.STOPPED) {
-                        movie.setMovieStatus(determineInitialStatus(request.getReleaseDate()));
-                }
+		if (request.getReleaseDate() != null && movie.getMovieStatus() != MovieStatus.STOPPED) {
+			movie.setMovieStatus(determineInitialStatus(request.getReleaseDate()));
+		}
 
-                if (request.getGenreName() != null) {
-                        Set<Genre> genres = request.getGenreName().stream()
-                                        .map(name -> genreRepository.findByName(name)
-                                                        .orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND)))
-                                        .collect(Collectors.toSet());
-                        movie.setGenre(genres);
-                }
+		if (request.getGenreName() != null) {
+			Set<Genre> genres = request.getGenreName().stream()
+					.map(name -> genreRepository.findByName(name)
+							.orElseThrow(() -> new AppException(ErrorCode.GENRE_NOT_FOUND)))
+					.collect(Collectors.toSet());
+			movie.setGenre(genres);
+		}
 
-                if (request.getCastIds() != null) {
-                        Set<Person> castPersons = request.getCastIds().stream()
-                                        .map(personId -> personRepository.findById(personId)
-                                                        .orElseThrow(() -> new AppException(
-                                                                        ErrorCode.PERSON_NOT_FOUND)))
-                                        .collect(Collectors.toSet());
-                        movie.setCastPersons(castPersons);
-                }
+		if (request.getCastIds() != null) {
+			Set<Person> castPersons = request.getCastIds().stream()
+					.map(personId -> personRepository.findById(personId)
+							.orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
+					.collect(Collectors.toSet());
+			movie.setCastPersons(castPersons);
+		}
 
-                if (request.getDirectorIds() != null) {
-                        Set<Person> directors = request.getDirectorIds().stream()
-                                        .map(personId -> personRepository.findById(personId)
-                                                        .orElseThrow(() -> new AppException(
-                                                                        ErrorCode.PERSON_NOT_FOUND)))
-                                        .collect(Collectors.toSet());
-                        movie.setDirectors(directors);
-                }
-                return movieMapper.toAdminMovieResponse(movieRepository.save(movie));
-        }
+		if (request.getDirectorIds() != null) {
+			Set<Person> directors = request.getDirectorIds().stream()
+					.map(personId -> personRepository.findById(personId)
+							.orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)))
+					.collect(Collectors.toSet());
+			movie.setDirectors(directors);
+		}
+		return movieMapper.toAdminMovieResponse(movieRepository.save(movie));
+	}
 
-        @Transactional
-        public void changeStatus(long id, EntityStatus entityStatus) {
-                Movies movie = movieRepository.findById(id)
-                                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-                movie.setEntityStatus(entityStatus);
-                movieRepository.save(movie);
-        }
+	@Transactional
+	public void changeStatus(long id, EntityStatus entityStatus) {
+		Movies movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+		movie.setEntityStatus(entityStatus);
+		movieRepository.save(movie);
+	}
 
-        private MovieStatus determineInitialStatus(LocalDateTime releaseDate) {
-                if (releaseDate == null)
-                        return MovieStatus.COMING_SOON;
-                return releaseDate.isAfter(LocalDateTime.now()) ? MovieStatus.COMING_SOON : MovieStatus.NOW_SHOWING;
-        }
+	private MovieStatus determineInitialStatus(LocalDateTime releaseDate) {
+		if (releaseDate == null)
+			return MovieStatus.COMING_SOON;
+		return releaseDate.isAfter(LocalDateTime.now()) ? MovieStatus.COMING_SOON : MovieStatus.NOW_SHOWING;
+	}
 
-        public void updateMovieStatuses() {
-                LocalDateTime now = LocalDateTime.now();
+	public void updateMovieStatuses() {
+		LocalDateTime now = LocalDateTime.now();
 
-                log.info("Bắt đầu cập nhật trạng thái phim tự động...");
+		log.info("Bắt đầu cập nhật trạng thái phim tự động...");
 
-                List<Movies> toNowShowing = movieRepository.findAllByMovieStatusAndReleaseDateBefore(
-                                MovieStatus.COMING_SOON, now);
-                toNowShowing.forEach(m -> m.setMovieStatus(MovieStatus.NOW_SHOWING));
-                movieRepository.saveAll(toNowShowing);
+		List<Movies> toNowShowing = movieRepository.findAllByMovieStatusAndReleaseDateBefore(MovieStatus.COMING_SOON,
+				now);
+		toNowShowing.forEach(m -> m.setMovieStatus(MovieStatus.NOW_SHOWING));
+		movieRepository.saveAll(toNowShowing);
 
-                List<Movies> toStopped = movieRepository.findNowShowingWithNoFutureShowtimes(now);
-                toStopped.forEach(m -> m.setMovieStatus(MovieStatus.STOPPED));
-                movieRepository.saveAll(toStopped);
+		List<Movies> toStopped = movieRepository.findNowShowingWithNoFutureShowtimes(now);
+		toStopped.forEach(m -> m.setMovieStatus(MovieStatus.STOPPED));
+		movieRepository.saveAll(toStopped);
 
-                log.info("Đã cập nhật {} phim sang Đang chiếu và {} phim sang Dừng chiếu.",
-                                toNowShowing.size(), toStopped.size());
-        }
+		log.info("Đã cập nhật {} phim sang Đang chiếu và {} phim sang Dừng chiếu.", toNowShowing.size(),
+				toStopped.size());
+	}
 }

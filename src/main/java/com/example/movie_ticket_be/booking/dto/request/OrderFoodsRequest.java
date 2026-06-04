@@ -9,6 +9,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderFoodsRequest {
-    Long foodId;
-    Integer quantity;
+	Long foodId;
+	Integer quantity;
 }

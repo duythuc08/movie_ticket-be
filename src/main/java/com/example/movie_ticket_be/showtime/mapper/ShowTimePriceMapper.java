@@ -8,9 +8,9 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface ShowTimePriceMapper {
-    ShowTimePrice toShowTimePrice(ShowTimePriceRequest request);
+	ShowTimePrice toShowTimePrice(ShowTimePriceRequest request);
 
-    @Mapping(source = "showTimePriceId",        target = "seatShowTimePriceId")
-    @Mapping(source = "showtimes.showTimeId",   target = "showTimeId")
-    ShowTimePriceResponse toShowTimePriceResponse(ShowTimePrice showTimePrice);
+	@Mapping(source = "showTimePriceId", target = "seatShowTimePriceId")
+	@Mapping(source = "showtimes.showTimeId", target = "showTimeId")
+	ShowTimePriceResponse toShowTimePriceResponse(ShowTimePrice showTimePrice);
 }

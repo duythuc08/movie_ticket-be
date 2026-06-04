@@ -12,8 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimeRequest {
-    List<LocalDateTime> startTimes;
-    Long movieId;
-    Long roomId;
-    List<ShowTimePriceRequest> prices;
+	List<LocalDateTime> startTimes;
+	Long movieId;
+	Long roomId;
+	List<ShowTimePriceRequest> prices;
 }

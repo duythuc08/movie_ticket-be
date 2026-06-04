@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ShowTimeScheduler {
 
-    private final ShowTimeService showTimeService;
+	private final ShowTimeService showTimeService;
 
-    @Scheduled(fixedDelay = 60000)
-    public void autoUpdateShowTimeStatus() {
-        log.info("Running autoUpdateShowTimeStatus...");
-        showTimeService.autoUpdateShowTimeStatus();
-    }
+	@Scheduled(fixedDelay = 60000)
+	public void autoUpdateShowTimeStatus() {
+		log.info("Running autoUpdateShowTimeStatus...");
+		showTimeService.autoUpdateShowTimeStatus();
+	}
 }

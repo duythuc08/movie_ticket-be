@@ -25,38 +25,31 @@ import org.springframework.web.bind.annotation.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
 
-    UserService userService;
+	UserService userService;
 
-    @GetMapping("/myInfo")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<UserClientRespone> getMyInfo() {
-        return ApiResponse.<UserClientRespone>builder()
-                .result(userService.getMyInfo())
-                .build();
-    }
+	@GetMapping("/myInfo")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<UserClientRespone> getMyInfo() {
+		return ApiResponse.<UserClientRespone>builder().result(userService.getMyInfo()).build();
+	}
 
-    @GetMapping("/myMenu")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<UserMenuRespone> getUserMenu() {
-        return ApiResponse.<UserMenuRespone>builder()
-                .result(userService.getUserMenu())
-                .build();
-    }
+	@GetMapping("/myMenu")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<UserMenuRespone> getUserMenu() {
+		return ApiResponse.<UserMenuRespone>builder().result(userService.getUserMenu()).build();
+	}
 
-    @PutMapping("/myInfo")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<UserClientRespone> updateMyInfo(@RequestBody UserUpdateRequest request) {
-        return ApiResponse.<UserClientRespone>builder()
-                .result(userService.updateMyInfo(request))
-                .build();
-    }
+	@PutMapping("/myInfo")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<UserClientRespone> updateMyInfo(@RequestBody UserUpdateRequest request) {
+		return ApiResponse.<UserClientRespone>builder().result(userService.updateMyInfo(request)).build();
+	}
 
-    @GetMapping("/myLoyaltyHistory")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<Page<LoyaltyPointsHistoryResponse>> getMyLoyaltyHistory(
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<LoyaltyPointsHistoryResponse>>builder()
-                .result(userService.getMyLoyaltyHistory(pageable))
-                .build();
-    }
+	@GetMapping("/myLoyaltyHistory")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<Page<LoyaltyPointsHistoryResponse>> getMyLoyaltyHistory(
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<LoyaltyPointsHistoryResponse>>builder()
+				.result(userService.getMyLoyaltyHistory(pageable)).build();
+	}
 }

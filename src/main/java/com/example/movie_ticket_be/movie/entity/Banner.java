@@ -16,25 +16,25 @@ import lombok.experimental.FieldDefaults;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Banner extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    private String imageUrl;
-    private String title;
-    private String description;
-    private String linkUrl;
-    private Integer priority;
-    private Boolean active;
+	private String imageUrl;
+	private String title;
+	private String description;
+	private String linkUrl;
+	private Integer priority;
+	private Boolean active;
 
-    @Enumerated(EnumType.STRING)
-    BannerType bannerType;
+	@Enumerated(EnumType.STRING)
+	BannerType bannerType;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "movie_id")
-    private Movies movies;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "movie_id")
+	private Movies movies;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "event_id")
-    private Event event;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "event_id")
+	private Event event;
 }

@@ -5,7 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface OrderFoodRepository extends JpaRepository<OrderFoods,Long> {
-    void deleteByOrders_OrderId(Long ordersOrderId);
-    List<OrderFoods> findByOrders_OrderId(Long orderId);
+public interface OrderFoodRepository extends JpaRepository<OrderFoods, Long> {
+	void deleteByOrders_OrderId(Long ordersOrderId);
+	List<OrderFoods> findByOrders_OrderId(Long orderId);
 }

@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminSeatUpdate {
-    String seatRow;
-    int seatNumber;
-    SeatType seatTypes;
+	String seatRow;
+	int seatNumber;
+	SeatType seatTypes;
 }

@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.cinema.dto.response;
 
-
 import com.example.movie_ticket_be.cinema.entity.Cinemas;
 import com.example.movie_ticket_be.cinema.enums.RoomStatus;
 import com.example.movie_ticket_be.cinema.enums.RoomType;
@@ -18,19 +17,19 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoomResponse {
-    Long roomId;
-    String name;
-    Integer capacity;
+	Long roomId;
+	String name;
+	Integer capacity;
 
-    @ManyToOne
-    @JoinColumn(name = "cinema_id")
-    Cinemas cinemas;
+	@ManyToOne
+	@JoinColumn(name = "cinema_id")
+	Cinemas cinemas;
 
-    @Enumerated(EnumType.STRING)
-    RoomType roomType;
+	@Enumerated(EnumType.STRING)
+	RoomType roomType;
 
-    @Enumerated(EnumType.STRING)
-    RoomStatus roomStatus;
+	@Enumerated(EnumType.STRING)
+	RoomStatus roomStatus;
 
-    EntityStatus entityStatus;
+	EntityStatus entityStatus;
 }

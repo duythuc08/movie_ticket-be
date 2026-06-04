@@ -7,8 +7,6 @@ import lombok.experimental.SuperBuilder;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
 import lombok.experimental.FieldDefaults;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "loyalty_points_history")
 @Getter
@@ -18,24 +16,24 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class LoyaltyPointsHistory extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long historyId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long historyId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    Users user;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "user_id")
+	Users user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
-    Orders order;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "order_id")
+	Orders order;
 
-    int pointsChange;
+	int pointsChange;
 
-    String description;
+	String description;
 
-    int oldBalance;
+	int oldBalance;
 
-    int newBalance;
+	int newBalance;
 
 }

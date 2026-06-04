@@ -9,14 +9,14 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 import java.util.Optional;
 
-public interface CinemaRepository extends JpaRepository<Cinemas,Long>,JpaSpecificationExecutor<Cinemas> {
-    boolean existsByName(String name);
+public interface CinemaRepository extends JpaRepository<Cinemas, Long>, JpaSpecificationExecutor<Cinemas> {
+	boolean existsByName(String name);
 
-    boolean existsByNameAndCinemaIdNot(String name, Long cinemaId);
+	boolean existsByNameAndCinemaIdNot(String name, Long cinemaId);
 
-    List<Cinemas> findByCinemaStatus(CinemaStatus status);
+	List<Cinemas> findByCinemaStatus(CinemaStatus status);
 
-    Optional<Cinemas> findByCinemaId(Long cinemaId);
-    List<Cinemas> findByNameContainingIgnoreCase(String name);
-    List<Cinemas> findByEntityStatusAndCinemaStatus(EntityStatus entityStatus, CinemaStatus cinemaStatus);
+	Optional<Cinemas> findByCinemaId(Long cinemaId);
+	List<Cinemas> findByNameContainingIgnoreCase(String name);
+	List<Cinemas> findByEntityStatusAndCinemaStatus(EntityStatus entityStatus, CinemaStatus cinemaStatus);
 }

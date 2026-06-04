@@ -7,5 +7,5 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface LoyaltyPointsHistoryRepository extends JpaRepository<LoyaltyPointsHistory, Long> {
-    Page<LoyaltyPointsHistory> findByUser_UserId(String userId, Pageable pageable);
+	Page<LoyaltyPointsHistory> findByUser_UserId(String userId, Pageable pageable);
 }

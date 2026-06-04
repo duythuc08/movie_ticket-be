@@ -9,7 +9,6 @@ import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 @Entity
@@ -20,42 +19,42 @@ import java.util.Set;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Users extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String userId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	String userId;
 
-    @Column(unique = true)
-    String username;
-    String password;
-    String firstname;
-    String lastname;
-    String phoneNumber;
-    LocalDate birthday;
+	@Column(unique = true)
+	String username;
+	String password;
+	String firstname;
+	String lastname;
+	String phoneNumber;
+	LocalDate birthday;
 
-    @OneToMany(mappedBy = "users")
-    Set<UserPromotion> userPromotions;
+	@OneToMany(mappedBy = "users")
+	Set<UserPromotion> userPromotions;
 
-    @ManyToMany
-    Set<Role> role;
+	@ManyToMany
+	Set<Role> role;
 
-    @Enumerated(EnumType.STRING)
-    UserStatus userStatus;
+	@Enumerated(EnumType.STRING)
+	UserStatus userStatus;
 
-    boolean enabled = false;
+	boolean enabled = false;
 
-    @Column(name = "loyalty_points")
-    int loyaltyPoints = 0;
+	@Column(name = "loyalty_points")
+	int loyaltyPoints = 0;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "tier_id")
-    MembershipTier membershipTier;
+	@ManyToOne(fetch = FetchType.EAGER)
+	@JoinColumn(name = "tier_id")
+	MembershipTier membershipTier;
 
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (this.userStatus == null) {
-            this.userStatus = UserStatus.UNVERIFIED;
-        }
-    }
+	@PrePersist
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		if (this.userStatus == null) {
+			this.userStatus = UserStatus.UNVERIFIED;
+		}
+	}
 }

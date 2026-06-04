@@ -16,22 +16,22 @@ import lombok.experimental.FieldDefaults;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Reviews extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long reviewId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long reviewId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    Users users;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	Users users;
 
-    @ManyToOne
-    @JoinColumn(name = "movie_id")
-    Movies movies;
+	@ManyToOne
+	@JoinColumn(name = "movie_id")
+	Movies movies;
 
-    Integer rating;
-    String comment;
-    Integer likeCount;
+	Integer rating;
+	String comment;
+	Integer likeCount;
 
-    @Enumerated(EnumType.STRING)
-    ReviewStatus reviewStatus;
+	@Enumerated(EnumType.STRING)
+	ReviewStatus reviewStatus;
 }

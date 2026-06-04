@@ -15,13 +15,13 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserUpdateRequest {
-    @Size(min = 8, message = "INVALID_PASSWORD")
-    String password;
+	@Size(min = 8, message = "INVALID_PASSWORD")
+	String password;
 
-    String firstname;
-    String lastname;
-    String phoneNumber;
-    LocalDate birthday;
+	String firstname;
+	String lastname;
+	String phoneNumber;
+	LocalDate birthday;
 
-    List<String> roles;
+	List<String> roles;
 }

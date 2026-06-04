@@ -18,16 +18,15 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminLoyaltyPointsHistoryService {
 
-    LoyaltyPointsHistoryRepository loyaltyPointsHistoryRepository;
-    LoyaltyPointsHistoryMapper loyaltyPointsHistoryMapper;
-    UserRepository userRepository;
+	LoyaltyPointsHistoryRepository loyaltyPointsHistoryRepository;
+	LoyaltyPointsHistoryMapper loyaltyPointsHistoryMapper;
+	UserRepository userRepository;
 
-    public Page<LoyaltyPointsHistoryResponse> getHistoriesByUserId(String userId, Pageable pageable) {
-        if (!userRepository.existsById(userId)) {
-            throw new AppException(ErrorCode.USER_NOT_FOUND);
-        }
-        return loyaltyPointsHistoryRepository
-                .findByUser_UserId(userId, pageable)
-                .map(loyaltyPointsHistoryMapper::toResponse);
-    }
+	public Page<LoyaltyPointsHistoryResponse> getHistoriesByUserId(String userId, Pageable pageable) {
+		if (!userRepository.existsById(userId)) {
+			throw new AppException(ErrorCode.USER_NOT_FOUND);
+		}
+		return loyaltyPointsHistoryRepository.findByUser_UserId(userId, pageable)
+				.map(loyaltyPointsHistoryMapper::toResponse);
+	}
 }

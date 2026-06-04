@@ -33,56 +33,48 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminEventController {
-    AdminEventService adminEventService;
+	AdminEventService adminEventService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminEventResponse> createEvent(@RequestBody EventRequest request) {
-        return ApiResponse.<AdminEventResponse>builder()
-                .result(adminEventService.createEvent(request))
-                .message("Tạo sự kiện thành công")
-                .build();
-    }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminEventResponse> createEvent(@RequestBody EventRequest request) {
+		return ApiResponse.<AdminEventResponse>builder().result(adminEventService.createEvent(request))
+				.message("Tạo sự kiện thành công").build();
+	}
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<AdminEventResponse>> getAllEvents(
-            @Parameter(name = "filter", required = false) @Filter Specification<Event> spec,
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<AdminEventResponse>>builder()
-                .result(adminEventService.getAllEvents(spec, pageable))
-                .build();
-    }
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Page<AdminEventResponse>> getAllEvents(
+			@Parameter(name = "filter", required = false) @Filter Specification<Event> spec,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<AdminEventResponse>>builder().result(adminEventService.getAllEvents(spec, pageable))
+				.build();
+	}
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminEventResponse> getEventById(@PathVariable long id) {
-        return ApiResponse.<AdminEventResponse>builder()
-                .result(adminEventService.getEventById(id))
-                .build();
-    }
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminEventResponse> getEventById(@PathVariable long id) {
+		return ApiResponse.<AdminEventResponse>builder().result(adminEventService.getEventById(id)).build();
+	}
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<AdminEventResponse> updateEvent(@PathVariable long id,
-            @RequestBody EventRequest request) {
-        return ApiResponse.<AdminEventResponse>builder()
-                .result(adminEventService.updateEvent(id, request))
-                .message("Cập nhật sự kiện thành công")
-                .build();
-    }
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminEventResponse> updateEvent(@PathVariable long id, @RequestBody EventRequest request) {
+		return ApiResponse.<AdminEventResponse>builder().result(adminEventService.updateEvent(id, request))
+				.message("Cập nhật sự kiện thành công").build();
+	}
 
-    @PutMapping("/{id}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> activate(@PathVariable long id) {
-        adminEventService.changeStatus(id, EntityStatus.ACTIVE);
-        return ApiResponse.<Void>builder().message("Kích hoạt sự kiện thành công").build();
-    }
+	@PutMapping("/{id}/activate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> activate(@PathVariable long id) {
+		adminEventService.changeStatus(id, EntityStatus.ACTIVE);
+		return ApiResponse.<Void>builder().message("Kích hoạt sự kiện thành công").build();
+	}
 
-    @PutMapping("/{id}/inactivate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> inactivate(@PathVariable long id) {
-        adminEventService.changeStatus(id, EntityStatus.INACTIVE);
-        return ApiResponse.<Void>builder().message("Vô hiệu hóa sự kiện thành công").build();
-    }
+	@PutMapping("/{id}/inactivate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> inactivate(@PathVariable long id) {
+		adminEventService.changeStatus(id, EntityStatus.INACTIVE);
+		return ApiResponse.<Void>builder().message("Vô hiệu hóa sự kiện thành công").build();
+	}
 }

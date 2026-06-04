@@ -12,11 +12,11 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventRequest {
-    String title;
-    String description;
-    String posterUrl;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    EventType eventType;
-    Long movieId;
+	String title;
+	String description;
+	String posterUrl;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	EventType eventType;
+	Long movieId;
 }

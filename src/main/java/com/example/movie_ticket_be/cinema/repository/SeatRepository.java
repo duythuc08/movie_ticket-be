@@ -11,18 +11,18 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SeatRepository extends JpaRepository<Seats, Long> {
-    Optional<Seats> findBySeatId(Long seatId);
-    boolean existsBySeatId(Long seatId);
-    List<Seats> findByRooms_RoomId(Long roomId);
-    boolean existsByRooms_RoomId(Long roomId);
-    boolean existsBySeatRowAndSeatNumberAndRooms_RoomId(String seatRow, Integer seatNumber, Long roomId);
+	Optional<Seats> findBySeatId(Long seatId);
+	boolean existsBySeatId(Long seatId);
+	List<Seats> findByRooms_RoomId(Long roomId);
+	boolean existsByRooms_RoomId(Long roomId);
+	boolean existsBySeatRowAndSeatNumberAndRooms_RoomId(String seatRow, Integer seatNumber, Long roomId);
 
-    Optional<Seats> findBySeatRowAndSeatNumberAndRooms_RoomId(String seatRow, Integer seatNumber, Long roomId);
+	Optional<Seats> findBySeatRowAndSeatNumberAndRooms_RoomId(String seatRow, Integer seatNumber, Long roomId);
 
-    @Query("SELECT DISTINCT s.seatType FROM Seats s WHERE s.rooms.roomId = :roomId AND s.entityStatus = 'ACTIVE'")
-    List<SeatType> findDistinctSeatTypeByRoomId(@Param("roomId") Long roomId);
+	@Query("SELECT DISTINCT s.seatType FROM Seats s WHERE s.rooms.roomId = :roomId AND s.entityStatus = 'ACTIVE'")
+	List<SeatType> findDistinctSeatTypeByRoomId(@Param("roomId") Long roomId);
 
-    @Modifying
-    @Query("DELETE FROM Seats s WHERE s.rooms.roomId = :roomId")
-    void deleteAllByRoomId(@Param("roomId") Long roomId);
+	@Modifying
+	@Query("DELETE FROM Seats s WHERE s.rooms.roomId = :roomId")
+	void deleteAllByRoomId(@Param("roomId") Long roomId);
 }

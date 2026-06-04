@@ -21,16 +21,16 @@ import lombok.experimental.FieldDefaults;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class UsersRespone {
 
-    String userId;
-    String username;
-    String firstname;
-    String lastname;
-    String phoneNumber;
-    LocalDate birthday;
+	String userId;
+	String username;
+	String firstname;
+	String lastname;
+	String phoneNumber;
+	LocalDate birthday;
 
-    UserStatus userStatus;
-    int loyaltyPoints;
-    String memberShipTierName;
-    Set<RoleResponse> roles;
-    boolean enabled;
+	UserStatus userStatus;
+	int loyaltyPoints;
+	String memberShipTierName;
+	Set<RoleResponse> roles;
+	boolean enabled;
 }

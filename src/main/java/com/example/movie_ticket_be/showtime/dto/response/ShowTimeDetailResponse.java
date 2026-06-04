@@ -14,14 +14,14 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimeDetailResponse {
-    Long showTimeId;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    String showTimeStatus;
+	Long showTimeId;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	String showTimeStatus;
 
-    Movies movies;
-    Rooms rooms;
+	Movies movies;
+	Rooms rooms;
 
-    List<ShowTimePriceResponse> prices;
-    SeatSummaryResponse seatSummary;
+	List<ShowTimePriceResponse> prices;
+	SeatSummaryResponse seatSummary;
 }

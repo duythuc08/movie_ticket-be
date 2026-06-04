@@ -32,82 +32,74 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminRoomService {
-    RoomRepository roomRepository;
-    RoomMapper roomMapper;
-    ShowTimeRepository showTimeRepository;
-    CinemaRepository cinemaRepository;
-    public RoomResponse createRoom(RoomRequest request) {
-        Long cinemaId = request.getCinemas().getCinemaId();
-        if (cinemaRepository.findByCinemaId(cinemaId).isEmpty()) {
-            throw new AppException(ErrorCode.CINEMA_NOT_FOUND);
-        }
-        if (roomRepository.existsByNameAndCinemas_CinemaId(request.getName(), cinemaId)) {
-            throw new AppException(ErrorCode.ROOM_EXISTED);
-        }
-        Rooms rooms = roomMapper.toRooms(request);
-        rooms.setEntityStatus(EntityStatus.ACTIVE);
-        return roomMapper.toRoomResponse(roomRepository.save(rooms));
-    }
+	RoomRepository roomRepository;
+	RoomMapper roomMapper;
+	ShowTimeRepository showTimeRepository;
+	CinemaRepository cinemaRepository;
+	public RoomResponse createRoom(RoomRequest request) {
+		Long cinemaId = request.getCinemas().getCinemaId();
+		if (cinemaRepository.findByCinemaId(cinemaId).isEmpty()) {
+			throw new AppException(ErrorCode.CINEMA_NOT_FOUND);
+		}
+		if (roomRepository.existsByNameAndCinemas_CinemaId(request.getName(), cinemaId)) {
+			throw new AppException(ErrorCode.ROOM_EXISTED);
+		}
+		Rooms rooms = roomMapper.toRooms(request);
+		rooms.setEntityStatus(EntityStatus.ACTIVE);
+		return roomMapper.toRoomResponse(roomRepository.save(rooms));
+	}
 
-    public List<RoomResponse> createRooms(List<RoomRequest> requests) {
-        return requests.stream().map(this::createRoom).toList();
-    }
+	public List<RoomResponse> createRooms(List<RoomRequest> requests) {
+		return requests.stream().map(this::createRoom).toList();
+	}
 
-    public RoomResponse updateRoom(long roomId, AdminRoomRequest request) {
-        Rooms room = roomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
+	public RoomResponse updateRoom(long roomId, AdminRoomRequest request) {
+		Rooms room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
 
-        if (!room.getName().equals(request.getName()) &&
-                roomRepository.existsByNameAndCinemas_CinemaIdAndRoomIdNot(
-                        request.getName(), room.getCinemas().getCinemaId(), roomId)) {
-            throw new AppException(ErrorCode.ROOM_EXISTED);
-        }
+		if (!room.getName().equals(request.getName()) && roomRepository.existsByNameAndCinemas_CinemaIdAndRoomIdNot(
+				request.getName(), room.getCinemas().getCinemaId(), roomId)) {
+			throw new AppException(ErrorCode.ROOM_EXISTED);
+		}
 
-        if (request.getRoomType() != null && !request.getRoomType().equals(room.getRoomType())) {
-            if (showTimeRepository.existsByRooms_RoomIdAndShowTimeStatusIn(
-                    roomId, List.of(ShowTimeStatus.SCHEDULED, ShowTimeStatus.ONGOING))) {
-                throw new AppException(ErrorCode.ROOM_HAS_ACTIVE_SHOWTIME);
-            }
-        }
+		if (request.getRoomType() != null && !request.getRoomType().equals(room.getRoomType())) {
+			if (showTimeRepository.existsByRooms_RoomIdAndShowTimeStatusIn(roomId,
+					List.of(ShowTimeStatus.SCHEDULED, ShowTimeStatus.ONGOING))) {
+				throw new AppException(ErrorCode.ROOM_HAS_ACTIVE_SHOWTIME);
+			}
+		}
 
-        room.setName(request.getName());
-        room.setCapacity(request.getCapacity());
-        room.setRoomType(request.getRoomType());
-        room.setRoomStatus(request.getRoomStatus());
+		room.setName(request.getName());
+		room.setCapacity(request.getCapacity());
+		room.setRoomType(request.getRoomType());
+		room.setRoomStatus(request.getRoomStatus());
 
-        return roomMapper.toRoomResponse(roomRepository.save(room));
-    }
-    
-    public Page<RoomResponse> getRooms(Specification<Rooms> spec, Pageable pageable) {
-        return roomRepository.findAll(spec, pageable).map(roomMapper::toRoomResponse);
-    }
+		return roomMapper.toRoomResponse(roomRepository.save(room));
+	}
 
-    @Transactional
-    public void updateRoomsForCinema(Cinemas cinema, List<AdminRoomRequest> requests) {
-        for (AdminRoomRequest request : requests) {
-            if (request.getRoomId() != null) {
-                updateRoom(request.getRoomId(), request);
-            } else {
-                if (roomRepository.existsByNameAndCinemas_CinemaId(request.getName(), cinema.getCinemaId())) {
-                    throw new AppException(ErrorCode.ROOM_EXISTED);
-                }
-                Rooms newRoom = Rooms.builder()
-                        .name(request.getName())
-                        .capacity(request.getCapacity())
-                        .roomType(request.getRoomType())
-                        .roomStatus(request.getRoomStatus())
-                        .cinemas(cinema)
-                        .build();
-                newRoom.setEntityStatus(EntityStatus.ACTIVE);
-                roomRepository.save(newRoom);
-            }
-        }
-    }
+	public Page<RoomResponse> getRooms(Specification<Rooms> spec, Pageable pageable) {
+		return roomRepository.findAll(spec, pageable).map(roomMapper::toRoomResponse);
+	}
 
-    public void changeStatus(long id, EntityStatus entityStatus) {
-        Rooms room = roomRepository.findByRoomId(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
-        room.setEntityStatus(entityStatus);
-        roomRepository.save(room);
-    }
+	@Transactional
+	public void updateRoomsForCinema(Cinemas cinema, List<AdminRoomRequest> requests) {
+		for (AdminRoomRequest request : requests) {
+			if (request.getRoomId() != null) {
+				updateRoom(request.getRoomId(), request);
+			} else {
+				if (roomRepository.existsByNameAndCinemas_CinemaId(request.getName(), cinema.getCinemaId())) {
+					throw new AppException(ErrorCode.ROOM_EXISTED);
+				}
+				Rooms newRoom = Rooms.builder().name(request.getName()).capacity(request.getCapacity())
+						.roomType(request.getRoomType()).roomStatus(request.getRoomStatus()).cinemas(cinema).build();
+				newRoom.setEntityStatus(EntityStatus.ACTIVE);
+				roomRepository.save(newRoom);
+			}
+		}
+	}
+
+	public void changeStatus(long id, EntityStatus entityStatus) {
+		Rooms room = roomRepository.findByRoomId(id).orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
+		room.setEntityStatus(entityStatus);
+		roomRepository.save(room);
+	}
 }

@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.cinema.enums;
 
 public enum CinemaStatus {
-    OPERATIONAL,
-    TEMPORARILY_CLOSED
+	OPERATIONAL, TEMPORARILY_CLOSED
 }

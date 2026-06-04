@@ -21,25 +21,25 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Payments extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long paymentId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long paymentId;
 
-    BigDecimal amount;
+	BigDecimal amount;
 
-    String transactionId;
+	String transactionId;
 
-    String paymentInfo;
+	String paymentInfo;
 
-    LocalDateTime paymentDate;
+	LocalDateTime paymentDate;
 
-    @Enumerated(EnumType.STRING)
-    PaymentType paymentType;
+	@Enumerated(EnumType.STRING)
+	PaymentType paymentType;
 
-    @Enumerated(EnumType.STRING)
-    PaymentStatus paymentStatus;
+	@Enumerated(EnumType.STRING)
+	PaymentStatus paymentStatus;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    Orders order;
+	@ManyToOne
+	@JoinColumn(name = "order_id", nullable = false)
+	Orders order;
 }

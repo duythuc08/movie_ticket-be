@@ -40,134 +40,119 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminSeatService {
-    RoomRepository roomRepository;
-    SeatRepository seatRepository;
-    SeatMapper seatMapper;
-    SeatShowTimeRepository seatShowTimeRepository;
-    ShowTimeMapper showTimeMapper;
+	RoomRepository roomRepository;
+	SeatRepository seatRepository;
+	SeatMapper seatMapper;
+	SeatShowTimeRepository seatShowTimeRepository;
+	ShowTimeMapper showTimeMapper;
 
-    public List<SeatResponse> getSeatsByRoom(Long roomId) {
-        return seatRepository.findByRooms_RoomId(roomId).stream()
-                .map(seatMapper::toSeatResponse)
-                .toList();
-    }
+	public List<SeatResponse> getSeatsByRoom(Long roomId) {
+		return seatRepository.findByRooms_RoomId(roomId).stream().map(seatMapper::toSeatResponse).toList();
+	}
 
-    public Set<SeatType> getDistinctSeatTypesByRoomId(Long roomId) {
-        return new HashSet<>(seatRepository.findDistinctSeatTypeByRoomId(roomId));
-    }
+	public Set<SeatType> getDistinctSeatTypesByRoomId(Long roomId) {
+		return new HashSet<>(seatRepository.findDistinctSeatTypeByRoomId(roomId));
+	}
 
-    public void changeStatus(long id, EntityStatus entityStatus) {
-        Seats seat = seatRepository.findBySeatId(id)
-                .orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
-        seat.setEntityStatus(entityStatus);
-        seatRepository.save(seat);
-    }
+	public void changeStatus(long id, EntityStatus entityStatus) {
+		Seats seat = seatRepository.findBySeatId(id).orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
+		seat.setEntityStatus(entityStatus);
+		seatRepository.save(seat);
+	}
 
-    public SeatResponse updateSeatType(Long seatId, AdminSeatUpdate request) {
-        Seats seat = seatRepository.findBySeatId(seatId)
-                .orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
-        seat.setSeatType(request.getSeatTypes());
-        return seatMapper.toSeatResponse(seatRepository.save(seat));
-    }
+	public SeatResponse updateSeatType(Long seatId, AdminSeatUpdate request) {
+		Seats seat = seatRepository.findBySeatId(seatId).orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
+		seat.setSeatType(request.getSeatTypes());
+		return seatMapper.toSeatResponse(seatRepository.save(seat));
+	}
 
-    public List<ShowTimeResponse> getBlockedUpcomingShowTimesBySeat(Long seatId) {
-        return seatShowTimeRepository.findBlockedUpcomingBySeat(seatId, LocalDateTime.now())
-                .stream()
-                .map(ss -> showTimeMapper.toShowTimeResponse(ss.getShowTimes()))
-                .toList();
-    }
+	public List<ShowTimeResponse> getBlockedUpcomingShowTimesBySeat(Long seatId) {
+		return seatShowTimeRepository.findBlockedUpcomingBySeat(seatId, LocalDateTime.now()).stream()
+				.map(ss -> showTimeMapper.toShowTimeResponse(ss.getShowTimes())).toList();
+	}
 
-    @Transactional
-    public SeatResponse updateSeatStatus(Long seatId, AdminSeatStatusUpdateRequest request) {
-        Seats seat = seatRepository.findBySeatId(seatId)
-                .orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
-        
-        seat.setSeatStatus(request.getSeatStatus());
-        seatRepository.save(seat);
+	@Transactional
+	public SeatResponse updateSeatStatus(Long seatId, AdminSeatStatusUpdateRequest request) {
+		Seats seat = seatRepository.findBySeatId(seatId).orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
 
-        if (request.getUnlockShowTimeIds() != null && !request.getUnlockShowTimeIds().isEmpty()) {
-            List<SeatShowTime> blockedSeats = seatShowTimeRepository.findBlockedUpcomingBySeat(seatId, LocalDateTime.now());
-            for (SeatShowTime ss : blockedSeats) {
-                if (request.getUnlockShowTimeIds().contains(ss.getShowTimes().getShowTimeId())) {
-                    ss.setSeatShowTimeStatus(SeatShowTimeStatus.AVAILABLE);
-                    seatShowTimeRepository.save(ss);
-                }
-            }
-        }
-        return seatMapper.toSeatResponse(seat);
-    }
+		seat.setSeatStatus(request.getSeatStatus());
+		seatRepository.save(seat);
 
-    @Transactional
-    public List<SeatResponse> setUpSeatsForRoom(Long roomId, SeatSetupRequest request) {
-        Rooms room = roomRepository.findByRoomId(roomId)
-                .orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
+		if (request.getUnlockShowTimeIds() != null && !request.getUnlockShowTimeIds().isEmpty()) {
+			List<SeatShowTime> blockedSeats = seatShowTimeRepository.findBlockedUpcomingBySeat(seatId,
+					LocalDateTime.now());
+			for (SeatShowTime ss : blockedSeats) {
+				if (request.getUnlockShowTimeIds().contains(ss.getShowTimes().getShowTimeId())) {
+					ss.setSeatShowTimeStatus(SeatShowTimeStatus.AVAILABLE);
+					seatShowTimeRepository.save(ss);
+				}
+			}
+		}
+		return seatMapper.toSeatResponse(seat);
+	}
 
-        seatRepository.deleteAllByRoomId(roomId);
+	@Transactional
+	public List<SeatResponse> setUpSeatsForRoom(Long roomId, SeatSetupRequest request) {
+		Rooms room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
 
-        int totalRows = request.getRows();
-        int totalCols = request.getCols();
-        SeatType[][] seatTypes = request.getSeatTypes();
+		seatRepository.deleteAllByRoomId(roomId);
 
-        double idealRow = (totalRows - 1) * 0.6;
-        double centerCol = (totalCols - 1) / 2.0;
+		int totalRows = request.getRows();
+		int totalCols = request.getCols();
+		SeatType[][] seatTypes = request.getSeatTypes();
 
-        double ratio = (double) totalCols / totalRows;
-        double colWeight = Math.min(0.7, Math.max(0.3, 0.5 + (ratio - 1) * 0.1));
-        double rowWeight = 1.0 - colWeight;
+		double idealRow = (totalRows - 1) * 0.6;
+		double centerCol = (totalCols - 1) / 2.0;
 
-        double maxRowDist = Math.max(idealRow, totalRows - 1 - idealRow);
+		double ratio = (double) totalCols / totalRows;
+		double colWeight = Math.min(0.7, Math.max(0.3, 0.5 + (ratio - 1) * 0.1));
+		double rowWeight = 1.0 - colWeight;
 
-        List<Seats> seats = new ArrayList<>();
-        for (int r = 0; r < totalRows; r++) {
-            for (int c = 0; c < totalCols; c++) {
-                SeatType type = seatTypes[r][c];
-                if (type == null) continue;
+		double maxRowDist = Math.max(idealRow, totalRows - 1 - idealRow);
 
-                double rowDist = (maxRowDist == 0) ? 0.0 : Math.abs(r - idealRow) / maxRowDist;
-                double colDist = (centerCol == 0) ? 0.0 : Math.abs(c - centerCol) / centerCol;
-                double distScore = rowWeight * rowDist + colWeight * colDist;
-                double viewScore = 10.0 - (distScore * 9.0);
+		List<Seats> seats = new ArrayList<>();
+		for (int r = 0; r < totalRows; r++) {
+			for (int c = 0; c < totalCols; c++) {
+				SeatType type = seatTypes[r][c];
+				if (type == null)
+					continue;
 
-                Seats seat = Seats.builder()
-                        .seatRow(toRowLabel(r))
-                        .seatNumber(c + 1)
-                        .rooms(room)
-                        .seatType(type)
-                        .seatStatus(SeatStatus.NORMAL)
-                        .viewQuanlityScore(BigDecimal.valueOf(Math.round(viewScore * 100.0) / 100.0))
-                        .build();
-                seat.setEntityStatus(EntityStatus.ACTIVE);
-                seats.add(seat);
-            }
-        }
+				double rowDist = (maxRowDist == 0) ? 0.0 : Math.abs(r - idealRow) / maxRowDist;
+				double colDist = (centerCol == 0) ? 0.0 : Math.abs(c - centerCol) / centerCol;
+				double distScore = rowWeight * rowDist + colWeight * colDist;
+				double viewScore = 10.0 - (distScore * 9.0);
 
-        return seatRepository.saveAll(seats).stream()
-                .map(seatMapper::toSeatResponse)
-                .toList();
-    }
+				Seats seat = Seats.builder().seatRow(toRowLabel(r)).seatNumber(c + 1).rooms(room).seatType(type)
+						.seatStatus(SeatStatus.NORMAL)
+						.viewQuanlityScore(BigDecimal.valueOf(Math.round(viewScore * 100.0) / 100.0)).build();
+				seat.setEntityStatus(EntityStatus.ACTIVE);
+				seats.add(seat);
+			}
+		}
 
-    @Transactional
-    public List<SeatResponse> updateSeatTypes(Long roomId, List<AdminSeatUpdate> requests) {
-        List<Seats> seats = new ArrayList<>();
-        for (AdminSeatUpdate r : requests) {
-            Seats seat = seatRepository
-                    .findBySeatRowAndSeatNumberAndRooms_RoomId(r.getSeatRow(), r.getSeatNumber(), roomId)
-                    .orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
-            seat.setSeatType(r.getSeatTypes());
-            seats.add(seat);
-        }
-        return seatRepository.saveAll(seats).stream()
-                .map(seatMapper::toSeatResponse)
-                .toList();
-    }
+		return seatRepository.saveAll(seats).stream().map(seatMapper::toSeatResponse).toList();
+	}
 
-    private static String toRowLabel(int index) {
-        StringBuilder sb = new StringBuilder();
-        int n = index;
-        do {
-            sb.insert(0, (char) ('A' + n % 26));
-            n = n / 26 - 1;
-        } while (n >= 0);
-        return sb.toString();
-    }
+	@Transactional
+	public List<SeatResponse> updateSeatTypes(Long roomId, List<AdminSeatUpdate> requests) {
+		List<Seats> seats = new ArrayList<>();
+		for (AdminSeatUpdate r : requests) {
+			Seats seat = seatRepository
+					.findBySeatRowAndSeatNumberAndRooms_RoomId(r.getSeatRow(), r.getSeatNumber(), roomId)
+					.orElseThrow(() -> new AppException(ErrorCode.SEAT_NOT_FOUND));
+			seat.setSeatType(r.getSeatTypes());
+			seats.add(seat);
+		}
+		return seatRepository.saveAll(seats).stream().map(seatMapper::toSeatResponse).toList();
+	}
+
+	private static String toRowLabel(int index) {
+		StringBuilder sb = new StringBuilder();
+		int n = index;
+		do {
+			sb.insert(0, (char) ('A' + n % 26));
+			n = n / 26 - 1;
+		} while (n >= 0);
+		return sb.toString();
+	}
 }

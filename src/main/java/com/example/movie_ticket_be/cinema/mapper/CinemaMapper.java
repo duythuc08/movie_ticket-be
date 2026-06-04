@@ -14,18 +14,18 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface CinemaMapper {
-    Cinemas toCinemas(CinemaRequest request);
+	Cinemas toCinemas(CinemaRequest request);
 
-    CinemaResponse toCinemasResponse(Cinemas cinemas);
+	CinemaResponse toCinemasResponse(Cinemas cinemas);
 
-    @Mapping(source = "rooms", target = "rooms")
-    AdminCinemaResponse toAdminCinemaResponse(Cinemas cinemas, List<Rooms> rooms);
+	@Mapping(source = "rooms", target = "rooms")
+	AdminCinemaResponse toAdminCinemaResponse(Cinemas cinemas, List<Rooms> rooms);
 
-    AdminCinemaResponse.AdminRoomResponse toAdminRoomResponse(Rooms room);
+	AdminCinemaResponse.AdminRoomResponse toAdminRoomResponse(Rooms room);
 
-    @Mapping(target = "cinemaId", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "entityStatus", ignore = true)
-    void updateCinema(AdminCinemaUpdateRequest request, @MappingTarget Cinemas cinema);
+	@Mapping(target = "cinemaId", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	@Mapping(target = "entityStatus", ignore = true)
+	void updateCinema(AdminCinemaUpdateRequest request, @MappingTarget Cinemas cinema);
 }

@@ -38,72 +38,62 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminUserController {
-    AdminUserService adminUserService;
-    AdminLoyaltyPointsHistoryService adminLoyaltyPointsHistoryService;
+	AdminUserService adminUserService;
+	AdminLoyaltyPointsHistoryService adminLoyaltyPointsHistoryService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<UsersRespone> createUser(@RequestBody @Valid UsersCreationRequest request) {
-        return ApiResponse.<UsersRespone>builder()
-                .result(adminUserService.createUser(request))
-                .build();
-    }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<UsersRespone> createUser(@RequestBody @Valid UsersCreationRequest request) {
+		return ApiResponse.<UsersRespone>builder().result(adminUserService.createUser(request)).build();
+	}
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<UsersRespone>> getUsers(
-            @Parameter(name = "filter", required = false) @Filter Specification<Users> spec,
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<UsersRespone>>builder()
-                .result(adminUserService.getUsers(spec, pageable))
-                .build();
-    }
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Page<UsersRespone>> getUsers(
+			@Parameter(name = "filter", required = false) @Filter Specification<Users> spec,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<UsersRespone>>builder().result(adminUserService.getUsers(spec, pageable)).build();
+	}
 
-    @GetMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<UsersRespone> getUser(@PathVariable String userId) {
-        return ApiResponse.<UsersRespone>builder()
-                .result(adminUserService.getUserById(userId))
-                .build();
-    }
+	@GetMapping("/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<UsersRespone> getUser(@PathVariable String userId) {
+		return ApiResponse.<UsersRespone>builder().result(adminUserService.getUserById(userId)).build();
+	}
 
-    @GetMapping("/{userId}/loyalty-history")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<LoyaltyPointsHistoryResponse>> getLoyaltyHistory(
-            @PathVariable String userId,
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<LoyaltyPointsHistoryResponse>>builder()
-                .result(adminLoyaltyPointsHistoryService.getHistoriesByUserId(userId, pageable))
-                .build();
-    }
+	@GetMapping("/{userId}/loyalty-history")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Page<LoyaltyPointsHistoryResponse>> getLoyaltyHistory(@PathVariable String userId,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<LoyaltyPointsHistoryResponse>>builder()
+				.result(adminLoyaltyPointsHistoryService.getHistoriesByUserId(userId, pageable)).build();
+	}
 
-    @PutMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<UsersRespone> updateUser(@PathVariable String userId,
-            @RequestBody @Valid UserUpdateRequest request) {
-        return ApiResponse.<UsersRespone>builder()
-                .result(adminUserService.updateUser(userId, request))
-                .build();
-    }
+	@PutMapping("/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<UsersRespone> updateUser(@PathVariable String userId,
+			@RequestBody @Valid UserUpdateRequest request) {
+		return ApiResponse.<UsersRespone>builder().result(adminUserService.updateUser(userId, request)).build();
+	}
 
-    @DeleteMapping("/{userId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<String> deleteUser(@PathVariable String userId) {
-        adminUserService.deleteUser(userId);
-        return ApiResponse.<String>builder().result("User has been deleted").build();
-    }
+	@DeleteMapping("/{userId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<String> deleteUser(@PathVariable String userId) {
+		adminUserService.deleteUser(userId);
+		return ApiResponse.<String>builder().result("User has been deleted").build();
+	}
 
-    @PutMapping("/{userId}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> activate(@PathVariable String userId) {
-        adminUserService.changeStatus(userId, EntityStatus.ACTIVE);
-        return ApiResponse.<Void>builder().message("Kích hoạt người dùng thành công").build();
-    }
+	@PutMapping("/{userId}/activate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> activate(@PathVariable String userId) {
+		adminUserService.changeStatus(userId, EntityStatus.ACTIVE);
+		return ApiResponse.<Void>builder().message("Kích hoạt người dùng thành công").build();
+	}
 
-    @PutMapping("/{userId}/inactivate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> inactivate(@PathVariable String userId) {
-        adminUserService.changeStatus(userId, EntityStatus.INACTIVE);
-        return ApiResponse.<Void>builder().message("Vô hiệu hóa người dùng thành công").build();
-    }
+	@PutMapping("/{userId}/inactivate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> inactivate(@PathVariable String userId) {
+		adminUserService.changeStatus(userId, EntityStatus.INACTIVE);
+		return ApiResponse.<Void>builder().message("Vô hiệu hóa người dùng thành công").build();
+	}
 }

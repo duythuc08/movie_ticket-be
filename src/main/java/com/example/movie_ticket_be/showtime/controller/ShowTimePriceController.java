@@ -19,21 +19,20 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ShowTimePriceController {
-    ShowTimePriceService service;
+	ShowTimePriceService service;
 
-    @GetMapping("/getPrice/by-showtime/{showTimeId}")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<List<ShowTimePriceResponse>> getAllPriceByShowTime(@PathVariable Long showTimeId) {
-        return ApiResponse.<List<ShowTimePriceResponse>>builder()
-                .result(service.getAllPriceByShowTime(showTimeId))
-                .build();
-    }
+	@GetMapping("/getPrice/by-showtime/{showTimeId}")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<List<ShowTimePriceResponse>> getAllPriceByShowTime(@PathVariable Long showTimeId) {
+		return ApiResponse.<List<ShowTimePriceResponse>>builder().result(service.getAllPriceByShowTime(showTimeId))
+				.build();
+	}
 
-    @GetMapping("/getPrice/by-showtime/{showTimeId}/type")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<ShowTimePriceResponse> getPriceByShowTimeAndSeatType(@PathVariable Long showTimeId, @RequestParam SeatType seatType) {
-        return ApiResponse.<ShowTimePriceResponse>builder()
-                .result(service.getPriceByShowTimeAndSeatType(showTimeId, seatType))
-                .build();
-    }
+	@GetMapping("/getPrice/by-showtime/{showTimeId}/type")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<ShowTimePriceResponse> getPriceByShowTimeAndSeatType(@PathVariable Long showTimeId,
+			@RequestParam SeatType seatType) {
+		return ApiResponse.<ShowTimePriceResponse>builder()
+				.result(service.getPriceByShowTimeAndSeatType(showTimeId, seatType)).build();
+	}
 }

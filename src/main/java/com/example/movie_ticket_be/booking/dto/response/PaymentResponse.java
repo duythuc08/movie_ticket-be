@@ -14,11 +14,11 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentResponse {
-    Long paymentId;
-    BigDecimal amount;
-    String transactionId;
-    String paymentInfo;
-    LocalDateTime paymentDate;
-    PaymentType paymentType;
-    PaymentStatus paymentStatus;
+	Long paymentId;
+	BigDecimal amount;
+	String transactionId;
+	String paymentInfo;
+	LocalDateTime paymentDate;
+	PaymentType paymentType;
+	PaymentStatus paymentStatus;
 }

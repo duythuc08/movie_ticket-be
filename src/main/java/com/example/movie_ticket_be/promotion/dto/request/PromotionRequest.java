@@ -15,16 +15,16 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PromotionRequest {
-    String code;
-    String name;
-    String description;
-    PromotionType type;
-    BigDecimal discountValue;
-    BigDecimal minOrderValue;
-    BigDecimal maxDiscountAmount;
-    Integer useLimit;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    Set<Long> applicableMovieIds;
-    Set<DayOfWeek> dayOfWeek;
+	String code;
+	String name;
+	String description;
+	PromotionType type;
+	BigDecimal discountValue;
+	BigDecimal minOrderValue;
+	BigDecimal maxDiscountAmount;
+	Integer useLimit;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	Set<Long> applicableMovieIds;
+	Set<DayOfWeek> dayOfWeek;
 }

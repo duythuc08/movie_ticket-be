@@ -18,72 +18,62 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
-
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE,makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MovieService {
-    MovieRepository movieRepository;
-    MovieMapper movieMapper;
+	MovieRepository movieRepository;
+	MovieMapper movieMapper;
 
-    public MovieResponse getMovieById(Long movieId) {
-        Movies movie = movieRepository.findByMovieId(movieId)
-                .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-        return movieMapper.toMovieResponse(movie);
-    }
-    public List<MovieResponse> getMovies(){
-        return movieRepository.findAll()
-                .stream()
-                .map(movieMapper::toMovieResponse)
-                .toList();
-    }
+	public MovieResponse getMovieById(Long movieId) {
+		Movies movie = movieRepository.findByMovieId(movieId)
+				.orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+		return movieMapper.toMovieResponse(movie);
+	}
+	public List<MovieResponse> getMovies() {
+		return movieRepository.findAll().stream().map(movieMapper::toMovieResponse).toList();
+	}
 
-    public List<MovieResponse> getMoviesShowing(){
-        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.NOW_SHOWING)
-                .stream()
-                .map(movieMapper::toMovieResponse)
-                .toList();
-    }
-    public List<MovieResponse> getMoviesComingSoon(){
-        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.COMING_SOON)
-                .stream()
-                .map(movieMapper::toMovieResponse)
-                .toList();
-    }
+	public List<MovieResponse> getMoviesShowing() {
+		return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.NOW_SHOWING).stream()
+				.map(movieMapper::toMovieResponse).toList();
+	}
+	public List<MovieResponse> getMoviesComingSoon() {
+		return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.COMING_SOON).stream()
+				.map(movieMapper::toMovieResponse).toList();
+	}
 
-    public List<MovieResponse> getMoviesShowingPaged(int page, int size) {
-        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.NOW_SHOWING,
-                        PageRequest.of(page, size, Sort.by("movieId").descending()))
-                .getContent().stream().map(movieMapper::toMovieResponse).toList();
-    }
+	public List<MovieResponse> getMoviesShowingPaged(int page, int size) {
+		return movieRepository
+				.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.NOW_SHOWING,
+						PageRequest.of(page, size, Sort.by("movieId").descending()))
+				.getContent().stream().map(movieMapper::toMovieResponse).toList();
+	}
 
-    public List<MovieResponse> getMoviesComingSoonPaged(int page, int size) {
-        return movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.COMING_SOON,
-                        PageRequest.of(page, size, Sort.by("movieId").descending()))
-                .getContent().stream().map(movieMapper::toMovieResponse).toList();
-    }
+	public List<MovieResponse> getMoviesComingSoonPaged(int page, int size) {
+		return movieRepository
+				.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, MovieStatus.COMING_SOON,
+						PageRequest.of(page, size, Sort.by("movieId").descending()))
+				.getContent().stream().map(movieMapper::toMovieResponse).toList();
+	}
 
-    private PagedMovieResponse buildPagedResponse(MovieStatus status, int page, int size) {
-        Page<Movies> result = movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, status, PageRequest.of(page, size, Sort.by("createdAt").descending()));
-        return PagedMovieResponse.builder()
-                .content(result.getContent().stream().map(movieMapper::toMovieResponse).toList())
-                .currentPage(page)
-                .pageSize(size)
-                .totalPages(result.getTotalPages())
-                .totalElements(result.getTotalElements())
-                .build();
-    }
+	private PagedMovieResponse buildPagedResponse(MovieStatus status, int page, int size) {
+		Page<Movies> result = movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, status,
+				PageRequest.of(page, size, Sort.by("createdAt").descending()));
+		return PagedMovieResponse.builder()
+				.content(result.getContent().stream().map(movieMapper::toMovieResponse).toList()).currentPage(page)
+				.pageSize(size).totalPages(result.getTotalPages()).totalElements(result.getTotalElements()).build();
+	}
 
-    public PagedMovieResponse getShowingMoviesPagedResponse(int page, int size) {
-        return buildPagedResponse(MovieStatus.NOW_SHOWING, page, size);
-    }
+	public PagedMovieResponse getShowingMoviesPagedResponse(int page, int size) {
+		return buildPagedResponse(MovieStatus.NOW_SHOWING, page, size);
+	}
 
-    public PagedMovieResponse getComingSoonMoviesPagedResponse(int page, int size) {
-        return buildPagedResponse(MovieStatus.COMING_SOON, page, size);
-    }
+	public PagedMovieResponse getComingSoonMoviesPagedResponse(int page, int size) {
+		return buildPagedResponse(MovieStatus.COMING_SOON, page, size);
+	}
 
 }

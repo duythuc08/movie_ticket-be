@@ -13,25 +13,23 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api/files")
 public class FileController {
 
-    private final CloudinaryService cloudinaryService;
+	private final CloudinaryService cloudinaryService;
 
-    public FileController(CloudinaryService cloudinaryService) {
-        this.cloudinaryService = cloudinaryService;
-    }
+	public FileController(CloudinaryService cloudinaryService) {
+		this.cloudinaryService = cloudinaryService;
+	}
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
-        System.out.println("Received file: " + file.getOriginalFilename());
-        try {
-            String fileUrl = cloudinaryService.uploadFile(file);
+	@PreAuthorize("hasRole('ADMIN')")
+	@PostMapping("/upload")
+	public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+		System.out.println("Received file: " + file.getOriginalFilename());
+		try {
+			String fileUrl = cloudinaryService.uploadFile(file);
 
-            return ResponseEntity.ok(fileUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Upload failed: " + e.getMessage());
-        }
-    }
+			return ResponseEntity.ok(fileUrl);
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new RuntimeException("Upload failed: " + e.getMessage());
+		}
+	}
 }
-
-

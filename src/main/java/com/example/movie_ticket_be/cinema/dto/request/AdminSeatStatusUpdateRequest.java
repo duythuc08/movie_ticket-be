@@ -10,6 +10,6 @@ import java.util.List;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminSeatStatusUpdateRequest {
-    SeatStatus seatStatus;
-    List<Long> unlockShowTimeIds;
+	SeatStatus seatStatus;
+	List<Long> unlockShowTimeIds;
 }

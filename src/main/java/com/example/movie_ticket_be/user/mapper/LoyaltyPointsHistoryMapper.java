@@ -8,6 +8,6 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface LoyaltyPointsHistoryMapper {
 
-    @Mapping(source = "order.orderId", target = "orderId")
-    LoyaltyPointsHistoryResponse toResponse(LoyaltyPointsHistory history);
+	@Mapping(source = "order.orderId", target = "orderId")
+	LoyaltyPointsHistoryResponse toResponse(LoyaltyPointsHistory history);
 }

@@ -11,9 +11,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminRoomRequest {
-    Long roomId;
-    String name;
-    Integer capacity;
-    RoomType roomType;
-    RoomStatus roomStatus;
+	Long roomId;
+	String name;
+	Integer capacity;
+	RoomType roomType;
+	RoomStatus roomStatus;
 }

@@ -12,8 +12,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class PersonRequest {
-    private String name;
-    private String avatarUrl;
-    private MovieRole movieRole;
+	private String name;
+	private String avatarUrl;
+	private MovieRole movieRole;
 }
-

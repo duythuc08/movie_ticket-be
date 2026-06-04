@@ -20,18 +20,16 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CinemaService {
-    CinemaRepository cinemaRepository;
-    CinemaMapper cinemaMapper;
+	CinemaRepository cinemaRepository;
+	CinemaMapper cinemaMapper;
 
-    public List<CinemaResponse> getCinemas() {
-        return cinemaRepository.findByEntityStatusAndCinemaStatus(EntityStatus.ACTIVE, CinemaStatus.OPERATIONAL).stream()
-                .map(cinemaMapper::toCinemasResponse)
-                .toList();
-    }
+	public List<CinemaResponse> getCinemas() {
+		return cinemaRepository.findByEntityStatusAndCinemaStatus(EntityStatus.ACTIVE, CinemaStatus.OPERATIONAL)
+				.stream().map(cinemaMapper::toCinemasResponse).toList();
+	}
 
-    public CinemaResponse getCinemaById(Long cinemaId) {
-        return cinemaMapper.toCinemasResponse(
-                cinemaRepository.findByCinemaId(cinemaId)
-                        .orElseThrow(() -> new AppException(ErrorCode.CINEMA_NOT_FOUND)));
-    }
+	public CinemaResponse getCinemaById(Long cinemaId) {
+		return cinemaMapper.toCinemasResponse(cinemaRepository.findByCinemaId(cinemaId)
+				.orElseThrow(() -> new AppException(ErrorCode.CINEMA_NOT_FOUND)));
+	}
 }

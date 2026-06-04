@@ -16,16 +16,16 @@ import java.math.BigDecimal;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimePrice extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long showTimePriceId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long showTimePriceId;
 
-    @ManyToOne
-    @JoinColumn(name = "show_time_id")
-    ShowTimes showtimes;
+	@ManyToOne
+	@JoinColumn(name = "show_time_id")
+	ShowTimes showtimes;
 
-    @Enumerated(EnumType.STRING)
-    SeatType seatType;
+	@Enumerated(EnumType.STRING)
+	SeatType seatType;
 
-    BigDecimal price;
+	BigDecimal price;
 }

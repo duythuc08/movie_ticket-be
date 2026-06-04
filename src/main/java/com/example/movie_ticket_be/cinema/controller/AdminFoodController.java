@@ -36,56 +36,50 @@ import lombok.experimental.FieldDefaults;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminFoodController {
-    AdminFoodService adminFoodService;
+	AdminFoodService adminFoodService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<FoodResponse> createFood(@RequestParam Long cinemaId, @RequestBody FoodRequest request) {
-        return ApiResponse.<FoodResponse>builder()
-                .result(adminFoodService.createFood(cinemaId, request))
-                .message("Thêm food thành công")
-                .build();
-    }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<FoodResponse> createFood(@RequestParam Long cinemaId, @RequestBody FoodRequest request) {
+		return ApiResponse.<FoodResponse>builder().result(adminFoodService.createFood(cinemaId, request))
+				.message("Thêm food thành công").build();
+	}
 
-    @PostMapping("/bulk")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<FoodResponse>> createFoods(@RequestParam Long cinemaId, @RequestBody List<FoodRequest> requests) {
-        return ApiResponse.<List<FoodResponse>>builder()
-                .result(adminFoodService.createFoods(cinemaId, requests))
-                .build();
-    }
+	@PostMapping("/bulk")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<List<FoodResponse>> createFoods(@RequestParam Long cinemaId,
+			@RequestBody List<FoodRequest> requests) {
+		return ApiResponse.<List<FoodResponse>>builder().result(adminFoodService.createFoods(cinemaId, requests))
+				.build();
+	}
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<FoodResponse>> getFoods(
-            @RequestParam Long cinemaId,
-            @Parameter(name = "filter", required = false) @Filter Specification<Foods> spec,
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<FoodResponse>>builder()
-                .result(adminFoodService.getFoods(cinemaId, spec, pageable))
-                .build();
-    }
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Page<FoodResponse>> getFoods(@RequestParam Long cinemaId,
+			@Parameter(name = "filter", required = false) @Filter Specification<Foods> spec,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<FoodResponse>>builder().result(adminFoodService.getFoods(cinemaId, spec, pageable))
+				.build();
+	}
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<FoodResponse> updateFood(@PathVariable long id, @RequestBody FoodRequest request) {
-        return ApiResponse.<FoodResponse>builder()
-                .result(adminFoodService.updateFood(id, request))
-                .message("Cập nhật food thành công")
-                .build();
-    }
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<FoodResponse> updateFood(@PathVariable long id, @RequestBody FoodRequest request) {
+		return ApiResponse.<FoodResponse>builder().result(adminFoodService.updateFood(id, request))
+				.message("Cập nhật food thành công").build();
+	}
 
-    @PutMapping("/{id}/activate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> activate(@PathVariable long id) {
-        adminFoodService.changeStatus(id, EntityStatus.ACTIVE);
-        return ApiResponse.<Void>builder().message("Kích hoạt food thành công").build();
-    }
+	@PutMapping("/{id}/activate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> activate(@PathVariable long id) {
+		adminFoodService.changeStatus(id, EntityStatus.ACTIVE);
+		return ApiResponse.<Void>builder().message("Kích hoạt food thành công").build();
+	}
 
-    @PutMapping("/{id}/inactivate")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> inactivate(@PathVariable long id) {
-        adminFoodService.changeStatus(id, EntityStatus.INACTIVE);
-        return ApiResponse.<Void>builder().message("Vô hiệu hóa food thành công").build();
-    }
+	@PutMapping("/{id}/inactivate")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> inactivate(@PathVariable long id) {
+		adminFoodService.changeStatus(id, EntityStatus.INACTIVE);
+		return ApiResponse.<Void>builder().message("Vô hiệu hóa food thành công").build();
+	}
 }

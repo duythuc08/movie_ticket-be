@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimePriceResponse {
-    Long seatShowTimePriceId;
-    Long showTimeId;
-    SeatType seatType;
-    BigDecimal price;
+	Long seatShowTimePriceId;
+	Long showTimeId;
+	SeatType seatType;
+	BigDecimal price;
 }

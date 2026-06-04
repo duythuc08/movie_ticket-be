@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;
 
-public interface VerificationTokenRepository extends JpaRepository<VerificationToken,String> {
+public interface VerificationTokenRepository extends JpaRepository<VerificationToken, String> {
 
-    Optional<VerificationToken> findByVerificationCode(String verificationCode);
-    Optional<VerificationToken> findByUser(Users user);
-    Optional<VerificationToken> findByUserAndVerificationCode(Users user, String verificationCode);
+	Optional<VerificationToken> findByVerificationCode(String verificationCode);
+	Optional<VerificationToken> findByUser(Users user);
+	Optional<VerificationToken> findByUserAndVerificationCode(Users user, String verificationCode);
 
-    void deleteByUser(Users user);
+	void deleteByUser(Users user);
 }

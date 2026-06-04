@@ -8,8 +8,8 @@ import lombok.experimental.FieldDefaults;
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentConfirmRequest {
-    Long orderId;
-    String transactionId;
-    String paymentInfo;
-    PaymentType paymentType;
+	Long orderId;
+	String transactionId;
+	String paymentInfo;
+	PaymentType paymentType;
 }

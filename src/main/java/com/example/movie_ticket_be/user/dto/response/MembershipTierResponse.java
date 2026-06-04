@@ -13,13 +13,13 @@ import java.time.LocalDateTime;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MembershipTierResponse {
-    Long tierId;
-    String name;
-    String description;
-    Long pointsRequired;
-    BigDecimal discountPercent;
-    BigDecimal birthdayDiscount;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
-    EntityStatus entityStatus;
+	Long tierId;
+	String name;
+	String description;
+	Long pointsRequired;
+	BigDecimal discountPercent;
+	BigDecimal birthdayDiscount;
+	LocalDateTime createdAt;
+	LocalDateTime updatedAt;
+	EntityStatus entityStatus;
 }

@@ -17,13 +17,13 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VerificationToken extends BaseEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
-    String verificationCode;
-    LocalDateTime verificationCodeExpiresAt;
-    LocalDateTime lastSentAt;
-    @OneToOne
-    Users user;
-    private boolean invalidated = false;
+	@Id
+	@GeneratedValue(strategy = GenerationType.UUID)
+	String id;
+	String verificationCode;
+	LocalDateTime verificationCodeExpiresAt;
+	LocalDateTime lastSentAt;
+	@OneToOne
+	Users user;
+	private boolean invalidated = false;
 }

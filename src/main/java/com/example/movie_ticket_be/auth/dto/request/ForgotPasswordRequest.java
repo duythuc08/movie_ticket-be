@@ -14,9 +14,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class ForgotPasswordRequest {
-    @NotBlank(message = "USERNAME_REQUIRED")
-    @Size(min = 3, message = "USERNAME_INVALID")
-    @Email(message = "USERNAME_MUST_BE_EMAIL")
-    String username;
+	@NotBlank(message = "USERNAME_REQUIRED")
+	@Size(min = 3, message = "USERNAME_INVALID")
+	@Email(message = "USERNAME_MUST_BE_EMAIL")
+	String username;
 
 }

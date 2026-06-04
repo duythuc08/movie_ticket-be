@@ -23,26 +23,26 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ShowTimePriceService {
-    ShowTimePriceRepository showTimePriceRepository;
-    ShowTimePriceMapper showTimePriceMapper;
+	ShowTimePriceRepository showTimePriceRepository;
+	ShowTimePriceMapper showTimePriceMapper;
 
-    public List<ShowTimePriceResponse> getAllPriceByShowTime(Long showTimeId) {
-        return showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId).stream()
-                .map(showTimePriceMapper::toShowTimePriceResponse)
-                .toList();
-    }
+	public List<ShowTimePriceResponse> getAllPriceByShowTime(Long showTimeId) {
+		return showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId).stream()
+				.map(showTimePriceMapper::toShowTimePriceResponse).toList();
+	}
 
-    public ShowTimePriceResponse getPriceByShowTimeAndSeatType(Long showTimeId, SeatType seatType) {
-        ShowTimePrice showTimePrice = showTimePriceRepository.findByShowtimes_ShowTimeIdAndSeatType(showTimeId, seatType)
-                .orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_PRICE_NOT_FOUND));
-        return showTimePriceMapper.toShowTimePriceResponse(showTimePrice);
-    }
+	public ShowTimePriceResponse getPriceByShowTimeAndSeatType(Long showTimeId, SeatType seatType) {
+		ShowTimePrice showTimePrice = showTimePriceRepository
+				.findByShowtimes_ShowTimeIdAndSeatType(showTimeId, seatType)
+				.orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_PRICE_NOT_FOUND));
+		return showTimePriceMapper.toShowTimePriceResponse(showTimePrice);
+	}
 
-    public Map<SeatType, BigDecimal> getPriceMapByShowTime(Long showTimeId) {
-        List<ShowTimePrice> priceList = showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId);
-        if (priceList.isEmpty()) {
-            throw new RuntimeException("Suất chiếu " + showTimeId + " chưa được cấu hình giá!");
-        }
-        return priceList.stream().collect(Collectors.toMap(ShowTimePrice::getSeatType, ShowTimePrice::getPrice));
-    }
+	public Map<SeatType, BigDecimal> getPriceMapByShowTime(Long showTimeId) {
+		List<ShowTimePrice> priceList = showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId);
+		if (priceList.isEmpty()) {
+			throw new RuntimeException("Suất chiếu " + showTimeId + " chưa được cấu hình giá!");
+		}
+		return priceList.stream().collect(Collectors.toMap(ShowTimePrice::getSeatType, ShowTimePrice::getPrice));
+	}
 }

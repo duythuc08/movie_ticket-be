@@ -15,10 +15,10 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventDetailrespone {
-    String title;
-    String description;
-    String posterUrl;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    String movieTitle;
+	String title;
+	String description;
+	String posterUrl;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	String movieTitle;
 }

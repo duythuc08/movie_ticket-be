@@ -11,11 +11,11 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminOrderStatsResponse {
-    BigDecimal totalRevenue;
-    Long totalOrders;
-    Long paidOrders;
-    Long cancelledOrders;
-    Long pendingOrders;
-    Long expiredOrders;
-    Long usedOrders;
+	BigDecimal totalRevenue;
+	Long totalOrders;
+	Long paidOrders;
+	Long cancelledOrders;
+	Long pendingOrders;
+	Long expiredOrders;
+	Long usedOrders;
 }

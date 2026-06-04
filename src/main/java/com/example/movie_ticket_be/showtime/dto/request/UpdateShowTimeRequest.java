@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class UpdateShowTimeRequest {
-    LocalDateTime startTime;
-    Long movieId;
-    Long roomId;
+	LocalDateTime startTime;
+	Long movieId;
+	Long roomId;
 }

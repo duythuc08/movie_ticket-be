@@ -15,15 +15,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CloudinaryService {
-    Cloudinary cloudinary;
+	Cloudinary cloudinary;
 
-    public String uploadFile(MultipartFile file) throws IOException {
-        Map uploadResult = cloudinary.uploader().upload(
-                file.getBytes(),
-                ObjectUtils.asMap("resource_type", "auto")
-        );
-        return uploadResult.get("secure_url").toString();
-    }
+	public String uploadFile(MultipartFile file) throws IOException {
+		Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+		return uploadResult.get("secure_url").toString();
+	}
 }
-
-

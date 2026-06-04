@@ -14,24 +14,24 @@ import java.util.List;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BookingResponse {
-    Long orderId;
-    String userId;
-    String fullName;
-    OrderStatus orderStatus;
+	Long orderId;
+	String userId;
+	String fullName;
+	OrderStatus orderStatus;
 
-    ShowTimeInfo showTimeInfo;
+	ShowTimeInfo showTimeInfo;
 
-    BigDecimal totalTicketPrice;
-    BigDecimal totalFoodPrice;
-    BigDecimal discountAmount;
-    BigDecimal finalPrice;
-    String promotionCode;
+	BigDecimal totalTicketPrice;
+	BigDecimal totalFoodPrice;
+	BigDecimal discountAmount;
+	BigDecimal finalPrice;
+	String promotionCode;
 
-    LocalDateTime bookingTime;
-    LocalDateTime expiredTime;
+	LocalDateTime bookingTime;
+	LocalDateTime expiredTime;
 
-    List<OrderTicketResponse> tickets;
-    List<OrderFoodResponse> foods;
+	List<OrderTicketResponse> tickets;
+	List<OrderFoodResponse> foods;
 
-    String paymentUrl;
+	String paymentUrl;
 }

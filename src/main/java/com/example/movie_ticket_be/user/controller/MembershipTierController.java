@@ -21,21 +21,19 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MembershipTierController {
-    MembershipTierService membershipTierService;
+	MembershipTierService membershipTierService;
 
-    @GetMapping("/getMembershipTier/{name}")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<MembershipTierResponse> getMembershipTier(@PathVariable String name) {
-        return ApiResponse.<MembershipTierResponse>builder()
-                .result(membershipTierService.getMembershipTierByName(name))
-                .build();
-    }
+	@GetMapping("/getMembershipTier/{name}")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<MembershipTierResponse> getMembershipTier(@PathVariable String name) {
+		return ApiResponse.<MembershipTierResponse>builder().result(membershipTierService.getMembershipTierByName(name))
+				.build();
+	}
 
-    @GetMapping("/getAllMembershipTiers")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<List<MembershipTierResponse>> getMembershipTiers() {
-        return ApiResponse.<List<MembershipTierResponse>>builder()
-                .result(membershipTierService.getMembershipTierList())
-                .build();
-    }
+	@GetMapping("/getAllMembershipTiers")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<List<MembershipTierResponse>> getMembershipTiers() {
+		return ApiResponse.<List<MembershipTierResponse>>builder().result(membershipTierService.getMembershipTierList())
+				.build();
+	}
 }

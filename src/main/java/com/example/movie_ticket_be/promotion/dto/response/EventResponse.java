@@ -17,9 +17,9 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EventResponse {
-    String title;
-    String posterUrl;
-    LocalDateTime startTime;
-    LocalDateTime endTime;
-    EventType eventType;
+	String title;
+	String posterUrl;
+	LocalDateTime startTime;
+	LocalDateTime endTime;
+	EventType eventType;
 }

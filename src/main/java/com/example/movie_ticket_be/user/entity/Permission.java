@@ -14,8 +14,7 @@ import lombok.experimental.FieldDefaults;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Permission extends BaseEntity {
-    @Id
-    String name;
-    String description;
+	@Id
+	String name;
+	String description;
 }
-

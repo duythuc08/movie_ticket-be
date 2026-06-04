@@ -21,13 +21,12 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SeatShowTImeController {
-    SeatShowTimeService seatShowTimeService;
+	SeatShowTimeService seatShowTimeService;
 
-    @GetMapping("/selection/{showTimeId}")
-    @PreAuthorize("isAuthenticated()")
-    public ApiResponse<SeatSelectionResponse> getSeatSelection(@PathVariable Long showTimeId) {
-        return ApiResponse.<SeatSelectionResponse>builder()
-                .result(seatShowTimeService.getSeatSelectionData(showTimeId))
-                .build();
-    }
+	@GetMapping("/selection/{showTimeId}")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<SeatSelectionResponse> getSeatSelection(@PathVariable Long showTimeId) {
+		return ApiResponse.<SeatSelectionResponse>builder().result(seatShowTimeService.getSeatSelectionData(showTimeId))
+				.build();
+	}
 }

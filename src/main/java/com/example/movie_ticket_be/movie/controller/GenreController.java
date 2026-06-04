@@ -19,14 +19,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class GenreController {
-    GenreService genreService;
+	GenreService genreService;
 
-    @GetMapping
-    public ApiResponse<List<GenreResponse>> listGenre() {
-        return ApiResponse.<List<GenreResponse>>builder()
-                .result(genreService.getGenres())
-                .message("Lấy danh sách genre thành công")
-                .build();
-    }
-    
+	@GetMapping
+	public ApiResponse<List<GenreResponse>> listGenre() {
+		return ApiResponse.<List<GenreResponse>>builder().result(genreService.getGenres())
+				.message("Lấy danh sách genre thành công").build();
+	}
+
 }

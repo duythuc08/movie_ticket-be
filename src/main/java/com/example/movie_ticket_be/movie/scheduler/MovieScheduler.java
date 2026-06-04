@@ -13,11 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class MovieScheduler {
-    private final AdminMovieService adminMovieService;
-    
-    @Scheduled(cron = "0 0 0 * * *")
-    @Transactional
-    public void updateMovieStatuses() {
-        adminMovieService.updateMovieStatuses();
-    }
+	private final AdminMovieService adminMovieService;
+
+	@Scheduled(cron = "0 0 0 * * *")
+	@Transactional
+	public void updateMovieStatuses() {
+		adminMovieService.updateMovieStatuses();
+	}
 }

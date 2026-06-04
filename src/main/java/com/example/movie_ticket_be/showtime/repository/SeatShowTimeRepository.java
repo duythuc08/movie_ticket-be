@@ -13,57 +13,54 @@ import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
-
 
 public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long> {
 
-    // --- API VẼ SƠ ĐỒ GHẾ ---
-    @Modifying
-    @Transactional
-    @Query(value = """
-    INSERT INTO seat_show_time (seat_id, show_time_id, seat_show_time_status)
-    SELECT s.seat_id, :showTimeId, 
-           CASE WHEN s.seat_status = 'NORMAL' AND s.entity_status = 'ACTIVE' THEN 'AVAILABLE' ELSE 'BLOCKED' END
-    FROM seat s
-    WHERE s.room_id = :roomId
-    AND NOT EXISTS (
-        SELECT 1 FROM seat_show_time ss
-        WHERE ss.seat_id = s.seat_id
-        AND ss.show_time_id = :showTimeId
-    )
-    """, nativeQuery = true)
-    void bulkInsertSeatsForShowTime(@Param("showTimeId") Long showTimeId, @Param("roomId") Long roomId);
+	// --- API VẼ SƠ ĐỒ GHẾ ---
+	@Modifying
+	@Transactional
+	@Query(value = """
+			INSERT INTO seat_show_time (seat_id, show_time_id, seat_show_time_status)
+			SELECT s.seat_id, :showTimeId,
+			       CASE WHEN s.seat_status = 'NORMAL' AND s.entity_status = 'ACTIVE' THEN 'AVAILABLE' ELSE 'BLOCKED' END
+			FROM seat s
+			WHERE s.room_id = :roomId
+			AND NOT EXISTS (
+			    SELECT 1 FROM seat_show_time ss
+			    WHERE ss.seat_id = s.seat_id
+			    AND ss.show_time_id = :showTimeId
+			)
+			""", nativeQuery = true)
+	void bulkInsertSeatsForShowTime(@Param("showTimeId") Long showTimeId, @Param("roomId") Long roomId);
 
-    List<SeatShowTime> findByShowTimes_ShowTimeId(Long showTimeId);
+	List<SeatShowTime> findByShowTimes_ShowTimeId(Long showTimeId);
 
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
-    List<SeatShowTime> findAllBySeatShowTimeIdIn(Collection<Long> seatShowTimeIds);
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	List<SeatShowTime> findAllBySeatShowTimeIdIn(Collection<Long> seatShowTimeIds);
 
-    @Query("SELECT ss FROM SeatShowTime ss JOIN FETCH ss.showTimes st WHERE ss.seats.seatId = :seatId AND st.startTime > :now AND ss.seatShowTimeStatus = 'BLOCKED'")
-    List<SeatShowTime> findBlockedUpcomingBySeat(@Param("seatId") Long seatId, @Param("now") LocalDateTime now);
+	@Query("SELECT ss FROM SeatShowTime ss JOIN FETCH ss.showTimes st WHERE ss.seats.seatId = :seatId AND st.startTime > :now AND ss.seatShowTimeStatus = 'BLOCKED'")
+	List<SeatShowTime> findBlockedUpcomingBySeat(@Param("seatId") Long seatId, @Param("now") LocalDateTime now);
 
-    @Query("SELECT COUNT(ss) > 0 FROM SeatShowTime ss " +
-            "WHERE ss.seatShowTimeId IN :ids " +
-            "AND ss.seatShowTimeStatus IN ('SOLD', 'RESERVED', 'BLOCKED')")
-    boolean existsAnyNotAvailable(@Param("ids") List<Long> ids);
+	@Query("SELECT COUNT(ss) > 0 FROM SeatShowTime ss " + "WHERE ss.seatShowTimeId IN :ids "
+			+ "AND ss.seatShowTimeStatus IN ('SOLD', 'RESERVED', 'BLOCKED')")
+	boolean existsAnyNotAvailable(@Param("ids") List<Long> ids);
 
+	List<SeatShowTime> findBySeatShowTimeStatusAndLockedUntilBefore(SeatShowTimeStatus status, LocalDateTime now);
 
-    List<SeatShowTime> findBySeatShowTimeStatusAndLockedUntilBefore(SeatShowTimeStatus status, LocalDateTime now);
+	@Modifying
+	@Query("UPDATE SeatShowTime ss SET ss.seatShowTimeStatus = 'AVAILABLE', ss.users = null, ss.lockedUntil = null "
+			+ "WHERE ss.seatShowTimeStatus = 'RESERVED' AND ss.lockedUntil < :now")
+	void releaseExpiredSeats(@Param("now") LocalDateTime now);
 
-    @Modifying
-    @Query("UPDATE SeatShowTime ss SET ss.seatShowTimeStatus = 'AVAILABLE', ss.users = null, ss.lockedUntil = null " +
-            "WHERE ss.seatShowTimeStatus = 'RESERVED' AND ss.lockedUntil < :now")
-    void releaseExpiredSeats(@Param("now") LocalDateTime now);
+	boolean existsBySeatShowTimeId(Long seatShowTimeId);
 
-    boolean existsBySeatShowTimeId(Long seatShowTimeId);
+	boolean existsByShowTimes_ShowTimeIdAndSeatShowTimeStatusIn(Long showTimeId,
+			Collection<SeatShowTimeStatus> statuses);
 
-    boolean existsByShowTimes_ShowTimeIdAndSeatShowTimeStatusIn(Long showTimeId, Collection<SeatShowTimeStatus> statuses);
+	long countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(Long showTimeId, SeatShowTimeStatus status);
 
-    long countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(Long showTimeId, SeatShowTimeStatus status);
-
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM SeatShowTime ss WHERE ss.showTimes.showTimeId = :showTimeId AND ss.seatShowTimeStatus IN ('AVAILABLE', 'RESERVED', 'BLOCKED')")
-    void deleteNonSoldSeatsByShowTime(@Param("showTimeId") Long showTimeId);
+	@Modifying
+	@Transactional
+	@Query("DELETE FROM SeatShowTime ss WHERE ss.showTimes.showTimeId = :showTimeId AND ss.seatShowTimeStatus IN ('AVAILABLE', 'RESERVED', 'BLOCKED')")
+	void deleteNonSoldSeatsByShowTime(@Param("showTimeId") Long showTimeId);
 }

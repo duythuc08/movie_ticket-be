@@ -23,28 +23,28 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class SeatShowTime extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    Long seatShowTimeId;
-    LocalDateTime lockedUntil;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@EqualsAndHashCode.Include
+	Long seatShowTimeId;
+	LocalDateTime lockedUntil;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    Users users;
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	Users users;
 
-    @ManyToOne
-    @JoinColumn(name = "seat_id")
-    Seats seats;
+	@ManyToOne
+	@JoinColumn(name = "seat_id")
+	Seats seats;
 
-    @ManyToOne
-    @JoinColumn(name = "show_time_id")
-    ShowTimes showTimes;
+	@ManyToOne
+	@JoinColumn(name = "show_time_id")
+	ShowTimes showTimes;
 
-    @OneToMany(mappedBy = "seatShowTime", fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<OrderTickets> orderTickets;
+	@OneToMany(mappedBy = "seatShowTime", fetch = FetchType.LAZY)
+	@JsonIgnore
+	private List<OrderTickets> orderTickets;
 
-    @Enumerated(EnumType.STRING)
-    SeatShowTimeStatus seatShowTimeStatus;
+	@Enumerated(EnumType.STRING)
+	SeatShowTimeStatus seatShowTimeStatus;
 }

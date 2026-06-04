@@ -10,7 +10,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatSetupRequest {
-    int rows;
-    int cols;
-    SeatType[][] seatTypes;
+	int rows;
+	int cols;
+	SeatType[][] seatTypes;
 }

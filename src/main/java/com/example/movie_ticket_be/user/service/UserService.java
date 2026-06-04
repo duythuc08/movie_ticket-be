@@ -26,38 +26,40 @@ import org.springframework.stereotype.Service;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserService {
 
-    UserRepository userRepository;
-    UserMapper userMapper;
-    LoyaltyPointsHistoryRepository loyaltyPointsHistoryRepository;
-    LoyaltyPointsHistoryMapper loyaltyPointsHistoryMapper;
+	UserRepository userRepository;
+	UserMapper userMapper;
+	LoyaltyPointsHistoryRepository loyaltyPointsHistoryRepository;
+	LoyaltyPointsHistoryMapper loyaltyPointsHistoryMapper;
 
-    public UserClientRespone getMyInfo() {
-        return userMapper.toUserClientRespone(getCurrentUser());
-    }
+	public UserClientRespone getMyInfo() {
+		return userMapper.toUserClientRespone(getCurrentUser());
+	}
 
-    public UserMenuRespone getUserMenu() {
-        return userMapper.toUserMenuRespone(getCurrentUser());
-    }
+	public UserMenuRespone getUserMenu() {
+		return userMapper.toUserMenuRespone(getCurrentUser());
+	}
 
-    public UserClientRespone updateMyInfo(UserUpdateRequest request) {
-        Users user = getCurrentUser();
-        if (request.getFirstname() != null) user.setFirstname(request.getFirstname());
-        if (request.getLastname() != null) user.setLastname(request.getLastname());
-        if (request.getPhoneNumber() != null) user.setPhoneNumber(request.getPhoneNumber());
-        if (request.getBirthday() != null) user.setBirthday(request.getBirthday());
-        return userMapper.toUserClientRespone(userRepository.save(user));
-    }
+	public UserClientRespone updateMyInfo(UserUpdateRequest request) {
+		Users user = getCurrentUser();
+		if (request.getFirstname() != null)
+			user.setFirstname(request.getFirstname());
+		if (request.getLastname() != null)
+			user.setLastname(request.getLastname());
+		if (request.getPhoneNumber() != null)
+			user.setPhoneNumber(request.getPhoneNumber());
+		if (request.getBirthday() != null)
+			user.setBirthday(request.getBirthday());
+		return userMapper.toUserClientRespone(userRepository.save(user));
+	}
 
-    public Page<LoyaltyPointsHistoryResponse> getMyLoyaltyHistory(Pageable pageable) {
-        String userId = getCurrentUser().getUserId();
-        return loyaltyPointsHistoryRepository
-                .findByUser_UserId(userId, pageable)
-                .map(loyaltyPointsHistoryMapper::toResponse);
-    }
+	public Page<LoyaltyPointsHistoryResponse> getMyLoyaltyHistory(Pageable pageable) {
+		String userId = getCurrentUser().getUserId();
+		return loyaltyPointsHistoryRepository.findByUser_UserId(userId, pageable)
+				.map(loyaltyPointsHistoryMapper::toResponse);
+	}
 
-    private Users getCurrentUser() {
-        String name = SecurityContextHolder.getContext().getAuthentication().getName();
-        return userRepository.findByUsername(name)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-    }
+	private Users getCurrentUser() {
+		String name = SecurityContextHolder.getContext().getAuthentication().getName();
+		return userRepository.findByUsername(name).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+	}
 }

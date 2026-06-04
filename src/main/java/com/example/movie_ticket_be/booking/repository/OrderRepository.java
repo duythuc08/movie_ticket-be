@@ -17,44 +17,31 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecificationExecutor<Orders> {
 
-    @EntityGraph(attributePaths = {
-            "users",
-            "orderTickets",
-            "orderTickets.seatShowTime.seats",
-            "orderTickets.seatShowTime.showTimes.movies",
-            "orderTickets.seatShowTime.showTimes.rooms.cinemas",
-            "orderFoods.foods"
-    })
-    Optional<Orders> findByOrderId(Long orderId);
+	@EntityGraph(attributePaths = {"users", "orderTickets", "orderTickets.seatShowTime.seats",
+			"orderTickets.seatShowTime.showTimes.movies", "orderTickets.seatShowTime.showTimes.rooms.cinemas",
+			"orderFoods.foods"})
+	Optional<Orders> findByOrderId(Long orderId);
 
-    @EntityGraph(attributePaths = {
-            "users",
-            "orderTickets",
-            "orderTickets.seatShowTime.seats",
-            "orderTickets.seatShowTime.showTimes.movies",
-            "orderTickets.seatShowTime.showTimes.rooms.cinemas",
-            "orderFoods.foods"
-    })
-    List<Orders> findByUsers_UserId(String usersUserId);
+	@EntityGraph(attributePaths = {"users", "orderTickets", "orderTickets.seatShowTime.seats",
+			"orderTickets.seatShowTime.showTimes.movies", "orderTickets.seatShowTime.showTimes.rooms.cinemas",
+			"orderFoods.foods"})
+	List<Orders> findByUsers_UserId(String usersUserId);
 
-    @EntityGraph(attributePaths = {
-            "users",
-            "orderTickets",
-            "orderTickets.seatShowTime.seats",
-            "orderTickets.seatShowTime.showTimes.movies",
-            "orderTickets.seatShowTime.showTimes.rooms.cinemas",
-            "orderFoods.foods"
-    })
-    List<Orders> findByUsers_UserIdAndOrderStatus(String usersUserId, OrderStatus orderStatus);
+	@EntityGraph(attributePaths = {"users", "orderTickets", "orderTickets.seatShowTime.seats",
+			"orderTickets.seatShowTime.showTimes.movies", "orderTickets.seatShowTime.showTimes.rooms.cinemas",
+			"orderFoods.foods"})
+	List<Orders> findByUsers_UserIdAndOrderStatus(String usersUserId, OrderStatus orderStatus);
 
-    List<Orders> findAllByOrderStatusAndExpiredTimeBefore(OrderStatus orderStatus, LocalDateTime expiredTimeBefore);
+	List<Orders> findAllByOrderStatusAndExpiredTimeBefore(OrderStatus orderStatus, LocalDateTime expiredTimeBefore);
 
-    @Query("SELECT SUM(o.finalPrice) FROM Orders o WHERE o.orderStatus = :status AND o.bookingTime >= :from AND o.bookingTime <= :to")
-    BigDecimal sumRevenue(@Param("status") OrderStatus status, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+	@Query("SELECT SUM(o.finalPrice) FROM Orders o WHERE o.orderStatus = :status AND o.bookingTime >= :from AND o.bookingTime <= :to")
+	BigDecimal sumRevenue(@Param("status") OrderStatus status, @Param("from") LocalDateTime from,
+			@Param("to") LocalDateTime to);
 
-    @Query("SELECT COUNT(o) FROM Orders o WHERE o.bookingTime >= :from AND o.bookingTime <= :to")
-    Long countByPeriod(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+	@Query("SELECT COUNT(o) FROM Orders o WHERE o.bookingTime >= :from AND o.bookingTime <= :to")
+	Long countByPeriod(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
-    @Query("SELECT COUNT(o) FROM Orders o WHERE o.orderStatus = :status AND o.bookingTime >= :from AND o.bookingTime <= :to")
-    Long countByStatusAndPeriod(@Param("status") OrderStatus status, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+	@Query("SELECT COUNT(o) FROM Orders o WHERE o.orderStatus = :status AND o.bookingTime >= :from AND o.bookingTime <= :to")
+	Long countByStatusAndPeriod(@Param("status") OrderStatus status, @Param("from") LocalDateTime from,
+			@Param("to") LocalDateTime to);
 }

@@ -30,78 +30,62 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminBannerController {
-    AdminBannerService adminBannerService;
+	AdminBannerService adminBannerService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<BannerResponse> createBanner(@RequestBody @Valid BannerRequest request) {
-        return ApiResponse.<BannerResponse>builder()
-                .result(adminBannerService.createBanner(request))
-                .message("Thêm banner thành công")
-                .build();
-    }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<BannerResponse> createBanner(@RequestBody @Valid BannerRequest request) {
+		return ApiResponse.<BannerResponse>builder().result(adminBannerService.createBanner(request))
+				.message("Thêm banner thành công").build();
+	}
 
-    @PostMapping("/bulk")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<BannerResponse>> createBanners(@RequestBody List<BannerRequest> requests) {
-        return ApiResponse.<List<BannerResponse>>builder()
-                .result(adminBannerService.createBanners(requests))
-                .build();
-    }
+	@PostMapping("/bulk")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<List<BannerResponse>> createBanners(@RequestBody List<BannerRequest> requests) {
+		return ApiResponse.<List<BannerResponse>>builder().result(adminBannerService.createBanners(requests)).build();
+	}
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<BannerResponse> updateBanner(@PathVariable Long id, @RequestBody @Valid BannerRequest request) {
-        return ApiResponse.<BannerResponse>builder()
-                .result(adminBannerService.updateBanner(id, request))
-                .message("Cập nhật banner thành công")
-                .build();
-    }
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<BannerResponse> updateBanner(@PathVariable Long id, @RequestBody @Valid BannerRequest request) {
+		return ApiResponse.<BannerResponse>builder().result(adminBannerService.updateBanner(id, request))
+				.message("Cập nhật banner thành công").build();
+	}
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> deleteBanner(@PathVariable Long id) {
-        adminBannerService.deleteBanner(id);
-        return ApiResponse.<Void>builder()
-                .message("Xóa banner thành công")
-                .build();
-    }
+	@DeleteMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> deleteBanner(@PathVariable Long id) {
+		adminBannerService.deleteBanner(id);
+		return ApiResponse.<Void>builder().message("Xóa banner thành công").build();
+	}
 
-    @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Page<BannerResponse>> getAllBanners(
-            @Parameter(name = "filter", required = false) @Filter Specification<Banner> spec,
-            @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
-        return ApiResponse.<Page<BannerResponse>>builder()
-                .result(adminBannerService.getAllBanners(spec, pageable))
-                .message("Lấy danh sách banner thành công")
-                .build();
-    }
+	@GetMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Page<BannerResponse>> getAllBanners(
+			@Parameter(name = "filter", required = false) @Filter Specification<Banner> spec,
+			@ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
+		return ApiResponse.<Page<BannerResponse>>builder().result(adminBannerService.getAllBanners(spec, pageable))
+				.message("Lấy danh sách banner thành công").build();
+	}
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<BannerResponse> getBannerById(@PathVariable Long id) {
-        return ApiResponse.<BannerResponse>builder()
-                .result(adminBannerService.getBannerById(id))
-                .message("Lấy banner thành công")
-                .build();
-    }
+	@GetMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<BannerResponse> getBannerById(@PathVariable Long id) {
+		return ApiResponse.<BannerResponse>builder().result(adminBannerService.getBannerById(id))
+				.message("Lấy banner thành công").build();
+	}
 
-    @PutMapping("/{id}/active")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> changeActive(@PathVariable Long id) {
-        adminBannerService.changeStatus(id, EntityStatus.ACTIVE);
-        return ApiResponse.<Void>builder()
-                .message("Kích hoạt banner thành công")
-                .build();
-    }
+	@PutMapping("/{id}/active")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> changeActive(@PathVariable Long id) {
+		adminBannerService.changeStatus(id, EntityStatus.ACTIVE);
+		return ApiResponse.<Void>builder().message("Kích hoạt banner thành công").build();
+	}
 
-    @PutMapping("/{id}/inactive")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<Void> changeInactive(@PathVariable Long id) {
-        adminBannerService.changeStatus(id, EntityStatus.INACTIVE);
-        return ApiResponse.<Void>builder()
-                .message("Vô hiệu hóa banner thành công")
-                .build();
-    }
+	@PutMapping("/{id}/inactive")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> changeInactive(@PathVariable Long id) {
+		adminBannerService.changeStatus(id, EntityStatus.INACTIVE);
+		return ApiResponse.<Void>builder().message("Vô hiệu hóa banner thành công").build();
+	}
 }

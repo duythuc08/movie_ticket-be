@@ -9,8 +9,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PersonRepository extends JpaRepository<Person, Long>,JpaSpecificationExecutor<Person> {
-    Optional<Person> findByName(String name);
-    boolean existsByName(String name);
-    boolean existsByNameAndMovieRole(String name, MovieRole movieRole);
+public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
+	Optional<Person> findByName(String name);
+	boolean existsByName(String name);
+	boolean existsByNameAndMovieRole(String name, MovieRole movieRole);
 }

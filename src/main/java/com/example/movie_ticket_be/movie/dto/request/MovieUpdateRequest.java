@@ -18,16 +18,16 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MovieUpdateRequest {
-    String title;
-    String description;
-    Integer duration;
-    String posterUrl;
-    String trailerUrl;
-    LocalDateTime releaseDate;
-    Set<Long> castIds;
-    Set<Long> directorIds;
-    String language;
-    String subTitle;
-    Set<String> genreName;
-    AgeRating ageRating;
+	String title;
+	String description;
+	Integer duration;
+	String posterUrl;
+	String trailerUrl;
+	LocalDateTime releaseDate;
+	Set<Long> castIds;
+	Set<Long> directorIds;
+	String language;
+	String subTitle;
+	Set<String> genreName;
+	AgeRating ageRating;
 }

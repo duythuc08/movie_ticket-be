@@ -1,6 +1,5 @@
 package com.example.movie_ticket_be.core.config;
 
-
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,24 +14,20 @@ import java.io.IOException;
 
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
-    public void commence(
-            HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
-            throws IOException, ServletException {
-        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+	public void commence(HttpServletRequest request, HttpServletResponse response,
+			AuthenticationException authException) throws IOException, ServletException {
+		ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
 
-        response.setStatus(errorCode.getStatusCode().value());
-        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+		response.setStatus(errorCode.getStatusCode().value());
+		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ApiResponse<?> apiResponse = ApiResponse.builder()
-                .code(errorCode.getCode())
-                .message(errorCode.getMessage())
-                .build();
+		ApiResponse<?> apiResponse = ApiResponse.builder().code(errorCode.getCode()).message(errorCode.getMessage())
+				.build();
 
-        ObjectMapper objectMapper = new ObjectMapper();
+		ObjectMapper objectMapper = new ObjectMapper();
 
-        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
-        response.flushBuffer();
-    }
-
+		response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+		response.flushBuffer();
+	}
 
 }

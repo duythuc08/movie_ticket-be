@@ -21,19 +21,15 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderController {
 
-    OrderService orderService;
+	OrderService orderService;
 
-    @GetMapping("/{orderId}")
-    public ApiResponse<OrderResponse> getOrder(@PathVariable Long orderId) {
-        return ApiResponse.<OrderResponse>builder()
-                .result(orderService.getOrderById(orderId))
-                .build();
-    }
+	@GetMapping("/{orderId}")
+	public ApiResponse<OrderResponse> getOrder(@PathVariable Long orderId) {
+		return ApiResponse.<OrderResponse>builder().result(orderService.getOrderById(orderId)).build();
+	}
 
-    @GetMapping("/user/{userId}")
-    public ApiResponse<List<OrderResponse>> getOrderByUserId(@PathVariable String userId) {
-        return ApiResponse.<List<OrderResponse>>builder()
-                .result(orderService.getOrdersByUserId(userId))
-                .build();
-    }
+	@GetMapping("/user/{userId}")
+	public ApiResponse<List<OrderResponse>> getOrderByUserId(@PathVariable String userId) {
+		return ApiResponse.<List<OrderResponse>>builder().result(orderService.getOrdersByUserId(userId)).build();
+	}
 }

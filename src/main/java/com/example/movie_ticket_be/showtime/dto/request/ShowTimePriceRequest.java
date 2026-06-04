@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ShowTimePriceRequest {
-    Long showTimeId;
-    SeatType seatType;
-    BigDecimal price;
+	Long showTimeId;
+	SeatType seatType;
+	BigDecimal price;
 }

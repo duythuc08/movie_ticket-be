@@ -13,18 +13,18 @@ import java.util.Base64;
 
 @Component
 public class QRCodeUtils {
-    public String generateQRCodeImage(String barcodeText, int width, int height) {
-        try {
-            QRCodeWriter barcodeWriter = new QRCodeWriter();
-            BitMatrix bitMatrix = barcodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, width, height);
+	public String generateQRCodeImage(String barcodeText, int width, int height) {
+		try {
+			QRCodeWriter barcodeWriter = new QRCodeWriter();
+			BitMatrix bitMatrix = barcodeWriter.encode(barcodeText, BarcodeFormat.QR_CODE, width, height);
 
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            MatrixToImageWriter.writeToStream(bitMatrix, "PNG", bos);
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			MatrixToImageWriter.writeToStream(bitMatrix, "PNG", bos);
 
-            byte[] imageBytes = bos.toByteArray();
-            return Base64.getEncoder().encodeToString(imageBytes);
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.CREATE_QR_CODE_FAILED);
-        }
-    }
+			byte[] imageBytes = bos.toByteArray();
+			return Base64.getEncoder().encodeToString(imageBytes);
+		} catch (Exception e) {
+			throw new AppException(ErrorCode.CREATE_QR_CODE_FAILED);
+		}
+	}
 }

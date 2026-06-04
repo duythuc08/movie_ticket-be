@@ -22,29 +22,29 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PROTECTED)
 public abstract class BaseEntity {
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "entity_status")
-    EntityStatus entityStatus;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "entity_status")
+	EntityStatus entityStatus;
 
-    @Column(name = "created_at", updatable = false)
-    LocalDateTime createdAt;
+	@Column(name = "created_at", updatable = false)
+	LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    LocalDateTime updatedAt;
+	@Column(name = "updated_at")
+	LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (this.entityStatus == null) {
-            this.entityStatus = EntityStatus.ACTIVE;
-        }
-        if (this.createdAt == null) {
-            this.createdAt = LocalDateTime.now();
-        }
-        this.updatedAt = LocalDateTime.now();
-    }
+	@PrePersist
+	protected void onCreate() {
+		if (this.entityStatus == null) {
+			this.entityStatus = EntityStatus.ACTIVE;
+		}
+		if (this.createdAt == null) {
+			this.createdAt = LocalDateTime.now();
+		}
+		this.updatedAt = LocalDateTime.now();
+	}
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = LocalDateTime.now();
-    }
+	@PreUpdate
+	protected void onUpdate() {
+		this.updatedAt = LocalDateTime.now();
+	}
 }

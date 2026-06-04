@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BannerRepository extends JpaRepository<Banner, Long>, JpaSpecificationExecutor<Banner> {
-    boolean existsByTitle(String name);
+	boolean existsByTitle(String name);
 
-    Optional<Banner> findById(Long id);
+	Optional<Banner> findById(Long id);
 
-    Banner findByMovies_MovieId(Long moviesMovieId);
-    List<Banner> findAllByOrderByPriorityAsc();
-    List<Banner> findByActiveTrueOrderByPriorityAsc();
-    List<Banner> findByBannerTypeOrderByPriorityAsc(BannerType bannerType);
+	Banner findByMovies_MovieId(Long moviesMovieId);
+	List<Banner> findAllByOrderByPriorityAsc();
+	List<Banner> findByActiveTrueOrderByPriorityAsc();
+	List<Banner> findByBannerTypeOrderByPriorityAsc(BannerType bannerType);
 
 }

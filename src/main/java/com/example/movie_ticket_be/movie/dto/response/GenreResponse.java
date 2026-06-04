@@ -10,8 +10,8 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class GenreResponse {
-    Long genreId;
-    String name;
-    String description;
-    EntityStatus entityStatus;
+	Long genreId;
+	String name;
+	String description;
+	EntityStatus entityStatus;
 }

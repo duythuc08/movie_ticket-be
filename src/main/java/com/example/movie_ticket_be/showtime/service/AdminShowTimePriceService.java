@@ -28,52 +28,52 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminShowTimePriceService {
-    ShowTimePriceRepository showTimePriceRepository;
-    ShowTimePriceMapper showTimePriceMapper;
-    ShowTimeRepository showTimeRepository;
-    AdminSeatService adminSeatService;
-    SeatShowTimeService seatShowTimeService;
+	ShowTimePriceRepository showTimePriceRepository;
+	ShowTimePriceMapper showTimePriceMapper;
+	ShowTimeRepository showTimeRepository;
+	AdminSeatService adminSeatService;
+	SeatShowTimeService seatShowTimeService;
 
-    public ShowTimePriceResponse createShowTimePrice(ShowTimePriceRequest request) {
-        ShowTimes showTime = showTimeRepository.findById(request.getShowTimeId())
-                .orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_NOT_FOUND));
+	public ShowTimePriceResponse createShowTimePrice(ShowTimePriceRequest request) {
+		ShowTimes showTime = showTimeRepository.findById(request.getShowTimeId())
+				.orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_NOT_FOUND));
 
-        Set<SeatType> validTypes = adminSeatService.getDistinctSeatTypesByRoomId(showTime.getRooms().getRoomId());
-        if (!validTypes.contains(request.getSeatType())) {
-            throw new AppException(ErrorCode.SEAT_TYPE_NOT_FOUND);
-        }
+		Set<SeatType> validTypes = adminSeatService.getDistinctSeatTypesByRoomId(showTime.getRooms().getRoomId());
+		if (!validTypes.contains(request.getSeatType())) {
+			throw new AppException(ErrorCode.SEAT_TYPE_NOT_FOUND);
+		}
 
-        if (showTimePriceRepository.existsByShowtimes_ShowTimeIdAndSeatType(request.getShowTimeId(), request.getSeatType())) {
-            throw new AppException(ErrorCode.SHOWTIME_PRICE_EXISTED);
-        }
+		if (showTimePriceRepository.existsByShowtimes_ShowTimeIdAndSeatType(request.getShowTimeId(),
+				request.getSeatType())) {
+			throw new AppException(ErrorCode.SHOWTIME_PRICE_EXISTED);
+		}
 
-        ShowTimePrice showTimePrice = showTimePriceMapper.toShowTimePrice(request);
-        return showTimePriceMapper.toShowTimePriceResponse(showTimePriceRepository.save(showTimePrice));
-    }
+		ShowTimePrice showTimePrice = showTimePriceMapper.toShowTimePrice(request);
+		return showTimePriceMapper.toShowTimePriceResponse(showTimePriceRepository.save(showTimePrice));
+	}
 
-    public List<ShowTimePriceResponse> createShowTimePrices(List<ShowTimePriceRequest> requests) {
-        return requests.stream().map(this::createShowTimePrice).toList();
-    }
+	public List<ShowTimePriceResponse> createShowTimePrices(List<ShowTimePriceRequest> requests) {
+		return requests.stream().map(this::createShowTimePrice).toList();
+	}
 
-    public List<ShowTimePriceResponse> getPricesByShowTimeId(Long showTimeId) {
-        return showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId).stream()
-                .map(showTimePriceMapper::toShowTimePriceResponse)
-                .toList();
-    }
+	public List<ShowTimePriceResponse> getPricesByShowTimeId(Long showTimeId) {
+		return showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId).stream()
+				.map(showTimePriceMapper::toShowTimePriceResponse).toList();
+	}
 
-    public ShowTimePriceResponse updateShowTimePrice(Long showTimePriceId, Long showTimeId, BigDecimal price) {
-        ShowTimePrice showTimePrice = showTimePriceRepository.findById(showTimePriceId)
-                .orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_PRICE_NOT_FOUND));
+	public ShowTimePriceResponse updateShowTimePrice(Long showTimePriceId, Long showTimeId, BigDecimal price) {
+		ShowTimePrice showTimePrice = showTimePriceRepository.findById(showTimePriceId)
+				.orElseThrow(() -> new AppException(ErrorCode.SHOWTIME_PRICE_NOT_FOUND));
 
-        if (!showTimePrice.getShowtimes().getShowTimeId().equals(showTimeId)) {
-            throw new AppException(ErrorCode.SHOWTIME_NOT_FOUND);
-        }
+		if (!showTimePrice.getShowtimes().getShowTimeId().equals(showTimeId)) {
+			throw new AppException(ErrorCode.SHOWTIME_NOT_FOUND);
+		}
 
-        if (seatShowTimeService.hasBookedSeats(showTimeId)) {
-            throw new AppException(ErrorCode.SHOWTIME_HAS_ACTIVE_SEATS);
-        }
+		if (seatShowTimeService.hasBookedSeats(showTimeId)) {
+			throw new AppException(ErrorCode.SHOWTIME_HAS_ACTIVE_SEATS);
+		}
 
-        showTimePrice.setPrice(price);
-        return showTimePriceMapper.toShowTimePriceResponse(showTimePriceRepository.save(showTimePrice));
-    }
+		showTimePrice.setPrice(price);
+		return showTimePriceMapper.toShowTimePriceResponse(showTimePriceRepository.save(showTimePrice));
+	}
 }

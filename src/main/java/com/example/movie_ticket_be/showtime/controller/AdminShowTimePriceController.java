@@ -18,32 +18,28 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminShowTimePriceController {
-    AdminShowTimePriceService adminShowTimePriceService;
+	AdminShowTimePriceService adminShowTimePriceService;
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<ShowTimePriceResponse> createShowTimePrice(@RequestBody ShowTimePriceRequest request) {
-        return ApiResponse.<ShowTimePriceResponse>builder()
-                .result(adminShowTimePriceService.createShowTimePrice(request))
-                .build();
-    }
+	@PostMapping
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<ShowTimePriceResponse> createShowTimePrice(@RequestBody ShowTimePriceRequest request) {
+		return ApiResponse.<ShowTimePriceResponse>builder()
+				.result(adminShowTimePriceService.createShowTimePrice(request)).build();
+	}
 
-    @PostMapping("/bulk")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<List<ShowTimePriceResponse>> createShowTimePrices(@RequestBody List<ShowTimePriceRequest> requests) {
-        return ApiResponse.<List<ShowTimePriceResponse>>builder()
-                .result(adminShowTimePriceService.createShowTimePrices(requests))
-                .build();
-    }
+	@PostMapping("/bulk")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<List<ShowTimePriceResponse>> createShowTimePrices(
+			@RequestBody List<ShowTimePriceRequest> requests) {
+		return ApiResponse.<List<ShowTimePriceResponse>>builder()
+				.result(adminShowTimePriceService.createShowTimePrices(requests)).build();
+	}
 
-    @PutMapping("/{showTimePriceId}/showtime/{showTimeId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ApiResponse<ShowTimePriceResponse> updateShowTimePrice(
-            @PathVariable Long showTimePriceId,
-            @PathVariable Long showTimeId,
-            @RequestParam BigDecimal price) {
-        return ApiResponse.<ShowTimePriceResponse>builder()
-                .result(adminShowTimePriceService.updateShowTimePrice(showTimePriceId, showTimeId, price))
-                .build();
-    }
+	@PutMapping("/{showTimePriceId}/showtime/{showTimeId}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<ShowTimePriceResponse> updateShowTimePrice(@PathVariable Long showTimePriceId,
+			@PathVariable Long showTimeId, @RequestParam BigDecimal price) {
+		return ApiResponse.<ShowTimePriceResponse>builder()
+				.result(adminShowTimePriceService.updateShowTimePrice(showTimePriceId, showTimeId, price)).build();
+	}
 }

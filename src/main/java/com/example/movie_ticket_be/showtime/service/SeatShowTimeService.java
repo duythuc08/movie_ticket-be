@@ -27,66 +27,56 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SeatShowTimeService {
-    SeatShowTimeMapper seatShowTimeMapper;
-    SeatShowTimeRepository seatShowTimeRepository;
-    ShowTimeRepository showTimeRepository;
-    ShowTimePriceService showTimePriceService;
+	SeatShowTimeMapper seatShowTimeMapper;
+	SeatShowTimeRepository seatShowTimeRepository;
+	ShowTimeRepository showTimeRepository;
+	ShowTimePriceService showTimePriceService;
 
-    public List<SeatShowTimeResponse> getAllSeatShowTimesByShowTime(Long showTimeId) {
-        if (!showTimeRepository.existsByShowTimeId(showTimeId)) {
-            throw new AppException(ErrorCode.SHOWTIME_NOT_FOUND);
-        }
-        return seatShowTimeRepository.findByShowTimes_ShowTimeId(showTimeId).stream()
-                .map(seatShowTimeMapper::toSeatShowTimeResponse)
-                .toList();
-    }
+	public List<SeatShowTimeResponse> getAllSeatShowTimesByShowTime(Long showTimeId) {
+		if (!showTimeRepository.existsByShowTimeId(showTimeId)) {
+			throw new AppException(ErrorCode.SHOWTIME_NOT_FOUND);
+		}
+		return seatShowTimeRepository.findByShowTimes_ShowTimeId(showTimeId).stream()
+				.map(seatShowTimeMapper::toSeatShowTimeResponse).toList();
+	}
 
-    public SeatSelectionResponse getSeatSelectionData(Long showTimeId) {
-        List<SeatShowTimeResponse> seats = getAllSeatShowTimesByShowTime(showTimeId);
-        Map<SeatType, BigDecimal> pricingMap = showTimePriceService.getPriceMapByShowTime(showTimeId);
+	public SeatSelectionResponse getSeatSelectionData(Long showTimeId) {
+		List<SeatShowTimeResponse> seats = getAllSeatShowTimesByShowTime(showTimeId);
+		Map<SeatType, BigDecimal> pricingMap = showTimePriceService.getPriceMapByShowTime(showTimeId);
 
-        List<SuggestedSeatResponse> suggested = seats.stream()
-                .filter(s -> s.getSeatShowTimeStatus() == SeatShowTimeStatus.AVAILABLE)
-                .sorted(Comparator.comparing(SeatShowTimeResponse::getViewQuanlityScore,
-                        Comparator.nullsLast(Comparator.reverseOrder())))
-                .limit(3)
-                .map(s -> SuggestedSeatResponse.builder()
-                        .seatShowTimeId(s.getSeatShowTimeId())
-                        .seatRow(s.getSeatRow())
-                        .seatNumber(s.getSeatNumber())
-                        .seatType(s.getSeatType())
-                        .viewQuanlityScore(s.getViewQuanlityScore())
-                        .build())
-                .toList();
+		List<SuggestedSeatResponse> suggested = seats.stream()
+				.filter(s -> s.getSeatShowTimeStatus() == SeatShowTimeStatus.AVAILABLE)
+				.sorted(Comparator.comparing(
+						SeatShowTimeResponse::getViewQuanlityScore, Comparator.nullsLast(Comparator.reverseOrder())))
+				.limit(3)
+				.map(s -> SuggestedSeatResponse.builder().seatShowTimeId(s.getSeatShowTimeId()).seatRow(s.getSeatRow())
+						.seatNumber(s.getSeatNumber()).seatType(s.getSeatType())
+						.viewQuanlityScore(s.getViewQuanlityScore()).build())
+				.toList();
 
-        return SeatSelectionResponse.builder()
-                .seats(seats)
-                .pricingMap(pricingMap)
-                .suggested(suggested)
-                .build();
-    }
+		return SeatSelectionResponse.builder().seats(seats).pricingMap(pricingMap).suggested(suggested).build();
+	}
 
-    public void generateSeatsForShowTime(Long showTimeId, Long roomId) {
-        seatShowTimeRepository.bulkInsertSeatsForShowTime(showTimeId, roomId);
-    }
+	public void generateSeatsForShowTime(Long showTimeId, Long roomId) {
+		seatShowTimeRepository.bulkInsertSeatsForShowTime(showTimeId, roomId);
+	}
 
-    public boolean hasBookedSeats(Long showTimeId) {
-        return seatShowTimeRepository.existsByShowTimes_ShowTimeIdAndSeatShowTimeStatusIn(
-                showTimeId, List.of(SeatShowTimeStatus.RESERVED, SeatShowTimeStatus.SOLD));
-    }
+	public boolean hasBookedSeats(Long showTimeId) {
+		return seatShowTimeRepository.existsByShowTimes_ShowTimeIdAndSeatShowTimeStatusIn(showTimeId,
+				List.of(SeatShowTimeStatus.RESERVED, SeatShowTimeStatus.SOLD));
+	}
 
-    public SeatSummaryResponse getSeatSummaryForShowTime(Long showTimeId) {
-        long available = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId, SeatShowTimeStatus.AVAILABLE);
-        long sold = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId, SeatShowTimeStatus.SOLD);
-        long reserved = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId, SeatShowTimeStatus.RESERVED);
-        long blocked = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId, SeatShowTimeStatus.BLOCKED);
-        long total = available + sold + reserved + blocked;
-        return SeatSummaryResponse.builder()
-                .total(total)
-                .available(available)
-                .sold(sold)
-                .reserved(reserved)
-                .blocked(blocked)
-                .build();
-    }
+	public SeatSummaryResponse getSeatSummaryForShowTime(Long showTimeId) {
+		long available = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId,
+				SeatShowTimeStatus.AVAILABLE);
+		long sold = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId,
+				SeatShowTimeStatus.SOLD);
+		long reserved = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId,
+				SeatShowTimeStatus.RESERVED);
+		long blocked = seatShowTimeRepository.countByShowTimes_ShowTimeIdAndSeatShowTimeStatus(showTimeId,
+				SeatShowTimeStatus.BLOCKED);
+		long total = available + sold + reserved + blocked;
+		return SeatSummaryResponse.builder().total(total).available(available).sold(sold).reserved(reserved)
+				.blocked(blocked).build();
+	}
 }

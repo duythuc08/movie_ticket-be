@@ -17,19 +17,15 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CinemaController {
-    CinemaService cinemaService;
+	CinemaService cinemaService;
 
-    @GetMapping("/getCinemas")
-    public ApiResponse<List<CinemaResponse>> getCinemas() {
-        return ApiResponse.<List<CinemaResponse>>builder()
-                .result(cinemaService.getCinemas())
-                .build();
-    }
+	@GetMapping("/getCinemas")
+	public ApiResponse<List<CinemaResponse>> getCinemas() {
+		return ApiResponse.<List<CinemaResponse>>builder().result(cinemaService.getCinemas()).build();
+	}
 
-    @GetMapping("/getCinema/{id}")
-    public ApiResponse<CinemaResponse> getCinemaById(@PathVariable Long id) {
-        return ApiResponse.<CinemaResponse>builder()
-                .result(cinemaService.getCinemaById(id))
-                .build();
-    }
+	@GetMapping("/getCinema/{id}")
+	public ApiResponse<CinemaResponse> getCinemaById(@PathVariable Long id) {
+		return ApiResponse.<CinemaResponse>builder().result(cinemaService.getCinemaById(id)).build();
+	}
 }

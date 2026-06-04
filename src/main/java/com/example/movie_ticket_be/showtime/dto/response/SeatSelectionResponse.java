@@ -14,7 +14,7 @@ import java.util.Map;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SeatSelectionResponse {
-    List<SeatShowTimeResponse> seats;
-    Map<SeatType, BigDecimal> pricingMap;
-    List<SuggestedSeatResponse> suggested;
+	List<SeatShowTimeResponse> seats;
+	Map<SeatType, BigDecimal> pricingMap;
+	List<SuggestedSeatResponse> suggested;
 }

@@ -19,16 +19,16 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PromotionScheduler {
 
-    PromotionRepository promotionRepository;
+	PromotionRepository promotionRepository;
 
-    @Scheduled(cron = "0 0 * * * *")
-    public void autoExpirePromotions() {
-        List<Promotion> expired = promotionRepository
-                .findByStatusAndEndTimeBefore(PromotionStatus.PUBLISHED, LocalDateTime.now());
-        if (!expired.isEmpty()) {
-            expired.forEach(p -> p.setStatus(PromotionStatus.EXPIRED));
-            promotionRepository.saveAll(expired);
-            log.info("Auto-expired {} promotion(s)", expired.size());
-        }
-    }
+	@Scheduled(cron = "0 0 * * * *")
+	public void autoExpirePromotions() {
+		List<Promotion> expired = promotionRepository.findByStatusAndEndTimeBefore(PromotionStatus.PUBLISHED,
+				LocalDateTime.now());
+		if (!expired.isEmpty()) {
+			expired.forEach(p -> p.setStatus(PromotionStatus.EXPIRED));
+			promotionRepository.saveAll(expired);
+			log.info("Auto-expired {} promotion(s)", expired.size());
+		}
+	}
 }

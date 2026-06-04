@@ -9,10 +9,10 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.example.movie_ticket_be.user.entity.Users;
 
-public interface UserRepository extends JpaRepository<Users,String>,JpaSpecificationExecutor<Users> {
-    boolean existsByUsername(String username);
-    Optional<Users> findByUsername(String username);
-    List<Users> findAllByEnabledFalseAndCreatedAtBefore(LocalDateTime time);
+public interface UserRepository extends JpaRepository<Users, String>, JpaSpecificationExecutor<Users> {
+	boolean existsByUsername(String username);
+	Optional<Users> findByUsername(String username);
+	List<Users> findAllByEnabledFalseAndCreatedAtBefore(LocalDateTime time);
 
-    Optional<Users> findByUserId(String userId);
+	Optional<Users> findByUserId(String userId);
 }

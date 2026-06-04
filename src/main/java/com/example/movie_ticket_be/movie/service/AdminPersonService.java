@@ -27,50 +27,44 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AdminPersonService {
-    PersonRepository personRepository;
-    PersonMapper personMapper;
+	PersonRepository personRepository;
+	PersonMapper personMapper;
 
-    @Transactional
-    public PersonResponse createPerson(PersonRequest request) {
-        if (personRepository.existsByNameAndMovieRole(request.getName(), request.getMovieRole())) {
-            throw new AppException(ErrorCode.PERSON_EXISTED);
-        }
-        Person person = personMapper.toPerson(request);
-        return personMapper.toPersonResponse(personRepository.save(person));
-    }
+	@Transactional
+	public PersonResponse createPerson(PersonRequest request) {
+		if (personRepository.existsByNameAndMovieRole(request.getName(), request.getMovieRole())) {
+			throw new AppException(ErrorCode.PERSON_EXISTED);
+		}
+		Person person = personMapper.toPerson(request);
+		return personMapper.toPersonResponse(personRepository.save(person));
+	}
 
-    @Transactional
-    public List<PersonResponse> createPersons(List<PersonRequest> requests) {
-        List<Person> persons = requests.stream().map(request -> {
-            if (personRepository.existsByNameAndMovieRole(request.getName(), request.getMovieRole())) {
-                throw new AppException(ErrorCode.PERSON_EXISTED);
-            }
-            Person person = personMapper.toPerson(request);
-            return person;
-        }).toList();
+	@Transactional
+	public List<PersonResponse> createPersons(List<PersonRequest> requests) {
+		List<Person> persons = requests.stream().map(request -> {
+			if (personRepository.existsByNameAndMovieRole(request.getName(), request.getMovieRole())) {
+				throw new AppException(ErrorCode.PERSON_EXISTED);
+			}
+			Person person = personMapper.toPerson(request);
+			return person;
+		}).toList();
 
-        return personRepository.saveAll(persons).stream()
-                .map(personMapper::toPersonResponse)
-                .toList();
-    }
+		return personRepository.saveAll(persons).stream().map(personMapper::toPersonResponse).toList();
+	}
 
-    public Page<PersonResponse> getAllPersons(
-            Specification<Person> spec,
-            Pageable pageable) {
-        return personRepository.findAll(spec, pageable)
-                .map(personMapper::toPersonResponse);
-    }
+	public Page<PersonResponse> getAllPersons(Specification<Person> spec, Pageable pageable) {
+		return personRepository.findAll(spec, pageable).map(personMapper::toPersonResponse);
+	}
 
-    public PersonResponse getPersonById(long id) {
-        return personMapper.toPersonResponse(personRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)));
-    }
+	public PersonResponse getPersonById(long id) {
+		return personMapper.toPersonResponse(
+				personRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)));
+	}
 
-    @Transactional
-    public void changeStatus(long id, EntityStatus entityStatus) {
-        Person person = personRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND));
-        person.setEntityStatus(entityStatus);
-        personRepository.save(person);
-    }
+	@Transactional
+	public void changeStatus(long id, EntityStatus entityStatus) {
+		Person person = personRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND));
+		person.setEntityStatus(entityStatus);
+		personRepository.save(person);
+	}
 }

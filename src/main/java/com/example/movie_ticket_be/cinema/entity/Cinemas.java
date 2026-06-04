@@ -15,26 +15,26 @@ import lombok.experimental.FieldDefaults;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class Cinemas extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long cinemaId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long cinemaId;
 
-    String name;
-    String address;
-    @Column(unique = true)
-    String phoneNumber;
-    @Column(unique = true)
-    String email;
+	String name;
+	String address;
+	@Column(unique = true)
+	String phoneNumber;
+	@Column(unique = true)
+	String email;
 
-    @Enumerated(EnumType.STRING)
-    CinemaStatus cinemaStatus;
+	@Enumerated(EnumType.STRING)
+	CinemaStatus cinemaStatus;
 
-    @PrePersist
-    @Override
-    protected void onCreate() {
-        super.onCreate();
-        if (this.cinemaStatus == null) {
-            this.cinemaStatus = CinemaStatus.OPERATIONAL;
-        }
-    }
+	@PrePersist
+	@Override
+	protected void onCreate() {
+		super.onCreate();
+		if (this.cinemaStatus == null) {
+			this.cinemaStatus = CinemaStatus.OPERATIONAL;
+		}
+	}
 }

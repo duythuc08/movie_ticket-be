@@ -11,9 +11,9 @@ import java.math.BigDecimal;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderFoodResponse {
-    Long foodId;
-    String name;
-    Integer quantity;
-    BigDecimal unitPrice;
-    BigDecimal totalPrice;
+	Long foodId;
+	String name;
+	Integer quantity;
+	BigDecimal unitPrice;
+	BigDecimal totalPrice;
 }

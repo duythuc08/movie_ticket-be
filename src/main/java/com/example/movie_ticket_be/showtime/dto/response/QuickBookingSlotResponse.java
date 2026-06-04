@@ -9,8 +9,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class QuickBookingSlotResponse {
-    Long showTimeId;
-    String startTime;
-    String roomName;
-    String roomType;
+	Long showTimeId;
+	String startTime;
+	String roomName;
+	String roomType;
 }

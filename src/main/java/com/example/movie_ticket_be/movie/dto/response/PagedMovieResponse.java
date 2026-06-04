@@ -11,9 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PagedMovieResponse {
-    List<MovieResponse> content;
-    int currentPage;
-    int pageSize;
-    int totalPages;
-    long totalElements;
+	List<MovieResponse> content;
+	int currentPage;
+	int pageSize;
+	int totalPages;
+	long totalElements;
 }

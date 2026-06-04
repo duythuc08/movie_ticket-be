@@ -31,44 +31,36 @@ import java.time.LocalDateTime;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminOrderController {
 
-    AdminOrderService adminOrderService;
+	AdminOrderService adminOrderService;
 
-    @GetMapping
-    public ApiResponse<Page<AdminOrderSummaryResponse>> getOrders(
-            @Parameter(name = "filter", required = false) @Filter Specification<Orders> spec,
-            @ParameterObject @PageableDefault(sort = "bookingTime", direction = Sort.Direction.DESC, size = 10) Pageable pageable) {
+	@GetMapping
+	public ApiResponse<Page<AdminOrderSummaryResponse>> getOrders(
+			@Parameter(name = "filter", required = false) @Filter Specification<Orders> spec,
+			@ParameterObject @PageableDefault(sort = "bookingTime", direction = Sort.Direction.DESC, size = 10) Pageable pageable) {
 
-        return ApiResponse.<Page<AdminOrderSummaryResponse>>builder()
-                .result(adminOrderService.getOrders(spec, pageable))
-                .build();
-    }
+		return ApiResponse.<Page<AdminOrderSummaryResponse>>builder()
+				.result(adminOrderService.getOrders(spec, pageable)).build();
+	}
 
-    @GetMapping("/{orderId}")
-    public ApiResponse<OrderResponse> getOrderDetail(@PathVariable Long orderId) {
-        return ApiResponse.<OrderResponse>builder()
-                .result(adminOrderService.getOrderDetail(orderId))
-                .build();
-    }
+	@GetMapping("/{orderId}")
+	public ApiResponse<OrderResponse> getOrderDetail(@PathVariable Long orderId) {
+		return ApiResponse.<OrderResponse>builder().result(adminOrderService.getOrderDetail(orderId)).build();
+	}
 
-    @PostMapping("/{orderId}/checkin")
-    public ApiResponse<String> checkin(@PathVariable Long orderId, @RequestParam String qrCode) {
-        adminOrderService.checkin(orderId, qrCode);
-        return ApiResponse.<String>builder()
-                .message("Check-in thành công")
-                .result("OK")
-                .build();
-    }
+	@PostMapping("/{orderId}/checkin")
+	public ApiResponse<String> checkin(@PathVariable Long orderId, @RequestParam String qrCode) {
+		adminOrderService.checkin(orderId, qrCode);
+		return ApiResponse.<String>builder().message("Check-in thành công").result("OK").build();
+	}
 
-    @GetMapping("/stats")
-    public ApiResponse<AdminOrderStatsResponse> getStats(
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+	@GetMapping("/stats")
+	public ApiResponse<AdminOrderStatsResponse> getStats(
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+			@RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
 
-        LocalDateTime fromDt = from != null ? from.atStartOfDay() : LocalDate.now().minusMonths(1).atStartOfDay();
-        LocalDateTime toDt = to != null ? to.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
+		LocalDateTime fromDt = from != null ? from.atStartOfDay() : LocalDate.now().minusMonths(1).atStartOfDay();
+		LocalDateTime toDt = to != null ? to.atTime(23, 59, 59) : LocalDate.now().atTime(23, 59, 59);
 
-        return ApiResponse.<AdminOrderStatsResponse>builder()
-                .result(adminOrderService.getStats(fromDt, toDt))
-                .build();
-    }
+		return ApiResponse.<AdminOrderStatsResponse>builder().result(adminOrderService.getStats(fromDt, toDt)).build();
+	}
 }

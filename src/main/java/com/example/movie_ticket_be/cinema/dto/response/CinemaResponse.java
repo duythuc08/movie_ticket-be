@@ -15,17 +15,17 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CinemaResponse {
-    Long cinemaId;
-    String name;
-    String address;
-    @Column(unique = true)
-    String phoneNumber;
-    @Column(unique = true)
-    String email;
+	Long cinemaId;
+	String name;
+	String address;
+	@Column(unique = true)
+	String phoneNumber;
+	@Column(unique = true)
+	String email;
 
-    @Enumerated(EnumType.STRING)
-    CinemaStatus cinemaStatus;
+	@Enumerated(EnumType.STRING)
+	CinemaStatus cinemaStatus;
 
-    @Enumerated(EnumType.STRING)
-    EntityStatus entityStatus;
+	@Enumerated(EnumType.STRING)
+	EntityStatus entityStatus;
 }

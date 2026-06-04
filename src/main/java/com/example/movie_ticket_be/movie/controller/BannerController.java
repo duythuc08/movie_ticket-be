@@ -17,26 +17,20 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BannerController {
-    BannerService bannerService;
+	BannerService bannerService;
 
-    @GetMapping("/getBanners")
-    public ApiResponse<List<BannerResponse>> listBanners() {
-        return ApiResponse.<List<BannerResponse>>builder()
-                .result(bannerService.getBannersActive())
-                .build();
-    }
+	@GetMapping("/getBanners")
+	public ApiResponse<List<BannerResponse>> listBanners() {
+		return ApiResponse.<List<BannerResponse>>builder().result(bannerService.getBannersActive()).build();
+	}
 
-    @GetMapping("/getBannerActive")
-    public ApiResponse<List<BannerResponse>> listBannersActive() {
-        return ApiResponse.<List<BannerResponse>>builder()
-                .result(bannerService.getBannersByActive())
-                .build();
-    }
+	@GetMapping("/getBannerActive")
+	public ApiResponse<List<BannerResponse>> listBannersActive() {
+		return ApiResponse.<List<BannerResponse>>builder().result(bannerService.getBannersByActive()).build();
+	}
 
-    @GetMapping("/getBannerByMovieId/{movieId}")
-    public ApiResponse<BannerResponse> getBannerByMovieId(@PathVariable Long movieId) {
-        return ApiResponse.<BannerResponse>builder()
-                .result(bannerService.getBannerByMovieId(movieId))
-                .build();
-    }
+	@GetMapping("/getBannerByMovieId/{movieId}")
+	public ApiResponse<BannerResponse> getBannerByMovieId(@PathVariable Long movieId) {
+		return ApiResponse.<BannerResponse>builder().result(bannerService.getBannerByMovieId(movieId)).build();
+	}
 }

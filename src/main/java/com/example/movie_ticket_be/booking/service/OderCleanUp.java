@@ -16,35 +16,34 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 public class OderCleanUp {
-    private final OrderRepository orderRepo;
-    private final PaymentService paymentService;
+	private final OrderRepository orderRepo;
+	private final PaymentService paymentService;
 
-    @Scheduled(fixedRate = 60000)
-    public void cleanupExpiredOrders() {
-        try {
-            List<Orders> expiredOrders = orderRepo.findAllByOrderStatusAndExpiredTimeBefore(
-                    OrderStatus.PENDING, LocalDateTime.now());
+	@Scheduled(fixedRate = 60000)
+	public void cleanupExpiredOrders() {
+		try {
+			List<Orders> expiredOrders = orderRepo.findAllByOrderStatusAndExpiredTimeBefore(OrderStatus.PENDING,
+					LocalDateTime.now());
 
-            if (expiredOrders.isEmpty()) {
-                return;
-            }
+			if (expiredOrders.isEmpty()) {
+				return;
+			}
 
-            int successCount = 0;
-            int failCount = 0;
+			int successCount = 0;
+			int failCount = 0;
 
-            for (Orders order : expiredOrders) {
-                try {
-                    paymentService.processFail(order);
-                    successCount++;
-                } catch (Exception e) {
-                    failCount++;
-                    log.error("Failed to process expired order {}:  {}",
-                            order.getOrderId(), e.getMessage(), e);
-                }
-            }
+			for (Orders order : expiredOrders) {
+				try {
+					paymentService.processFail(order);
+					successCount++;
+				} catch (Exception e) {
+					failCount++;
+					log.error("Failed to process expired order {}:  {}", order.getOrderId(), e.getMessage(), e);
+				}
+			}
 
-        } catch (Exception e) {
-            log.error("Error during cleanup process:  {}", e.getMessage(), e);
-        }
-    }
+		} catch (Exception e) {
+			log.error("Error during cleanup process:  {}", e.getMessage(), e);
+		}
+	}
 }

@@ -10,21 +10,21 @@ import org.mapstruct.MappingTarget;
 @Mapper(componentModel = "spring")
 public interface FoodMapper {
 
-    @Mapping(target = "cinema", ignore = true)
-    @Mapping(target = "foodId", ignore = true)
-    @Mapping(target = "entityStatus", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    Foods toFoods(FoodRequest request);
+	@Mapping(target = "cinema", ignore = true)
+	@Mapping(target = "foodId", ignore = true)
+	@Mapping(target = "entityStatus", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	Foods toFoods(FoodRequest request);
 
-    @Mapping(source = "cinema.cinemaId", target = "cinemaId")
-    @Mapping(source = "cinema.name", target = "cinemaName")
-    FoodResponse toFoodResponse(Foods foods);
+	@Mapping(source = "cinema.cinemaId", target = "cinemaId")
+	@Mapping(source = "cinema.name", target = "cinemaName")
+	FoodResponse toFoodResponse(Foods foods);
 
-    @Mapping(target = "cinema", ignore = true)
-    @Mapping(target = "foodId", ignore = true)
-    @Mapping(target = "entityStatus", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void updateFoods(FoodRequest request, @MappingTarget Foods foods);
+	@Mapping(target = "cinema", ignore = true)
+	@Mapping(target = "foodId", ignore = true)
+	@Mapping(target = "entityStatus", ignore = true)
+	@Mapping(target = "createdAt", ignore = true)
+	@Mapping(target = "updatedAt", ignore = true)
+	void updateFoods(FoodRequest request, @MappingTarget Foods foods);
 }

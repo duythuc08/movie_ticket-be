@@ -18,19 +18,19 @@ import java.math.BigDecimal;
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderFoods extends BaseEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long orderFoodId;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	Long orderFoodId;
 
-    Integer quantity;
-    BigDecimal unitPrice;
-    BigDecimal totalPrice;
+	Integer quantity;
+	BigDecimal unitPrice;
+	BigDecimal totalPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    Orders orders;
+	@ManyToOne
+	@JoinColumn(name = "order_id")
+	Orders orders;
 
-    @ManyToOne
-    @JoinColumn(name = "food_id")
-    Foods foods;
+	@ManyToOne
+	@JoinColumn(name = "food_id")
+	Foods foods;
 }

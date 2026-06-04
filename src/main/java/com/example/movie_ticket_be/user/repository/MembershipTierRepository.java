@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MembershipTierRepository extends JpaRepository<MembershipTier, Long> {
-    @Query("SELECT m FROM MembershipTier m ORDER BY m.pointsRequired DESC")
-    List<MembershipTier> findAllOrderByPointsRequiredDesc();
+	@Query("SELECT m FROM MembershipTier m ORDER BY m.pointsRequired DESC")
+	List<MembershipTier> findAllOrderByPointsRequiredDesc();
 
-    Optional<MembershipTier> findByName(String name);
-
+	Optional<MembershipTier> findByName(String name);
 
 }

@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderTicketResponse {
-    Long orderTicketId;
-    String seatName;
-    SeatType seatType;
-    BigDecimal price;
+	Long orderTicketId;
+	String seatName;
+	SeatType seatType;
+	BigDecimal price;
 }
