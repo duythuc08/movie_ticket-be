@@ -81,7 +81,13 @@ public enum ErrorCode {
     FOOD_OUT_OF_STOCK(1069,"Food is out of stock",HttpStatus.BAD_REQUEST),
     ORDER_ALREADY_USED(1070,"Order has already been checked in",HttpStatus.BAD_REQUEST),
     INVALID_QR_CODE(1071,"Invalid QR code",HttpStatus.BAD_REQUEST),
-    ORDER_CANNOT_CHECKIN(1072,"Order status does not allow check-in",HttpStatus.BAD_REQUEST);
+    ORDER_CANNOT_CHECKIN(1072,"Order status does not allow check-in",HttpStatus.BAD_REQUEST),
+    PROMOTION_ALREADY_CLAIMED(1073,"You have already claimed this promotion",HttpStatus.BAD_REQUEST),
+    PROMOTION_NOT_PUBLISHED(1074,"Promotion is not available",HttpStatus.BAD_REQUEST),
+    PROMOTION_ALREADY_USED(1075,"This voucher has already been used",HttpStatus.BAD_REQUEST),
+    VOUCHER_NOT_FOUND(1076,"Voucher not found in your account",HttpStatus.NOT_FOUND),
+    PROMOTION_STATUS_INVALID(1077,"Invalid promotion status transition",HttpStatus.BAD_REQUEST),
+    MEMBERSHIP_TIER_EXISTED(1078,"Membership tier already existed",HttpStatus.BAD_REQUEST);
     // Constructor để gán giá trị cho từng phần tử enum
     ErrorCode(int code, String message,HttpStatusCode statusCode) {
         this.code = code;

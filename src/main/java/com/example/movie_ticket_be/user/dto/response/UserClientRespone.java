@@ -15,8 +15,7 @@ import java.time.LocalDate;
 public class UserClientRespone {
 
     String userId;
-    String username; //su dung email
-    String password;
+    String username;
     String firstname;
     String lastname;
     String phoneNumber;

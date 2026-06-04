@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.promotion.entity;
 
+import com.example.movie_ticket_be.booking.entity.Orders;
 import com.example.movie_ticket_be.user.entity.Users;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,14 +22,28 @@ public class UserPromotion extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     Users users;
 
-    @ManyToOne
-    @JoinColumn(name = "promotion_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "promotion_id", nullable = false)
     Promotion promotion;
 
-    Boolean isUsed;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "order_id")
+    Orders order;
+
+    boolean isUsed;
+    LocalDateTime claimedAt;
     LocalDateTime usedAt;
+
+    @PrePersist
+    @Override
+    protected void onCreate() {
+        super.onCreate();
+        if (this.claimedAt == null) {
+            this.claimedAt = LocalDateTime.now();
+        }
+    }
 }
