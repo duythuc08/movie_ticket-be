@@ -13,15 +13,20 @@ import com.example.movie_ticket_be.user.enums.UserStatus;
 import com.example.movie_ticket_be.user.mapper.UserMapper;
 import com.example.movie_ticket_be.user.repository.RoleRepository;
 import com.example.movie_ticket_be.user.repository.UserRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
-import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @Slf4j
 @Service
@@ -47,13 +52,11 @@ public class AdminUserService {
         return userMapper.toUsersRespone(userRepository.save(newUsers));
     }
 
-    public List<UsersRespone> getUsers() {
-        return userRepository.findAll().stream()
-                .map(userMapper::toUsersRespone)
-                .toList();
+    public Page<UsersRespone> getUsers(Specification<Users> spec, Pageable pageable) {
+        return userRepository.findAll(spec, pageable).map(userMapper::toUsersRespone);
     }
 
-    public UsersRespone getUser(String id) {
+    public UsersRespone getUserById(String id) {
         Users user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return userMapper.toUsersRespone(user);

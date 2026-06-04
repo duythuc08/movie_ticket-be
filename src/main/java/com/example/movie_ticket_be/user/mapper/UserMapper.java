@@ -17,6 +17,8 @@ import org.mapstruct.MappingTarget;
 public interface UserMapper {
     Users toUsers(UsersCreationRequest request);
 
+    @Mapping(source = "membershipTier.name", target = "memberShipTierName")
+    @Mapping(source = "role", target = "roles")
     UsersRespone toUsersRespone(Users users);
 
     UserMenuRespone toUserMenuRespone(Users users);
