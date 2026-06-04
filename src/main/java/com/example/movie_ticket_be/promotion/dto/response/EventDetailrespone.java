@@ -2,8 +2,6 @@ package com.example.movie_ticket_be.promotion.dto.response;
 
 import java.time.LocalDateTime;
 
-import com.example.movie_ticket_be.promotion.enums.EventType;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,10 +14,11 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class EventResponse {
+public class EventDetailrespone {
     String title;
+    String description;
     String posterUrl;
     LocalDateTime startTime;
     LocalDateTime endTime;
-    EventType eventType;
+    String movieTitle;
 }
