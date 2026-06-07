@@ -1,21 +1,22 @@
-# Stage 1: Build JAR bên trong Docker (không cần cài Maven trên máy)
-FROM maven:3.9-eclipse-temurin-21 AS builder
-WORKDIR /app
+# Stage 1: build
+# Start with a Maven image that includes JDK 21
+FROM maven:3.9.8-amazoncorretto-21 AS build
 
-# Copy pom.xml trước để cache dependencies (chỉ re-download khi pom.xml thay đổi)
+# Copy source code and pom.xml file to /app folder
+WORKDIR /app
 COPY pom.xml .
-RUN mvn dependency:go-offline -q
-
-# Copy source và build
 COPY src ./src
-RUN mvn package -DskipTests -q
 
-# Stage 2: Chỉ lấy JAR, bỏ Maven và source code — image nhỏ hơn nhiều
-FROM eclipse-temurin:21-jre-alpine
+# Build source code with maven
+RUN mvn package -DskipTests
+
+#Stage 2: create image
+# Start with Amazon Correto JDK 21
+FROM amazoncorretto:21.0.4
+
+# Set working folder to App and copy complied file from above step
 WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
 
-COPY --from=builder /app/target/*.jar app.jar
-
-EXPOSE 8080
-
+# Command to run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
