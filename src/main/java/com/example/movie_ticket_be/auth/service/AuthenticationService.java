@@ -301,10 +301,10 @@ public class AuthenticationService {
 		}
 	}
 
-	@Scheduled(fixedRate = 60000)
+	@Scheduled(cron = "0 0 2 * * ?")
 	@Transactional
 	public void deleteUnverifiedUsers() {
-		LocalDateTime cutoff = LocalDateTime.now().minusMinutes(5);
+		LocalDateTime cutoff = LocalDateTime.now().minusDays(3);
 		List<Users> unverifiedUsers = userRepository.findAllByEnabledFalseAndCreatedAtBefore(cutoff);
 
 		if (unverifiedUsers.isEmpty()) {

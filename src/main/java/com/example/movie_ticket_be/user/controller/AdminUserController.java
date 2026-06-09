@@ -96,4 +96,11 @@ public class AdminUserController {
 		adminUserService.changeStatus(userId, EntityStatus.INACTIVE);
 		return ApiResponse.<Void>builder().message("Vô hiệu hóa người dùng thành công").build();
 	}
+
+	@PutMapping("/{userId}/banned")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> banUser(@PathVariable String userId) {
+		adminUserService.banUser(userId);
+		return ApiResponse.<Void>builder().message("Người dùng đã bị cấm").build();
+	}
 }

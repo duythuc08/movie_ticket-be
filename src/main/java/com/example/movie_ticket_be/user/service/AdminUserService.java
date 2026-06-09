@@ -79,4 +79,10 @@ public class AdminUserService {
 		user.setEntityStatus(entityStatus);
 		userRepository.save(user);
 	}
+
+	public void banUser(String userId) {
+		Users user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+		user.setUserStatus(UserStatus.BANNED);
+		userRepository.save(user);
+	}
 }

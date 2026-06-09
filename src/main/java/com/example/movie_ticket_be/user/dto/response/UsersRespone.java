@@ -3,6 +3,7 @@ package com.example.movie_ticket_be.user.dto.response;
 import java.time.LocalDate;
 import java.util.Set;
 
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.user.enums.UserStatus;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -33,4 +34,5 @@ public class UsersRespone {
 	String memberShipTierName;
 	Set<RoleResponse> roles;
 	boolean enabled;
+	EntityStatus entityStatus;
 }
