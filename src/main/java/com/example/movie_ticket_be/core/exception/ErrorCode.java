@@ -1,243 +1,341 @@
 package com.example.movie_ticket_be.core.exception;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
 	UNCATEGORIZED_EXCEPTION(999, "erorr", HttpStatus.INTERNAL_SERVER_ERROR), INVALID_KEY(1000, "Message invalid key",
-			HttpStatus.BAD_REQUEST), USER_EXISTED(1001, "User existed", HttpStatus.BAD_REQUEST), EMAIL_EXISTED(1002,
-					"Email existed", HttpStatus.BAD_REQUEST), USER_NOT_FOUND(1003, "User Not Found",
-							HttpStatus.BAD_REQUEST), INVALID_OTP(1004, "Message invalid otp",
-									HttpStatus.BAD_REQUEST), OTP_EXPIRED(1005, "OTP is expired",
-											HttpStatus.BAD_REQUEST), USERNAME_INVALID(1006,
-													"User must be at least {min} characters",
-													HttpStatus.BAD_REQUEST), INVALID_PASSWORD(1007,
-															"Password must be at least {min} characters",
-															HttpStatus.BAD_REQUEST), USER_NOT_EXISTED(1008,
-																	"User not existed",
-																	HttpStatus.NOT_FOUND), AUTHENTICATED(1009,
-																			"Authenticated",
-																			HttpStatus.UNAUTHORIZED), UNAUTHORIZED(1010,
-																					"You do not have permission",
-																					HttpStatus.FORBIDDEN), INVALID_DOB(
-																							1011,
-																							"Your age must be at least {min}",
-																							HttpStatus.BAD_REQUEST), OTP_NOT_FOUND(
-																									1012,
-																									"OTP Not Found",
-																									HttpStatus.BAD_REQUEST), OTP_RESEND_TOO_SOON(
-																											1012,
-																											"Please wait for 30 second before resend OTP",
-																											HttpStatus.BAD_REQUEST), UNAUTHENTICATED(
-																													1009,
-																													"Unauthenticated",
-																													HttpStatus.UNAUTHORIZED), OTP_NOT_VERIFIED(
-																															1013,
-																															"OTP is not verified",
-																															HttpStatus.BAD_REQUEST), GENRE_NOT_FOUND(
-																																	1014,
-																																	"Genre not found",
-																																	HttpStatus.NOT_FOUND), GENRE_EXISTED(
-																																			1015,
-																																			"Genre existed",
-																																			HttpStatus.BAD_REQUEST), MOVIE_NOT_FOUND(
-																																					1016,
-																																					"Movie not found",
-																																					HttpStatus.NOT_FOUND), MOVIE_EXISTED(
-																																							1017,
-																																							"Movie existed",
-																																							HttpStatus.BAD_REQUEST), PERSON_NOT_FOUND(
-																																									1018,
-																																									"Person not found",
-																																									HttpStatus.NOT_FOUND), PERSON_EXISTED(
-																																											1019,
-																																											"Person existed",
-																																											HttpStatus.BAD_REQUEST), BANNER_NOT_FOUND(
-																																													1020,
-																																													"Banner not found",
-																																													HttpStatus.NOT_FOUND), BANNER_EXISTED(
-																																															1021,
-																																															"Banner existed",
-																																															HttpStatus.BAD_REQUEST), EVENT_NOT_FOUND(
-																																																	1022,
-																																																	"Event not found",
-																																																	HttpStatus.NOT_FOUND), EVENT_EXISTED(
-																																																			1023,
-																																																			"Event existed",
-																																																			HttpStatus.BAD_REQUEST), MOVIE_ID_REQUIRED(
-																																																					1024,
-																																																					"Movie Id is required",
-																																																					HttpStatus.BAD_REQUEST), EVENT_ID_NOT_ALLOWED(
-																																																							1025,
-																																																							"Event Id is not allowed",
-																																																							HttpStatus.BAD_REQUEST), EVENT_ID_REQUIRED(
-																																																									1026,
-																																																									"Event Id is required",
-																																																									HttpStatus.BAD_REQUEST), MOVIE_ID_NOT_ALLOWED(
-																																																											1027,
-																																																											"Movie Id is not allowed",
-																																																											HttpStatus.BAD_REQUEST), BANNER_TYPE_INVALID(
-																																																													1028,
-																																																													"Banner type is invalid",
-																																																													HttpStatus.BAD_REQUEST), CINEMA_EXISTED(
-																																																															1029,
-																																																															"Cinema existed",
-																																																															HttpStatus.BAD_REQUEST), CINEMA_NOT_FOUND(
-																																																																	1030,
-																																																																	"Cinema not found",
-																																																																	HttpStatus.NOT_FOUND), ROOM_EXISTED(
-																																																																			1031,
-																																																																			"Room existed",
-																																																																			HttpStatus.BAD_REQUEST), ROOM_NOT_FOUND(
-																																																																					1032,
-																																																																					"Room not found",
-																																																																					HttpStatus.NOT_FOUND), SEAT_EXISTED(
-																																																																							1033,
-																																																																							"Seat existed",
-																																																																							HttpStatus.BAD_REQUEST), SEAT_NOT_FOUND(
-																																																																									1034,
-																																																																									"Seat Not Found",
-																																																																									HttpStatus.NOT_FOUND), SHOWTIME_EXISTED(
-																																																																											1035,
-																																																																											"Show Time existed",
-																																																																											HttpStatus.BAD_REQUEST), SHOWTIME_NOT_FOUND(
-																																																																													1036,
-																																																																													"Show Time not found",
-																																																																													HttpStatus.NOT_FOUND), SEAT_SHOWTIME_EXISTED(
-																																																																															1037,
-																																																																															"Seat Show Time existed",
-																																																																															HttpStatus.BAD_REQUEST), SEAT_SHOWTIME_NOT_FOUND(
-																																																																																	1038,
-																																																																																	"Seat Show Time not found",
-																																																																																	HttpStatus.NOT_FOUND), SHOWTIME_PRICE_EXISTED(
-																																																																																			1039,
-																																																																																			"Show Time price existed",
-																																																																																			HttpStatus.BAD_REQUEST), SHOWTIME_PRICE_NOT_FOUND(
-																																																																																					1040,
-																																																																																					"Show Time price not found",
-																																																																																					HttpStatus.NOT_FOUND), FOOD_EXISTED(
-																																																																																							1041,
-																																																																																							"Food existed",
-																																																																																							HttpStatus.BAD_REQUEST), FOOD_NOT_FOUND(
-																																																																																									1042,
-																																																																																									"Food not found",
-																																																																																									HttpStatus.NOT_FOUND), PROMOTION_EXISTED(
-																																																																																											1043,
-																																																																																											"Promotion existed",
-																																																																																											HttpStatus.BAD_REQUEST), PROMOTION_NOT_FOUND(
-																																																																																													1044,
-																																																																																													"Promotion not found",
-																																																																																													HttpStatus.NOT_FOUND), PROMOTION_EXPIRED(
-																																																																																															1045,
-																																																																																															"Promotion expired",
-																																																																																															HttpStatus.BAD_REQUEST), PROMOTION_OUT_OF_STOCK(
-																																																																																																	1046,
-																																																																																																	"Promotion out of stock",
-																																																																																																	HttpStatus.BAD_REQUEST), PROMOTION_CONDITION_NOT_MET(
-																																																																																																			1047,
-																																																																																																			"Promotion condition not met",
-																																																																																																			HttpStatus.BAD_REQUEST), ORDER_EXISTED(
-																																																																																																					1048,
-																																																																																																					"Order existed",
-																																																																																																					HttpStatus.BAD_REQUEST), ORDER_NOT_FOUND(
-																																																																																																							1049,
-																																																																																																							"Order not found",
-																																																																																																							HttpStatus.NOT_FOUND), INVALID_SEAT_SELECTION(
-																																																																																																									1050,
-																																																																																																									"Invalid seat selection",
-																																																																																																									HttpStatus.BAD_REQUEST), INVALID_FOOD_SELECTION(
-																																																																																																											1051,
-																																																																																																											"Invalid food selection",
-																																																																																																											HttpStatus.BAD_REQUEST), SEAT_ALREADY_BOOKED(
-																																																																																																													1052,
-																																																																																																													"Seat already booked",
-																																																																																																													HttpStatus.BAD_REQUEST), INVALID_SEAT_DATA(
-																																																																																																															1053,
-																																																																																																															"Invalid seat data",
-																																																																																																															HttpStatus.BAD_REQUEST), PRICE_NOT_FOUND(
-																																																																																																																	1054,
-																																																																																																																	"Price not found",
-																																																																																																																	HttpStatus.NOT_FOUND), MEMBERSHIP_TIER_NOT_FOUND(
-																																																																																																																			1055,
-																																																																																																																			"Membership tier not found",
-																																																																																																																			HttpStatus.NOT_FOUND), SHOWTIME_ALREADY_CANCELLED(
-																																																																																																																					1056,
-																																																																																																																					"Showtime is already cancelled",
-																																																																																																																					HttpStatus.BAD_REQUEST), SHOWTIME_NOT_UPDATABLE(
-																																																																																																																							1057,
-																																																																																																																							"Showtime can only be updated when status is SCHEDULED",
-																																																																																																																							HttpStatus.BAD_REQUEST), SHOWTIME_HAS_ACTIVE_SEATS(
-																																																																																																																									1058,
-																																																																																																																									"Showtime has reserved or sold seats, cannot update",
-																																																																																																																									HttpStatus.BAD_REQUEST), SIZE_MISMATCH(
-																																																																																																																											1059,
-																																																																																																																											"Size of input data does not match expected size",
-																																																																																																																											HttpStatus.BAD_REQUEST), SEAT_TYPE_NOT_FOUND(
-																																																																																																																													1060,
-																																																																																																																													"Seat type not found",
-																																																																																																																													HttpStatus.NOT_FOUND), CREATE_QR_CODE_FAILED(
-																																																																																																																															1061,
-																																																																																																																															"Failed to create QR code",
-																																																																																																																															HttpStatus.INTERNAL_SERVER_ERROR), MOVIE_RELEASE_DATE_NOT_VALID(
-																																																																																																																																	1062,
-																																																																																																																																	"Movie release date not valid",
-																																																																																																																																	HttpStatus.BAD_REQUEST), ROOM_HAS_ACTIVE_SHOWTIME(
-																																																																																																																																			1063,
-																																																																																																																																			"Room has active showtimes, cannot change room type",
-																																																																																																																																			HttpStatus.BAD_REQUEST), SEATS_ALREADY_EXIST_FOR_ROOM(
-																																																																																																																																					1064,
-																																																																																																																																					"Seats already exist for room",
-																																																																																																																																					HttpStatus.BAD_REQUEST), MOVIE_STOPPED(
-																																																																																																																																							1065,
-																																																																																																																																							"Movie is no longer showing, cannot create showtime",
-																																																																																																																																							HttpStatus.BAD_REQUEST), SHOWTIME_TIME_OVERLAP(
-																																																																																																																																									1066,
-																																																																																																																																									"Showtime start or end time overlaps with an existing showtime",
-																																																																																																																																									HttpStatus.BAD_REQUEST), SHOWTIME_BUFFER_CONFLICT(
-																																																																																																																																											1067,
-																																																																																																																																											"Showtime must be at least 15 minutes apart from other showtimes",
-																																																																																																																																											HttpStatus.BAD_REQUEST), FOOD_NOT_BELONG_TO_CINEMA(
-																																																																																																																																													1068,
-																																																																																																																																													"Food does not belong to the selected cinema",
-																																																																																																																																													HttpStatus.BAD_REQUEST), FOOD_OUT_OF_STOCK(
-																																																																																																																																															1069,
-																																																																																																																																															"Food is out of stock",
-																																																																																																																																															HttpStatus.BAD_REQUEST), ORDER_ALREADY_USED(
-																																																																																																																																																	1070,
-																																																																																																																																																	"Order has already been checked in",
-																																																																																																																																																	HttpStatus.BAD_REQUEST), INVALID_QR_CODE(
-																																																																																																																																																			1071,
-																																																																																																																																																			"Invalid QR code",
-																																																																																																																																																			HttpStatus.BAD_REQUEST), ORDER_CANNOT_CHECKIN(
-																																																																																																																																																					1072,
-																																																																																																																																																					"Order status does not allow check-in",
-																																																																																																																																																					HttpStatus.BAD_REQUEST), PROMOTION_ALREADY_CLAIMED(
-																																																																																																																																																							1073,
-																																																																																																																																																							"You have already claimed this promotion",
-																																																																																																																																																							HttpStatus.BAD_REQUEST), PROMOTION_NOT_PUBLISHED(
-																																																																																																																																																									1074,
-																																																																																																																																																									"Promotion is not available",
-																																																																																																																																																									HttpStatus.BAD_REQUEST), PROMOTION_ALREADY_USED(
-																																																																																																																																																											1075,
-																																																																																																																																																											"This voucher has already been used",
-																																																																																																																																																											HttpStatus.BAD_REQUEST), VOUCHER_NOT_FOUND(
-																																																																																																																																																													1076,
-																																																																																																																																																													"Voucher not found in your account",
-																																																																																																																																																													HttpStatus.NOT_FOUND), PROMOTION_STATUS_INVALID(
-																																																																																																																																																															1077,
-																																																																																																																																																															"Invalid promotion status transition",
-																																																																																																																																																															HttpStatus.BAD_REQUEST), MEMBERSHIP_TIER_EXISTED(
-																																																																																																																																																																	1078,
-																																																																																																																																																																	"Membership tier already existed",
-																																																																																																																																																																	HttpStatus.BAD_REQUEST);
+			HttpStatus.BAD_REQUEST),
+	USER_EXISTED(1001, "User existed", HttpStatus.BAD_REQUEST), EMAIL_EXISTED(1002,
+			"Email existed", HttpStatus.BAD_REQUEST),
+	USER_NOT_FOUND(1003, "User Not Found",
+			HttpStatus.BAD_REQUEST),
+	INVALID_OTP(1004, "Message invalid otp",
+			HttpStatus.BAD_REQUEST),
+	OTP_EXPIRED(1005, "OTP is expired",
+			HttpStatus.BAD_REQUEST),
+	USERNAME_INVALID(1006,
+			"User must be at least {min} characters",
+			HttpStatus.BAD_REQUEST),
+	INVALID_PASSWORD(1007,
+			"Password must be at least {min} characters",
+			HttpStatus.BAD_REQUEST),
+	USER_NOT_EXISTED(1008,
+			"User not existed",
+			HttpStatus.NOT_FOUND),
+	AUTHENTICATED(1009,
+			"Authenticated",
+			HttpStatus.UNAUTHORIZED),
+	UNAUTHORIZED(1010,
+			"You do not have permission",
+			HttpStatus.FORBIDDEN),
+	INVALID_DOB(
+			1011,
+			"Your age must be at least {min}",
+			HttpStatus.BAD_REQUEST),
+	OTP_NOT_FOUND(
+			1012,
+			"OTP Not Found",
+			HttpStatus.BAD_REQUEST),
+	OTP_RESEND_TOO_SOON(
+			1012,
+			"Please wait for 30 second before resend OTP",
+			HttpStatus.BAD_REQUEST),
+	UNAUTHENTICATED(
+			1009,
+			"Unauthenticated",
+			HttpStatus.UNAUTHORIZED),
+	OTP_NOT_VERIFIED(
+			1013,
+			"OTP is not verified",
+			HttpStatus.BAD_REQUEST),
+	GENRE_NOT_FOUND(
+			1014,
+			"Genre not found",
+			HttpStatus.NOT_FOUND),
+	GENRE_EXISTED(
+			1015,
+			"Genre existed",
+			HttpStatus.BAD_REQUEST),
+	MOVIE_NOT_FOUND(
+			1016,
+			"Movie not found",
+			HttpStatus.NOT_FOUND),
+	MOVIE_EXISTED(
+			1017,
+			"Movie existed",
+			HttpStatus.BAD_REQUEST),
+	PERSON_NOT_FOUND(
+			1018,
+			"Person not found",
+			HttpStatus.NOT_FOUND),
+	PERSON_EXISTED(
+			1019,
+			"Person existed",
+			HttpStatus.BAD_REQUEST),
+	BANNER_NOT_FOUND(
+			1020,
+			"Banner not found",
+			HttpStatus.NOT_FOUND),
+	BANNER_EXISTED(
+			1021,
+			"Banner existed",
+			HttpStatus.BAD_REQUEST),
+	EVENT_NOT_FOUND(
+			1022,
+			"Event not found",
+			HttpStatus.NOT_FOUND),
+	EVENT_EXISTED(
+			1023,
+			"Event existed",
+			HttpStatus.BAD_REQUEST),
+	MOVIE_ID_REQUIRED(
+			1024,
+			"Movie Id is required",
+			HttpStatus.BAD_REQUEST),
+	EVENT_ID_NOT_ALLOWED(
+			1025,
+			"Event Id is not allowed",
+			HttpStatus.BAD_REQUEST),
+	EVENT_ID_REQUIRED(
+			1026,
+			"Event Id is required",
+			HttpStatus.BAD_REQUEST),
+	MOVIE_ID_NOT_ALLOWED(
+			1027,
+			"Movie Id is not allowed",
+			HttpStatus.BAD_REQUEST),
+	BANNER_TYPE_INVALID(
+			1028,
+			"Banner type is invalid",
+			HttpStatus.BAD_REQUEST),
+	CINEMA_EXISTED(
+			1029,
+			"Cinema existed",
+			HttpStatus.BAD_REQUEST),
+	CINEMA_NOT_FOUND(
+			1030,
+			"Cinema not found",
+			HttpStatus.NOT_FOUND),
+	ROOM_EXISTED(
+			1031,
+			"Room existed",
+			HttpStatus.BAD_REQUEST),
+	ROOM_NOT_FOUND(
+			1032,
+			"Room not found",
+			HttpStatus.NOT_FOUND),
+	SEAT_EXISTED(
+			1033,
+			"Seat existed",
+			HttpStatus.BAD_REQUEST),
+	SEAT_NOT_FOUND(
+			1034,
+			"Seat Not Found",
+			HttpStatus.NOT_FOUND),
+	SHOWTIME_EXISTED(
+			1035,
+			"Show Time existed",
+			HttpStatus.BAD_REQUEST),
+	SHOWTIME_NOT_FOUND(
+			1036,
+			"Show Time not found",
+			HttpStatus.NOT_FOUND),
+	SEAT_SHOWTIME_EXISTED(
+			1037,
+			"Seat Show Time existed",
+			HttpStatus.BAD_REQUEST),
+	SEAT_SHOWTIME_NOT_FOUND(
+			1038,
+			"Seat Show Time not found",
+			HttpStatus.NOT_FOUND),
+	SHOWTIME_PRICE_EXISTED(
+			1039,
+			"Show Time price existed",
+			HttpStatus.BAD_REQUEST),
+	SHOWTIME_PRICE_NOT_FOUND(
+			1040,
+			"Show Time price not found",
+			HttpStatus.NOT_FOUND),
+	FOOD_EXISTED(
+			1041,
+			"Food existed",
+			HttpStatus.BAD_REQUEST),
+	FOOD_NOT_FOUND(
+			1042,
+			"Food not found",
+			HttpStatus.NOT_FOUND),
+	PROMOTION_EXISTED(
+			1043,
+			"Promotion existed",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_NOT_FOUND(
+			1044,
+			"Promotion not found",
+			HttpStatus.NOT_FOUND),
+	PROMOTION_EXPIRED(
+			1045,
+			"Promotion expired",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_OUT_OF_STOCK(
+			1046,
+			"Promotion out of stock",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_CONDITION_NOT_MET(
+			1047,
+			"Promotion condition not met",
+			HttpStatus.BAD_REQUEST),
+	ORDER_EXISTED(
+			1048,
+			"Order existed",
+			HttpStatus.BAD_REQUEST),
+	ORDER_NOT_FOUND(
+			1049,
+			"Order not found",
+			HttpStatus.NOT_FOUND),
+	INVALID_SEAT_SELECTION(
+			1050,
+			"Invalid seat selection",
+			HttpStatus.BAD_REQUEST),
+	INVALID_FOOD_SELECTION(
+			1051,
+			"Invalid food selection",
+			HttpStatus.BAD_REQUEST),
+	SEAT_ALREADY_BOOKED(
+			1052,
+			"Seat already booked",
+			HttpStatus.BAD_REQUEST),
+	INVALID_SEAT_DATA(
+			1053,
+			"Invalid seat data",
+			HttpStatus.BAD_REQUEST),
+	PRICE_NOT_FOUND(
+			1054,
+			"Price not found",
+			HttpStatus.NOT_FOUND),
+	MEMBERSHIP_TIER_NOT_FOUND(
+			1055,
+			"Membership tier not found",
+			HttpStatus.NOT_FOUND),
+	SHOWTIME_ALREADY_CANCELLED(
+			1056,
+			"Showtime is already cancelled",
+			HttpStatus.BAD_REQUEST),
+	SHOWTIME_NOT_UPDATABLE(
+			1057,
+			"Showtime can only be updated when status is SCHEDULED",
+			HttpStatus.BAD_REQUEST),
+	SHOWTIME_HAS_ACTIVE_SEATS(
+			1058,
+			"Showtime has reserved or sold seats, cannot update",
+			HttpStatus.BAD_REQUEST),
+	SIZE_MISMATCH(
+			1059,
+			"Size of input data does not match expected size",
+			HttpStatus.BAD_REQUEST),
+	SEAT_TYPE_NOT_FOUND(
+			1060,
+			"Seat type not found",
+			HttpStatus.NOT_FOUND),
+	CREATE_QR_CODE_FAILED(
+			1061,
+			"Failed to create QR code",
+			HttpStatus.INTERNAL_SERVER_ERROR),
+	MOVIE_RELEASE_DATE_NOT_VALID(
+			1062,
+			"Movie release date not valid",
+			HttpStatus.BAD_REQUEST),
+	ROOM_HAS_ACTIVE_SHOWTIME(
+			1063,
+			"Room has active showtimes, cannot change room type",
+			HttpStatus.BAD_REQUEST),
+	SEATS_ALREADY_EXIST_FOR_ROOM(
+			1064,
+			"Seats already exist for room",
+			HttpStatus.BAD_REQUEST),
+	MOVIE_STOPPED(
+			1065,
+			"Movie is no longer showing, cannot create showtime",
+			HttpStatus.BAD_REQUEST),
+	SHOWTIME_TIME_OVERLAP(
+			1066,
+			"Showtime start or end time overlaps with an existing showtime",
+			HttpStatus.BAD_REQUEST),
+	SHOWTIME_BUFFER_CONFLICT(
+			1067,
+			"Showtime must be at least 15 minutes apart from other showtimes",
+			HttpStatus.BAD_REQUEST),
+	FOOD_NOT_BELONG_TO_CINEMA(
+			1068,
+			"Food does not belong to the selected cinema",
+			HttpStatus.BAD_REQUEST),
+	FOOD_OUT_OF_STOCK(
+			1069,
+			"Food is out of stock",
+			HttpStatus.BAD_REQUEST),
+	ORDER_ALREADY_USED(
+			1070,
+			"Order has already been checked in",
+			HttpStatus.BAD_REQUEST),
+	INVALID_QR_CODE(
+			1071,
+			"Invalid QR code",
+			HttpStatus.BAD_REQUEST),
+	ORDER_CANNOT_CHECKIN(
+			1072,
+			"Order status does not allow check-in",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_ALREADY_CLAIMED(
+			1073,
+			"You have already claimed this promotion",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_NOT_PUBLISHED(
+			1074,
+			"Promotion is not available",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_ALREADY_USED(
+			1075,
+			"This voucher has already been used",
+			HttpStatus.BAD_REQUEST),
+	VOUCHER_NOT_FOUND(
+			1076,
+			"Voucher not found in your account",
+			HttpStatus.NOT_FOUND),
+	PROMOTION_STATUS_INVALID(
+			1077,
+			"Invalid promotion status transition",
+			HttpStatus.BAD_REQUEST),
+	MEMBERSHIP_TIER_EXISTED(
+			1078,
+			"Membership tier already existed",
+			HttpStatus.BAD_REQUEST),
+	REVIEW_NOT_FOUND(
+			1079,
+			"Review not found",
+			HttpStatus.NOT_FOUND),
+	REVIEW_ALREADY_EXISTS(
+			1080,
+			"You have already reviewed this movie",
+			HttpStatus.BAD_REQUEST),
+	CANNOT_REVIEW_UNFINISHED_SHOWTIME(
+			1081,
+			"You can only review a movie after watching it",
+			HttpStatus.BAD_REQUEST),
+	REVIEW_NOT_OWNED(
+			1082,
+			"You do not own this review",
+			HttpStatus.FORBIDDEN);
+
 	// Constructor để gán giá trị cho từng phần tử enum
 	ErrorCode(int code, String message, HttpStatusCode statusCode) {
 		this.code = code;
 		this.message = message;
 		this.statusCode = statusCode;
 	}
+
 	private int code;
 	private String message;
 	private HttpStatusCode statusCode;
