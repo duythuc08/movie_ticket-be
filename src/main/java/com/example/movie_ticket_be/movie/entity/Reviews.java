@@ -29,9 +29,10 @@ public class Reviews extends BaseEntity {
 	Movies movies;
 
 	Integer rating;
+	@Lob
 	String comment;
 	Integer likeCount;
-
+	Integer dislikeCount;
 	@Enumerated(EnumType.STRING)
 	ReviewStatus reviewStatus;
 }
