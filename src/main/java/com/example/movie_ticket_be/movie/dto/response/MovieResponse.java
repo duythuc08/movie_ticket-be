@@ -32,4 +32,6 @@ public class MovieResponse {
 
 	AgeRating ageRating;
 	MovieStatus movieStatus;
+
+	Boolean hasReviewed;
 }

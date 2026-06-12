@@ -39,12 +39,20 @@ public class ReviewInteractionService {
 
         if (existing.isPresent()) {
             ReviewInteractions interaction = existing.get();
-            if (interaction.getInteractionType() == newType) {
-                interactionRepository.delete(interaction);
-                decreaseCount(review, newType);
+            if (interaction.isActive()) {
+                if (interaction.getInteractionType() == newType) {
+                    interaction.setActive(false);
+                    interactionRepository.save(interaction);
+                    decreaseCount(review, newType);
+                } else {
+                    decreaseCount(review, interaction.getInteractionType());
+                    interaction.setInteractionType(newType);
+                    interactionRepository.save(interaction);
+                    increaseCount(review, newType);
+                }
             } else {
-                decreaseCount(review, interaction.getInteractionType());
                 interaction.setInteractionType(newType);
+                interaction.setActive(true);
                 interactionRepository.save(interaction);
                 increaseCount(review, newType);
             }
@@ -53,6 +61,7 @@ public class ReviewInteractionService {
             newInteraction.setUsers(user);
             newInteraction.setReviews(review);
             newInteraction.setInteractionType(newType);
+            newInteraction.setActive(true);
             interactionRepository.save(newInteraction);
             increaseCount(review, newType);
         }

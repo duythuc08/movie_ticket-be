@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.movie.dto.request.ReviewRequest;
+import com.example.movie_ticket_be.movie.dto.response.MovieReviewPageResponse;
 import com.example.movie_ticket_be.movie.dto.response.ReviewResponse;
+import com.example.movie_ticket_be.movie.dto.response.UnreviewedMovieResponse;
 import com.example.movie_ticket_be.movie.service.ReviewInteractionService;
 import com.example.movie_ticket_be.movie.service.ReviewService;
 import com.example.movie_ticket_be.user.enums.InteractionType;
@@ -48,12 +50,13 @@ public class ReviewController {
     }
 
     @GetMapping("/movie/{movieId}")
-    public ApiResponse<Page<ReviewResponse>> getReviewsByMovie(
+    public ApiResponse<MovieReviewPageResponse> getReviewsByMovie(
             @PathVariable Long movieId,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ApiResponse.<Page<ReviewResponse>>builder()
-                .result(reviewService.getReviewsByMovie(movieId, page, size))
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) Integer rating) {
+        return ApiResponse.<MovieReviewPageResponse>builder()
+                .result(reviewService.getReviewsByMovie(movieId, page, size, rating))
                 .build();
     }
 
@@ -64,5 +67,12 @@ public class ReviewController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         reviewInteractionService.toggleInteraction(reviewId, type, username);
         return ApiResponse.<Void>builder().build();
+    }
+
+    @GetMapping("/recent-unreviewed")
+    public ApiResponse<UnreviewedMovieResponse> getRecentUnreviewedMovie() {
+        return ApiResponse.<UnreviewedMovieResponse>builder()
+                .result(reviewService.getRecentUnreviewedMovie())
+                .build();
     }
 }

@@ -29,26 +29,8 @@ public class AdminReviewService {
     MovieRepository movieRepository;
     ReviewMapper reviewMapper;
 
-    public Page<AdminReviewResponse> getAdminReviews(ReviewStatus status, Long movieId, int page, int size) {
-        PageRequest pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        if (status != null && movieId != null) {
-            Movies movie = movieRepository.findById(movieId)
-                    .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-            return reviewRepository.findByMoviesAndReviewStatus(movie, status, pageable)
-                    .map(reviewMapper::toAdminReviewResponse);
-        }
-        if (status != null) {
-            return reviewRepository.findByReviewStatus(status, pageable)
-                    .map(reviewMapper::toAdminReviewResponse);
-        }
-        if (movieId != null) {
-            Movies movie = movieRepository.findById(movieId)
-                    .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-            return reviewRepository.findByMovies(movie, pageable)
-                    .map(reviewMapper::toAdminReviewResponse);
-        }
-        return reviewRepository.findAll(pageable).map(reviewMapper::toAdminReviewResponse);
+    public Page<AdminReviewResponse> getAdminReviews(org.springframework.data.jpa.domain.Specification<Reviews> spec, org.springframework.data.domain.Pageable pageable) {
+        return reviewRepository.findAll(spec, pageable).map(reviewMapper::toAdminReviewResponse);
     }
 
     @Transactional

@@ -18,7 +18,9 @@ import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.dto.request.ReviewRequest;
+import com.example.movie_ticket_be.movie.dto.response.MovieReviewPageResponse;
 import com.example.movie_ticket_be.movie.dto.response.ReviewResponse;
+import com.example.movie_ticket_be.movie.dto.response.UnreviewedMovieResponse;
 import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.movie.entity.Reviews;
 import com.example.movie_ticket_be.movie.enums.ReviewStatus;
@@ -91,34 +93,60 @@ public class ReviewService {
         return reviewMapper.toReviewResponse(reviewRepository.save(review));
     }
 
-    public Page<ReviewResponse> getReviewsByMovie(Long movieId, int page, int size) {
+    public MovieReviewPageResponse getReviewsByMovie(Long movieId, int page, int size, Integer rating) {
         Movies movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
 
-        Page<Reviews> reviewPage = reviewRepository.findByMoviesAndReviewStatus(
-                movie, ReviewStatus.APPROVED,
-                PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt")));
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Reviews> reviewPage = (rating != null)
+                ? reviewRepository.findByMoviesAndReviewStatusAndRating(movie, ReviewStatus.APPROVED, rating, pageRequest)
+                : reviewRepository.findByMoviesAndReviewStatus(movie, ReviewStatus.APPROVED, pageRequest);
+
+        // Build rating distribution from all approved reviews (not just current page)
+        Map<Integer, Long> distribution = new java.util.HashMap<>();
+        for (int i = 1; i <= 5; i++) distribution.put(i, 0L);
+        reviewRepository.countGroupByRating(movie, ReviewStatus.APPROVED)
+                .forEach(row -> distribution.put(((Number) row[0]).intValue(), (Long) row[1]));
+
+        long totalReviews = distribution.values().stream().mapToLong(Long::longValue).sum();
+        double averageRating = totalReviews == 0 ? 0.0
+                : distribution.entrySet().stream()
+                        .mapToDouble(e -> e.getKey() * e.getValue())
+                        .sum() / totalReviews;
 
         Users currentUser = getCurrentUser();
+        List<ReviewResponse> content;
         if (currentUser == null) {
-            return reviewPage.map(reviewMapper::toReviewResponse);
+            content = reviewPage.getContent().stream()
+                    .map(reviewMapper::toReviewResponse)
+                    .collect(Collectors.toList());
+        } else {
+            List<Reviews> reviews = reviewPage.getContent();
+            Map<Long, InteractionType> interactionMap = interactionRepository
+                    .findByUsersAndReviewsInAndIsActiveTrue(currentUser, reviews)
+                    .stream()
+                    .collect(Collectors.toMap(
+                            i -> i.getReviews().getReviewId(),
+                            ReviewInteractions::getInteractionType));
+            content = reviews.stream().map(r -> {
+                ReviewResponse response = reviewMapper.toReviewResponse(r);
+                InteractionType type = interactionMap.get(r.getReviewId());
+                response.setLikedByMe(type == InteractionType.LIKE);
+                response.setDislikedByMe(type == InteractionType.DISLIKE);
+                return response;
+            }).collect(Collectors.toList());
         }
 
-        List<Reviews> reviews = reviewPage.getContent();
-        Map<Long, InteractionType> interactionMap = interactionRepository
-                .findByUsersAndReviewsIn(currentUser, reviews)
-                .stream()
-                .collect(Collectors.toMap(
-                        i -> i.getReviews().getReviewId(),
-                        ReviewInteractions::getInteractionType));
-
-        return reviewPage.map(r -> {
-            ReviewResponse response = reviewMapper.toReviewResponse(r);
-            InteractionType type = interactionMap.get(r.getReviewId());
-            response.setLikedByMe(type == InteractionType.LIKE);
-            response.setDislikedByMe(type == InteractionType.DISLIKE);
-            return response;
-        });
+        return MovieReviewPageResponse.builder()
+                .averageRating(Math.round(averageRating * 10.0) / 10.0)
+                .totalReviews(totalReviews)
+                .ratingDistribution(distribution)
+                .content(content)
+                .currentPage(reviewPage.getNumber())
+                .totalPages(reviewPage.getTotalPages())
+                .totalElements(reviewPage.getTotalElements())
+                .last(reviewPage.isLast())
+                .build();
     }
 
     private Users getCurrentUser() {
@@ -127,5 +155,33 @@ public class ReviewService {
             return null;
         }
         return userRepository.findByUsername(auth.getName()).orElse(null);
+    }
+
+    public UnreviewedMovieResponse getRecentUnreviewedMovie() {
+        Users currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return null;
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threeDaysAgo = now.minusDays(3);
+
+        List<Movies> unreviewedMovies = movieRepository.findRecentUnreviewedMovies(
+                currentUser.getUserId(),
+                threeDaysAgo,
+                now,
+                PageRequest.of(0, 1)
+        );
+
+        if (unreviewedMovies.isEmpty()) {
+            return null;
+        }
+
+        Movies movie = unreviewedMovies.get(0);
+        return UnreviewedMovieResponse.builder()
+                .movieId(movie.getMovieId())
+                .movieName(movie.getTitle())
+                .posterUrl(movie.getPosterUrl())
+                .build();
     }
 }

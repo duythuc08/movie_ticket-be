@@ -1,7 +1,5 @@
 package com.example.movie_ticket_be.movie.dto.response;
 
-import java.time.LocalDateTime;
-
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,17 +12,8 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ReviewResponse {
-    Long reviewId;
+public class UnreviewedMovieResponse {
     Long movieId;
-    Long userId;
-    String username;
-    String fullName;
-    Integer rating;
-    String comment;
-    Integer likeCount;
-    Integer dislikeCount;
-    LocalDateTime createdAt;
-    boolean isLikedByMe;
-    boolean isDislikedByMe;
+    String movieName;
+    String posterUrl;
 }

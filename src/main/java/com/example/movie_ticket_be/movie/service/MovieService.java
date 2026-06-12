@@ -16,7 +16,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import com.example.movie_ticket_be.user.entity.Users;
+import com.example.movie_ticket_be.user.repository.UserRepository;
+import com.example.movie_ticket_be.movie.repository.ReviewRepository;
 
 import java.util.List;
 
@@ -27,11 +33,31 @@ import java.util.List;
 public class MovieService {
 	MovieRepository movieRepository;
 	MovieMapper movieMapper;
+	UserRepository userRepository;
+	ReviewRepository reviewRepository;
+
+	private Users getCurrentUser() {
+		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+		if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getPrincipal())) {
+			return null;
+		}
+		return userRepository.findByUsername(auth.getName()).orElse(null);
+	}
 
 	public MovieResponse getMovieById(Long movieId) {
 		Movies movie = movieRepository.findByMovieId(movieId)
 				.orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
-		return movieMapper.toMovieResponse(movie);
+		MovieResponse response = movieMapper.toMovieResponse(movie);
+		
+		Users currentUser = getCurrentUser();
+		if (currentUser != null) {
+			boolean hasReviewed = reviewRepository.existsByUsersAndMovies(currentUser, movie);
+			response.setHasReviewed(hasReviewed);
+		} else {
+			response.setHasReviewed(false);
+		}
+		
+		return response;
 	}
 	public List<MovieResponse> getMovies() {
 		return movieRepository.findAll().stream().map(movieMapper::toMovieResponse).toList();

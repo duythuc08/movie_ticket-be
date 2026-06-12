@@ -22,6 +22,7 @@ public class AdminReviewResponse {
     String movieTitle;
     String userId;
     String username;
+    String fullName;
     Integer rating;
     String comment;
     Integer likeCount;

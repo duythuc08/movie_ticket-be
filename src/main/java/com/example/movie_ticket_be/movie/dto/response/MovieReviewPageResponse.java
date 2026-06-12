@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.movie.dto.response;
 
-import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -14,17 +15,14 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class ReviewResponse {
-    Long reviewId;
-    Long movieId;
-    Long userId;
-    String username;
-    String fullName;
-    Integer rating;
-    String comment;
-    Integer likeCount;
-    Integer dislikeCount;
-    LocalDateTime createdAt;
-    boolean isLikedByMe;
-    boolean isDislikedByMe;
+public class MovieReviewPageResponse {
+    double averageRating;
+    long totalReviews;
+    Map<Integer, Long> ratingDistribution;
+
+    List<ReviewResponse> content;
+    int currentPage;
+    int totalPages;
+    long totalElements;
+    boolean last;
 }

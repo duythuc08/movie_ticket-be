@@ -24,6 +24,7 @@ public interface ReviewMapper {
     @Mapping(source = "movies.movieId", target = "movieId")
     @Mapping(source = "users.userId", target = "userId")
     @Mapping(source = "users.username", target = "username")
+    @Mapping(target = "fullName", expression = "java((review.getUsers().getFirstname() != null ? review.getUsers().getFirstname() : \"\") + \" \" + (review.getUsers().getLastname() != null ? review.getUsers().getLastname() : \"\"))")
     @Mapping(target = "isLikedByMe", ignore = true)
     @Mapping(target = "isDislikedByMe", ignore = true)
     ReviewResponse toReviewResponse(Reviews review);
@@ -32,5 +33,6 @@ public interface ReviewMapper {
     @Mapping(source = "movies.title", target = "movieTitle")
     @Mapping(source = "users.userId", target = "userId")
     @Mapping(source = "users.username", target = "username")
+    @Mapping(target = "fullName", expression = "java((review.getUsers().getFirstname() != null ? review.getUsers().getFirstname() : \"\") + \" \" + (review.getUsers().getLastname() != null ? review.getUsers().getLastname() : \"\"))")
     AdminReviewResponse toAdminReviewResponse(Reviews review);
 }

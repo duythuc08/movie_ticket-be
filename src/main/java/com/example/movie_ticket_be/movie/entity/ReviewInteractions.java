@@ -47,4 +47,6 @@ public class ReviewInteractions extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     InteractionType interactionType;
+
+    boolean isActive = true;
 }
