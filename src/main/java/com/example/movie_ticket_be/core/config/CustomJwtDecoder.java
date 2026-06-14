@@ -37,7 +37,7 @@ public class CustomJwtDecoder implements JwtDecoder {
 		try {
 			response = authenticationService.introspect(IntrospectResquest.builder().token(token).build());
 		} catch (JOSEException | ParseException e) {
-			throw new RuntimeException(e);
+			throw new JwtException("Token validation failed: " + e.getMessage());
 		}
 
 		if (!response.isValid())

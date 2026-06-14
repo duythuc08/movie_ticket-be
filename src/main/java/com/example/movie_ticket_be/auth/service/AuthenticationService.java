@@ -203,7 +203,7 @@ public class AuthenticationService {
 		boolean inValid = true;
 		try {
 			verifyToken(token);
-		} catch (AppException e) {
+		} catch (AppException | JOSEException | ParseException e) {
 			inValid = false;
 		}
 
