@@ -72,6 +72,7 @@ public class ReviewService {
         Reviews review = reviewMapper.toReview(request);
         review.setUsers(user);
         review.setMovies(movie);
+        review.setComment(request.getComment());
         return reviewMapper.toReviewResponse(reviewRepository.save(review));
     }
 

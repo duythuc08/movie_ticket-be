@@ -1,24 +1,23 @@
 package com.example.movie_ticket_be.movie.mapper;
 
+import org.mapstruct.BeanMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
 
 import com.example.movie_ticket_be.movie.dto.request.ReviewRequest;
 import com.example.movie_ticket_be.movie.dto.response.AdminReviewResponse;
 import com.example.movie_ticket_be.movie.dto.response.ReviewResponse;
 import com.example.movie_ticket_be.movie.entity.Reviews;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ReviewMapper {
-    @Mapping(target = "users", ignore = true)
-    @Mapping(target = "movies", ignore = true)
+    @BeanMapping(ignoreByDefault = true)
+    @Mapping(source = "rating", target = "rating")
+    @Mapping(source = "comment", target = "comment")
     @Mapping(target = "likeCount", constant = "0")
     @Mapping(target = "dislikeCount", constant = "0")
     @Mapping(target = "reviewStatus", constant = "APPROVED")
-    @Mapping(target = "reviewId", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "entityStatus", ignore = true)
     Reviews toReview(ReviewRequest request);
 
     @Mapping(source = "movies.movieId", target = "movieId")

@@ -44,8 +44,7 @@ public interface MovieRepository extends JpaRepository<Movies, Long>, JpaSpecifi
 			"AND ot.seatShowTime.showTimes.startTime <= :now " +
 			"AND ot.seatShowTime.showTimes.movies.movieId NOT IN (" +
 			"    SELECT r.movies.movieId FROM Reviews r WHERE r.users.userId = :userId" +
-			") " +
-			"ORDER BY ot.seatShowTime.showTimes.startTime DESC")
+			")")
 	List<Movies> findRecentUnreviewedMovies(
 			@Param("userId") String userId,
 			@Param("threeDaysAgo") LocalDateTime threeDaysAgo,

@@ -327,7 +327,15 @@ public enum ErrorCode {
 	REVIEW_NOT_OWNED(
 			1082,
 			"You do not own this review",
-			HttpStatus.FORBIDDEN);
+			HttpStatus.FORBIDDEN),
+	REFRESH_TOKEN_INVALID(
+			1083,
+			"Refresh token is invalid or expired",
+			HttpStatus.UNAUTHORIZED),
+	SHOWTIME_IN_PAST(
+			1084,
+			"Cannot create showtime in the past",
+			HttpStatus.BAD_REQUEST);
 
 	// Constructor để gán giá trị cho từng phần tử enum
 	ErrorCode(int code, String message, HttpStatusCode statusCode) {

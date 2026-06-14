@@ -57,7 +57,7 @@ public class SecurityConfig {
 		config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://192.168.7.99",
 				"http://192.168.7.99:8081"));
 		config.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization"));
-		config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		config.setMaxAge(3600L);
 		config.setAllowCredentials(true);;
 

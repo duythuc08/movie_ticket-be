@@ -64,6 +64,13 @@ public class AdminShowTimeService {
 		int totalMinutes = movie.getDuration() + BUFFER_MINUTES;
 
 		List<LocalDateTime> sortedStarts = request.getStartTimes().stream().sorted().distinct().toList();
+		
+		LocalDateTime now = LocalDateTime.now();
+		for (LocalDateTime start : sortedStarts) {
+			if (start.isBefore(now)) {
+				throw new AppException(ErrorCode.SHOWTIME_IN_PAST);
+			}
+		}
 
 		for (int i = 0; i < sortedStarts.size() - 1; i++) {
 			LocalDateTime endA = sortedStarts.get(i).plusMinutes(totalMinutes);

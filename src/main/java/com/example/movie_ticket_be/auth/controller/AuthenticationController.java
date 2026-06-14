@@ -1,21 +1,33 @@
 package com.example.movie_ticket_be.auth.controller;
 
-import com.example.movie_ticket_be.auth.dto.request.*;
+import java.text.ParseException;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.movie_ticket_be.auth.dto.request.AuthenticationResquest;
+import com.example.movie_ticket_be.auth.dto.request.ForgotPasswordRequest;
+import com.example.movie_ticket_be.auth.dto.request.IntrospectResquest;
+import com.example.movie_ticket_be.auth.dto.request.LogoutResquest;
+import com.example.movie_ticket_be.auth.dto.request.RefreshTokenRequest;
+import com.example.movie_ticket_be.auth.dto.request.RegisterRequest;
+import com.example.movie_ticket_be.auth.dto.request.ResetPasswordRequest;
 import com.example.movie_ticket_be.auth.dto.response.AuthenticationResponse;
 import com.example.movie_ticket_be.auth.dto.response.IntrospectResponse;
 import com.example.movie_ticket_be.auth.service.AuthenticationService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.user.dto.response.UsersRespone;
 import com.nimbusds.jose.JOSEException;
+
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-
-import java.text.ParseException;
 
 @Slf4j
 @RestController
@@ -75,5 +87,11 @@ public class AuthenticationController {
 	public ApiResponse<Void> resendOTP(@RequestParam String email) {
 		authenticationService.resendOtp(email);
 		return ApiResponse.<Void>builder().message("OTP mới đã được gửi, Vui lòng kiểm tra").build();
+	}
+
+	@PostMapping("/refresh")
+	public ApiResponse<AuthenticationResponse> refresh(@RequestBody RefreshTokenRequest request) {
+		var result = authenticationService.refresh(request.getRefreshToken());
+		return ApiResponse.<AuthenticationResponse>builder().result(result).build();
 	}
 }

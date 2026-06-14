@@ -41,7 +41,7 @@ public class ShowTimePriceService {
 	public Map<SeatType, BigDecimal> getPriceMapByShowTime(Long showTimeId) {
 		List<ShowTimePrice> priceList = showTimePriceRepository.findByShowtimes_ShowTimeId(showTimeId);
 		if (priceList.isEmpty()) {
-			throw new RuntimeException("Suất chiếu " + showTimeId + " chưa được cấu hình giá!");
+			return new java.util.HashMap<>();
 		}
 		return priceList.stream().collect(Collectors.toMap(ShowTimePrice::getSeatType, ShowTimePrice::getPrice));
 	}

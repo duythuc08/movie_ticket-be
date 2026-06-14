@@ -7,8 +7,10 @@ import com.example.movie_ticket_be.auth.dto.request.RegisterRequest;
 import com.example.movie_ticket_be.auth.dto.response.AuthenticationResponse;
 import com.example.movie_ticket_be.auth.dto.response.IntrospectResponse;
 import com.example.movie_ticket_be.auth.entity.InvalidatedToken;
+import com.example.movie_ticket_be.auth.entity.RefreshToken;
 import com.example.movie_ticket_be.auth.entity.VerificationToken;
 import com.example.movie_ticket_be.auth.repository.InvalidatedTokenRepository;
+import com.example.movie_ticket_be.auth.repository.RefreshTokenRepository;
 import com.example.movie_ticket_be.auth.repository.VerificationTokenRepository;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
@@ -55,6 +57,7 @@ import java.util.*;
 public class AuthenticationService {
 	UserRepository userRepository;
 	InvalidatedTokenRepository invalidatedTokenRepository;
+	RefreshTokenRepository refreshTokenRepository;
 	private final UserMapper userMapper;
 	private final VerificationTokenRepository verificationTokenRepository;
 	private final @Lazy EmailService emailService;
@@ -62,8 +65,11 @@ public class AuthenticationService {
 	private final PasswordEncoder passwordEncoder;
 	private final MembershipTierRepository membershipTierRepository;
 	@NonFinal
-	@Value("${jwt.signerKey}") // doc bien tu file .yaml
+	@Value("${jwt.signerKey}")
 	protected String SIGNER_KEY;
+	@NonFinal
+	@Value("${jwt.refreshExpiryDays:7}")
+	protected int REFRESH_EXPIRY_DAYS;
 
 	public AuthenticationResponse authenticate(AuthenticationResquest resquest) {
 		var user = userRepository.findByUsername(resquest.getUsername())
@@ -74,24 +80,52 @@ public class AuthenticationService {
 		if (!authenticated)
 			throw new AppException(ErrorCode.UNAUTHENTICATED);
 		var token = generateToken(user);
+		var refreshToken = generateRefreshToken(user);
 
-		return AuthenticationResponse.builder().token(token).authenticated(true).enabled(user.isEnabled()).build();
+		return AuthenticationResponse.builder()
+				.token(token)
+				.refreshToken(refreshToken)
+				.authenticated(true)
+				.enabled(user.isEnabled())
+				.build();
 	}
 
+	@Transactional
+	public AuthenticationResponse refresh(String refreshToken) {
+		RefreshToken stored = refreshTokenRepository.findById(refreshToken)
+				.orElseThrow(() -> new AppException(ErrorCode.REFRESH_TOKEN_INVALID));
+
+		if (stored.getExpiryTime().before(new Date()))
+			throw new AppException(ErrorCode.REFRESH_TOKEN_INVALID);
+
+		Users user = userRepository.findById(stored.getUserId())
+				.orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+		refreshTokenRepository.delete(stored);
+
+		String newAccessToken = generateToken(user);
+		String newRefreshToken = generateRefreshToken(user);
+
+		return AuthenticationResponse.builder()
+				.token(newAccessToken)
+				.refreshToken(newRefreshToken)
+				.authenticated(true)
+				.build();
+	}
+
+	@Transactional
 	public void logout(LogoutResquest request) throws ParseException, JOSEException {
 		try {
 			var signToken = verifyToken(request.getToken());
-
 			String jit = signToken.getJWTClaimsSet().getJWTID();
-
 			Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
-
-			InvalidatedToken invalidatedToken = InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
-
-			invalidatedTokenRepository.save(invalidatedToken);
-
+			invalidatedTokenRepository.save(InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build());
 		} catch (AppException exception) {
 			log.info("Token already expired");
+		}
+
+		if (request.getRefreshToken() != null) {
+			refreshTokenRepository.deleteById(request.getRefreshToken());
 		}
 	}
 
@@ -226,6 +260,13 @@ public class AuthenticationService {
 		return scope.toString();
 	}
 
+	private String generateRefreshToken(Users user) {
+		String token = UUID.randomUUID().toString();
+		Date expiry = new Date(Instant.now().plus(REFRESH_EXPIRY_DAYS, ChronoUnit.DAYS).toEpochMilli());
+		refreshTokenRepository.save(RefreshToken.builder().token(token).userId(user.getUserId()).expiryTime(expiry).build());
+		return token;
+	}
+
 	private String generateVerificationCode() {
 		Random random = new Random();
 		int code = random.nextInt(900000);
@@ -299,6 +340,13 @@ public class AuthenticationService {
 		} catch (Exception e) {
 			log.error("Failed to send email", e);
 		}
+	}
+
+	@Scheduled(cron = "0 0 3 * * ?")
+	@Transactional
+	public void deleteExpiredRefreshTokens() {
+		refreshTokenRepository.deleteExpiredTokens(new Date());
+		log.info("Cleaned up expired refresh tokens");
 	}
 
 	@Scheduled(cron = "0 0 2 * * ?")

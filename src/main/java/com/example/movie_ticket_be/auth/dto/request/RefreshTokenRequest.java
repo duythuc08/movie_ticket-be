@@ -8,7 +8,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class LogoutResquest {
-	String token;
+public class RefreshTokenRequest {
 	String refreshToken;
 }

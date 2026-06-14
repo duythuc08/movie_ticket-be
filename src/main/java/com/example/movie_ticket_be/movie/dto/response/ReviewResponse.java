@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class ReviewResponse {
     Long reviewId;
     Long movieId;
-    Long userId;
+    String userId;
     String username;
     String fullName;
     Integer rating;

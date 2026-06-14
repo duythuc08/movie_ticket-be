@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class AdminReviewController {
     AdminReviewInteractionService adminReviewInteractionService;
 
     @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<Page<AdminReviewResponse>> getAdminReviews(
             @Parameter(name = "filter", required = false) @Filter Specification<Reviews> spec,
             @ParameterObject @PageableDefault(sort = "createdAt", direction = Direction.DESC) Pageable pageable) {
@@ -49,6 +51,7 @@ public class AdminReviewController {
     }
 
     @PatchMapping("/{reviewId}/approve")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<AdminReviewResponse> approveReview(@PathVariable Long reviewId) {
         return ApiResponse.<AdminReviewResponse>builder()
                 .result(adminReviewService.approveReview(reviewId))
@@ -56,6 +59,7 @@ public class AdminReviewController {
     }
 
     @PatchMapping("/{reviewId}/reject")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<AdminReviewResponse> rejectReview(@PathVariable Long reviewId) {
         return ApiResponse.<AdminReviewResponse>builder()
                 .result(adminReviewService.rejectReview(reviewId))
@@ -63,6 +67,7 @@ public class AdminReviewController {
     }
 
     @PatchMapping("/{reviewId}/hide")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<AdminReviewResponse> hideReview(@PathVariable Long reviewId) {
         return ApiResponse.<AdminReviewResponse>builder()
                 .result(adminReviewService.hideReview(reviewId))
@@ -70,6 +75,7 @@ public class AdminReviewController {
     }
 
     @GetMapping("/{reviewId}/interactions")
+    @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<List<AdminReviewInteractionResponse>> getReviewInteractions(@PathVariable Long reviewId) {
         return ApiResponse.<List<AdminReviewInteractionResponse>>builder()
                 .result(adminReviewInteractionService.getAllReviewInteractions(reviewId))
