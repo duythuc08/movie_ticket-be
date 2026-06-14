@@ -57,18 +57,11 @@ public class AdminPromotionController {
 				.message("Cập nhật khuyến mãi thành công").build();
 	}
 
-	@PutMapping("/{id}/submit")
+	@PutMapping("/{id}/publish")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<Void> submit(@PathVariable Long id) {
-		adminPromotionService.submit(id);
-		return ApiResponse.<Void>builder().message("Gửi duyệt thành công").build();
-	}
-
-	@PutMapping("/{id}/approve")
-	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<Void> approve(@PathVariable Long id) {
-		adminPromotionService.approve(id);
-		return ApiResponse.<Void>builder().message("Phê duyệt và đăng khuyến mãi thành công").build();
+	public ApiResponse<Void> publish(@PathVariable Long id) {
+		adminPromotionService.publish(id);
+		return ApiResponse.<Void>builder().message("Đăng khuyến mãi thành công").build();
 	}
 
 	@PutMapping("/{id}/pause")

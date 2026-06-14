@@ -1,25 +1,31 @@
 
 package com.example.movie_ticket_be.payment.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
 import com.example.movie_ticket_be.auth.service.EmailService;
 import com.example.movie_ticket_be.booking.entity.OrderFoods;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
-import com.example.movie_ticket_be.cinema.entity.Foods;
-import com.example.movie_ticket_be.cinema.enums.FoodStatus;
-import com.example.movie_ticket_be.cinema.repository.FoodRepository;
-import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.booking.repository.OrderFoodRepository;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
+import com.example.movie_ticket_be.cinema.entity.Foods;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
+import com.example.movie_ticket_be.cinema.repository.FoodRepository;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.core.utils.QRCodeUtils;
 import com.example.movie_ticket_be.payment.dto.request.PaymentConfirmRequest;
 import com.example.movie_ticket_be.payment.entity.Payments;
 import com.example.movie_ticket_be.payment.enums.PaymentStatus;
+import com.example.movie_ticket_be.payment.enums.PaymentType;
 import com.example.movie_ticket_be.payment.repository.PaymentRepository;
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
@@ -30,15 +36,12 @@ import com.example.movie_ticket_be.user.entity.Users;
 import com.example.movie_ticket_be.user.repository.LoyaltyPointsHistoryRepository;
 import com.example.movie_ticket_be.user.repository.MembershipTierRepository;
 import com.example.movie_ticket_be.user.repository.UserRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -59,14 +62,31 @@ public class PaymentService {
 	EmailService emailService;
 
 	@Transactional
+	public void createPendingPayment(Long orderId, PaymentType paymentType) {
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		Payments payment = Payments.builder()
+				.order(order)
+				.amount(order.getFinalPrice())
+				.paymentType(paymentType)
+				.paymentStatus(PaymentStatus.PENDING)
+				.build();
+		paymentRepository.save(payment);
+	}
+
+	@Transactional
 	public void processSuccess(PaymentConfirmRequest request) {
 		Orders order = orderRepository.findByOrderId(request.getOrderId())
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-		// a. Lưu bản ghi thanh toán
-		Payments payment = Payments.builder().order(order).amount(order.getFinalPrice())
-				.paymentDate(LocalDateTime.now()).transactionId(request.getTransactionId())
-				.paymentInfo(request.getPaymentInfo()).paymentType(request.getPaymentType())
-				.paymentStatus(PaymentStatus.SUCCESS).build();
+		// a. Cập nhật bản ghi PENDING → SUCCESS (hoặc tạo mới nếu không tồn tại)
+		Payments payment = paymentRepository
+				.findByOrder_OrderIdAndPaymentStatus(order.getOrderId(), PaymentStatus.PENDING)
+				.orElse(Payments.builder().order(order).amount(order.getFinalPrice()).build());
+		payment.setPaymentDate(LocalDateTime.now());
+		payment.setTransactionId(request.getTransactionId());
+		payment.setPaymentInfo(request.getPaymentInfo());
+		payment.setPaymentType(request.getPaymentType());
+		payment.setPaymentStatus(PaymentStatus.SUCCESS);
 		paymentRepository.save(payment);
 
 		// b. cập nhật order tạo qrCode
@@ -103,6 +123,14 @@ public class PaymentService {
 		// a. Cập nhật Order
 		order.setOrderStatus(OrderStatus.CANCELLED);
 		orderRepository.save(order);
+
+		// a2. Cập nhật Payment PENDING → FAILED
+		paymentRepository.findByOrder_OrderIdAndPaymentStatus(order.getOrderId(), PaymentStatus.PENDING)
+				.ifPresent(payment -> {
+					payment.setPaymentStatus(PaymentStatus.FAILED);
+					payment.setPaymentDate(LocalDateTime.now());
+					paymentRepository.save(payment);
+				});
 
 		// b. Cập nhật Ticket & TRẢ GHẾ
 		List<OrderTickets> tickets = orderTicketRepository.findByOrders_OrderId(order.getOrderId());

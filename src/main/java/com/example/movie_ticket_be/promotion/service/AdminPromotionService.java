@@ -61,18 +61,9 @@ public class AdminPromotionService {
 		return promotionMapper.toAdminResponse(promotionRepository.save(promotion));
 	}
 
-	public void submit(Long id) {
+	public void publish(Long id) {
 		Promotion promotion = findById(id);
 		if (promotion.getStatus() != PromotionStatus.DRAFT) {
-			throw new AppException(ErrorCode.PROMOTION_STATUS_INVALID);
-		}
-		promotion.setStatus(PromotionStatus.PENDING_APPROVAL);
-		promotionRepository.save(promotion);
-	}
-
-	public void approve(Long id) {
-		Promotion promotion = findById(id);
-		if (promotion.getStatus() != PromotionStatus.PENDING_APPROVAL) {
 			throw new AppException(ErrorCode.PROMOTION_STATUS_INVALID);
 		}
 		promotion.setStatus(PromotionStatus.PUBLISHED);

@@ -47,6 +47,8 @@ public class PaymentController {
 		String paymentUrl = vnPayService.createPaymentUrl(request, orderResponse.getOrderId(),
 				orderResponse.getFinalPrice());
 
+		paymentService.createPendingPayment(orderResponse.getOrderId(), PaymentType.VNPAY);
+
 		BookingResponse response = BookingResponse.builder().orderId(orderResponse.getOrderId())
 				.userId(orderResponse.getUserId()).fullName(orderResponse.getFullName())
 				.orderStatus(orderResponse.getOrderStatus()).showTimeInfo(orderResponse.getShowTimeInfo())
@@ -116,7 +118,7 @@ public class PaymentController {
 					paymentService.processFail(order);
 
 				return new RedirectView(
-						"http://localhost:3000/payment-fail?vnp_ResponseCode=" + status + "&orderId=" + txnRef);
+						"http://localhost:3000/payment-fail/" + txnRef + "?vnp_ResponseCode=" + status);
 			}
 		} else {
 			return new RedirectView("http://localhost:3000/payment-error");
