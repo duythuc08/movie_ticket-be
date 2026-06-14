@@ -107,7 +107,11 @@ public class AdminShowTimeService {
 			seatShowTimeService.generateSeatsForShowTime(st.getShowTimeId(), request.getRoomId());
 		});
 
-		return saved.stream().map(showTimeMapper::toShowTimeResponse).toList();
+		return saved.stream().map(st -> {
+			ShowTimeResponse response = showTimeMapper.toShowTimeResponse(st);
+			response.setPrices(adminShowTimePriceService.getPricesByShowTimeId(st.getShowTimeId()));
+			return response;
+		}).toList();
 	}
 
 	@Transactional

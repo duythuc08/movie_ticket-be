@@ -49,6 +49,7 @@ public class AdminShowTimePriceService {
 		}
 
 		ShowTimePrice showTimePrice = showTimePriceMapper.toShowTimePrice(request);
+		showTimePrice.setShowtimes(showTime);
 		return showTimePriceMapper.toShowTimePriceResponse(showTimePriceRepository.save(showTimePrice));
 	}
 
