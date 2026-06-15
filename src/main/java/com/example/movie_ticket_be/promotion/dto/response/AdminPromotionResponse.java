@@ -26,6 +26,7 @@ public class AdminPromotionResponse {
 	BigDecimal maxDiscountAmount;
 	Integer useLimit;
 	Integer usedCount;
+	Boolean isPublic;
 	LocalDateTime startTime;
 	LocalDateTime endTime;
 	PromotionStatus status;

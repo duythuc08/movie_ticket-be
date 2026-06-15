@@ -36,6 +36,7 @@ public class Promotion extends BaseEntity {
 	BigDecimal maxDiscountAmount;
 	Integer useLimit;
 	Integer usedCount;
+	Boolean isPublic;
 
 	LocalDateTime startTime;
 	LocalDateTime endTime;
@@ -63,6 +64,9 @@ public class Promotion extends BaseEntity {
 		super.onCreate();
 		if (this.status == null) {
 			this.status = PromotionStatus.DRAFT;
+		}
+		if (this.isPublic == null) {
+			this.isPublic = true;
 		}
 	}
 }

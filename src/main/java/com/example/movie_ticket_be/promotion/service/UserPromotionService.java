@@ -38,6 +38,7 @@ public class UserPromotionService {
 		String userId = getCurrentUserId();
 		LocalDateTime now = LocalDateTime.now();
 		return promotionRepository.findByStatus(PromotionStatus.PUBLISHED).stream()
+				.filter(p -> p.getIsPublic() != null && p.getIsPublic())
 				.filter(p -> !now.isAfter(p.getEndTime()) && !now.isBefore(p.getStartTime()))
 				.filter(p -> p.getUseLimit() == null || p.getUsedCount() < p.getUseLimit())
 				.filter(p -> !userPromotionRepository.existsByUsers_UserIdAndPromotion_PromotionId(userId,
@@ -65,7 +66,28 @@ public class UserPromotionService {
 		}
 
 		Users user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+		userPromotionRepository.save(UserPromotion.builder().users(user).promotion(promotion).isUsed(false).build());
+	}
 
+	public void claimPromotionByCode(String code) {
+		String userId = getCurrentUserId();
+		Promotion promotion = promotionRepository.findByStatus(PromotionStatus.PUBLISHED).stream()
+				.filter(p -> code.equalsIgnoreCase(p.getCode()))
+				.findFirst()
+				.orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+
+		LocalDateTime now = LocalDateTime.now();
+		if (now.isAfter(promotion.getEndTime()) || now.isBefore(promotion.getStartTime())) {
+			throw new AppException(ErrorCode.PROMOTION_EXPIRED);
+		}
+		if (promotion.getUseLimit() != null && promotion.getUsedCount() >= promotion.getUseLimit()) {
+			throw new AppException(ErrorCode.PROMOTION_OUT_OF_STOCK);
+		}
+		if (userPromotionRepository.existsByUsers_UserIdAndPromotion_PromotionId(userId, promotion.getPromotionId())) {
+			throw new AppException(ErrorCode.PROMOTION_ALREADY_CLAIMED);
+		}
+
+		Users user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 		userPromotionRepository.save(UserPromotion.builder().users(user).promotion(promotion).isUsed(false).build());
 	}
 

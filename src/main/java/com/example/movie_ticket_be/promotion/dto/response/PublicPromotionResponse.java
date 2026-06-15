@@ -25,6 +25,7 @@ public class PublicPromotionResponse {
 	BigDecimal maxDiscountAmount;
 	Integer useLimit;
 	Integer usedCount;
+	Boolean isPublic;
 	LocalDateTime startTime;
 	LocalDateTime endTime;
 	Set<DayOfWeek> dayOfWeek;

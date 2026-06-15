@@ -23,6 +23,7 @@ public class PromotionRequest {
 	BigDecimal minOrderValue;
 	BigDecimal maxDiscountAmount;
 	Integer useLimit;
+	Boolean isPublic;
 	LocalDateTime startTime;
 	LocalDateTime endTime;
 	Set<Long> applicableMovieIds;

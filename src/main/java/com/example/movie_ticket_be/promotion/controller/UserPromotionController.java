@@ -34,6 +34,13 @@ public class UserPromotionController {
 		return ApiResponse.<Void>builder().message("Nhận voucher thành công").build();
 	}
 
+	@PostMapping("/promotions/claim-by-code")
+	@PreAuthorize("isAuthenticated()")
+	public ApiResponse<Void> claimPromotionByCode(@RequestParam String code) {
+		userPromotionService.claimPromotionByCode(code);
+		return ApiResponse.<Void>builder().message("Nhận voucher thành công").build();
+	}
+
 	@GetMapping("/users/vouchers")
 	@PreAuthorize("isAuthenticated()")
 	public ApiResponse<List<UserVoucherResponse>> getMyVouchers() {
