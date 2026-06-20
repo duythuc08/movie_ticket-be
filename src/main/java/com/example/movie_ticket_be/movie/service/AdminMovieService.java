@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.movie.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -25,6 +26,11 @@ import com.example.movie_ticket_be.movie.mapper.MovieMapper;
 import com.example.movie_ticket_be.movie.repository.GenreRepository;
 import com.example.movie_ticket_be.movie.repository.MovieRepository;
 import com.example.movie_ticket_be.movie.repository.PersonRepository;
+import com.example.movie_ticket_be.showtime.entity.ShowTimes;
+import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
+import com.example.movie_ticket_be.showtime.enums.ShowTimeStatus;
+import com.example.movie_ticket_be.showtime.repository.ShowTimeRepository;
+import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -41,6 +47,8 @@ public class AdminMovieService {
 	MovieMapper movieMapper;
 	GenreRepository genreRepository;
 	PersonRepository personRepository;
+	ShowTimeRepository showTimeRepository;
+	SeatShowTimeRepository seatShowTimeRepository;
 
 	@Transactional
 	public MovieResponse createAdminMovie(MovieCreationRequest request) {
@@ -127,9 +135,57 @@ public class AdminMovieService {
 		return releaseDate.isAfter(LocalDateTime.now()) ? MovieStatus.COMING_SOON : MovieStatus.NOW_SHOWING;
 	}
 
+	@Transactional
+	public void stoppedMoive(long id) {
+		Movies movie = movieRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+		
+		if (movie.getMovieStatus() == MovieStatus.STOPPED) {
+			throw new AppException(ErrorCode.MOVIE_ALREADY_STOPPED);
+		}
+		
+		List<ShowTimes> activeShowTime = showTimeRepository.findByMovies_MovieIdAndShowTimeStatusIn(movie.getMovieId(),
+				List.of(
+						ShowTimeStatus.SCHEDULED,
+						ShowTimeStatus.ONGOING));
+
+		for (ShowTimes showTime : activeShowTime) {
+			boolean hasBooking = seatShowTimeRepository.existsByShowTimes_ShowTimeIdAndSeatShowTimeStatusIn(
+					showTime.getShowTimeId(),
+					List.of(SeatShowTimeStatus.SOLD,
+							SeatShowTimeStatus.RESERVED));
+
+			if (!hasBooking) {
+				showTime.setShowTimeStatus(ShowTimeStatus.CANCELLED);
+			}
+
+		}
+		showTimeRepository.saveAll(activeShowTime);
+		movie.setMovieStatus(MovieStatus.STOPPED);
+		movieRepository.save(movie);
+	}
+
+	@Transactional
+	public void replayMovie(long id) {
+		Movies movie = movieRepository.findById(id)
+				.orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+
+		if (movie.getMovieStatus() != MovieStatus.STOPPED) {
+			throw new AppException(ErrorCode.MOVIE_NOT_STOPPED);
+		}
+
+		LocalDate today = LocalDate.now();
+		if (movie.getReleaseDate() != null && movie.getReleaseDate().toLocalDate().isAfter(today)) {
+			movie.setMovieStatus(MovieStatus.COMING_SOON);
+		} else {
+			movie.setMovieStatus(MovieStatus.NOW_SHOWING);
+		}
+
+		movieRepository.save(movie);
+	}
+
 	public void updateMovieStatuses() {
 		LocalDateTime now = LocalDateTime.now();
-
+		LocalDateTime threeDaysAgo = now.minusDays(3);
 		log.info("Bắt đầu cập nhật trạng thái phim tự động...");
 
 		List<Movies> toNowShowing = movieRepository.findAllByMovieStatusAndReleaseDateBefore(MovieStatus.COMING_SOON,
@@ -137,7 +193,7 @@ public class AdminMovieService {
 		toNowShowing.forEach(m -> m.setMovieStatus(MovieStatus.NOW_SHOWING));
 		movieRepository.saveAll(toNowShowing);
 
-		List<Movies> toStopped = movieRepository.findNowShowingWithNoFutureShowtimes(now);
+		List<Movies> toStopped = movieRepository.findNowShowingWithNoFutureShowtimes(threeDaysAgo);
 		toStopped.forEach(m -> m.setMovieStatus(MovieStatus.STOPPED));
 		movieRepository.saveAll(toStopped);
 

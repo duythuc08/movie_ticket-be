@@ -335,6 +335,14 @@ public enum ErrorCode {
 	SHOWTIME_IN_PAST(
 			1084,
 			"Cannot create showtime in the past",
+			HttpStatus.BAD_REQUEST),
+	MOVIE_ALREADY_STOPPED(
+			1085,
+			"Phim đã được tạm dừng",
+			HttpStatus.BAD_REQUEST),
+	MOVIE_NOT_STOPPED(
+			1086,
+			"Phim chưa được tạm dừng, không thể chiếu lại",
 			HttpStatus.BAD_REQUEST);
 
 	// Constructor để gán giá trị cho từng phần tử enum

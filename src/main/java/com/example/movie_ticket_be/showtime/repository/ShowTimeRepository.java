@@ -124,4 +124,6 @@ public interface ShowTimeRepository extends JpaRepository<ShowTimes, Long>, JpaS
 	boolean existsByRooms_Cinemas_CinemaId(Long cinemaId);
 	List<ShowTimes> findByRooms_Cinemas_CinemaIdAndStartTimeBetween(Long cinemaId, LocalDateTime start,
 			LocalDateTime end);
+
+	List<ShowTimes> findByMovies_MovieIdAndShowTimeStatusIn(Long movieId, List<ShowTimeStatus> statuses);
 }

@@ -78,4 +78,18 @@ public class AdminMovieController {
 		adminMovieService.changeStatus(id, EntityStatus.INACTIVE);
 		return ApiResponse.<Void>builder().message("Vô hiệu hóa phim thành công").build();
 	}
+
+	@PostMapping("/{id}/stop")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> stop(@PathVariable long id) {
+		adminMovieService.stoppedMoive(id);
+		return ApiResponse.<Void>builder().message("Dừng phim thành công").build();
+	}
+
+	@PostMapping("/{id}/replay")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<Void> replayMovie(@PathVariable long id) {
+		adminMovieService.replayMovie(id);
+		return ApiResponse.<Void>builder().message("Chiếu lại phim thành công").build();
+	}
 }

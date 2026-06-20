@@ -32,10 +32,12 @@ public interface MovieRepository extends JpaRepository<Movies, Long>, JpaSpecifi
 
 	List<Movies> findAllByMovieStatusAndReleaseDateBefore(MovieStatus status, LocalDateTime dateTime);
 
-	@Query("SELECT m FROM Movies m WHERE m.movieStatus = 'NOW_SHOWING' " + "AND m.entityStatus = 'ACTIVE' "
-			+ "AND NOT EXISTS (SELECT s FROM ShowTimes s WHERE s.movies = m "
-			+ "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED') " + "AND s.startTime > :now)")
-	List<Movies> findNowShowingWithNoFutureShowtimes(@Param("now") LocalDateTime now);
+	@Query("SELECT m FROM Movies m WHERE m.movieStatus = 'NOW_SHOWING' " 
+        + "AND m.entityStatus = 'ACTIVE' "
+        + "AND NOT EXISTS (SELECT s FROM ShowTimes s WHERE s.movies = m "
+        + "AND s.showTimeStatus IN ('SCHEDULED', 'FULLY_BOOKED', 'ONGOING', 'COMPLETED') "
+        + "AND s.startTime > :threeDaysAgo)")
+	List<Movies> findNowShowingWithNoFutureShowtimes(@Param("threeDaysAgo") LocalDateTime threeDaysAgo);
 
 	@Query("SELECT DISTINCT ot.seatShowTime.showTimes.movies FROM OrderTickets ot " +
 			"WHERE ot.orders.users.userId = :userId " +
