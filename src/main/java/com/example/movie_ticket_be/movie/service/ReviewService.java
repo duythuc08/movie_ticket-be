@@ -15,6 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
+import com.example.movie_ticket_be.cf.dto.request.ActivityLogRequest;
+import com.example.movie_ticket_be.cf.enums.ActionType;
+import com.example.movie_ticket_be.cf.service.UserActivityLogService;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.dto.request.ReviewRequest;
@@ -50,6 +53,7 @@ public class ReviewService {
     MovieRepository movieRepository;
     OrderTicketRepository orderTicketRepository;
     ReviewInteractionRepository interactionRepository;
+    UserActivityLogService userActivityLogService;
 
     @Transactional
     public ReviewResponse createReview(ReviewRequest request) {
@@ -73,7 +77,18 @@ public class ReviewService {
         review.setUsers(user);
         review.setMovies(movie);
         review.setComment(request.getComment());
-        return reviewMapper.toReviewResponse(reviewRepository.save(review));
+        Reviews saved = reviewRepository.save(review);
+
+        userActivityLogService.logInternal(ActivityLogRequest.builder()
+                .actionType(ActionType.WRITE_REVIEW)
+                .movieId(movie.getMovieId())
+                .metadata(java.util.Map.of(
+                        "reviewId", saved.getReviewId(),
+                        "rating", request.getRating()
+                ))
+                .build());
+
+        return reviewMapper.toReviewResponse(saved);
     }
 
     @Transactional

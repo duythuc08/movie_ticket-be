@@ -15,6 +15,9 @@ import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.booking.repository.OrderFoodRepository;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
+import com.example.movie_ticket_be.cf.dto.request.ActivityLogRequest;
+import com.example.movie_ticket_be.cf.enums.ActionType;
+import com.example.movie_ticket_be.cf.service.UserActivityLogService;
 import com.example.movie_ticket_be.cinema.entity.Foods;
 import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.cinema.repository.FoodRepository;
@@ -22,6 +25,7 @@ import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.core.utils.QRCodeUtils;
+import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.payment.dto.request.PaymentConfirmRequest;
 import com.example.movie_ticket_be.payment.entity.Payments;
 import com.example.movie_ticket_be.payment.enums.PaymentStatus;
@@ -60,6 +64,7 @@ public class PaymentService {
 	LoyaltyPointsHistoryRepository pointsHistoryRepository;
 
 	EmailService emailService;
+	UserActivityLogService userActivityLogService;
 
 	@Transactional
 	public void createPendingPayment(Long orderId, PaymentType paymentType) {
@@ -95,7 +100,7 @@ public class PaymentService {
 		String qrBase64 = qrCodeUtils.generateQRCodeImage(qrCode, 300, 300);
 		order.setQrCode(qrCode);
 		orderRepository.save(order);
-
+        logBookTicket(order);
 		// c. Cập nhật vé và ghế
 		List<OrderTickets> tickets = orderTicketRepository.findByOrders_OrderId(order.getOrderId());
 		for (OrderTickets t : tickets) {
@@ -116,6 +121,27 @@ public class PaymentService {
 		if (order.getUsers() != null) {
 			sendPaymentSuccessMail(order.getUsers(), order, qrCode, qrBase64);
 		}
+
+	}
+
+	private void logBookTicket(Orders order) {
+		if (order.getUsers() == null) return;
+		Movies movie = order.getOrderTickets().stream()
+				.findFirst()
+				.map(t -> t.getSeatShowTime().getShowTimes().getMovies())
+				.orElse(null);
+		List<String> seatNames = order.getOrderTickets().stream()
+				.map(t -> t.getSeatShowTime().getSeats().getSeatRow() + t.getSeatShowTime().getSeats().getSeatNumber())
+				.toList();
+		userActivityLogService.logInternal(ActivityLogRequest.builder()
+				.actionType(ActionType.BOOK_TICKET)
+				.movieId(movie != null ? movie.getMovieId() : null)
+				.metadata(java.util.Map.of(
+						"orderId", order.getOrderId(),
+						"amount", order.getFinalPrice(),
+						"seats", seatNames
+				))
+				.build(), order.getUsers());
 	}
 
 	@Transactional
