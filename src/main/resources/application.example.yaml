@@ -47,3 +47,69 @@ cloudinary:
   cloud_name: ${CLOUDINARY_CLOUD_NAME}
   api_key: ${CLOUDINARY_API_KEY}
   api_secret: ${CLOUDINARY_API_SECRET}
+
+recommendation:
+  weights:
+    # ===== Nhóm 1 — w(a) cố định (không điều chỉnh theo trục nào) =====
+    view-showtime: 3          # VIEW_SHOWTIMES — xem lịch chiếu
+    search: 2                  # SEARCH — click vào kết quả search
+    skip-recommendation: -1    # SKIP_RECOMMENDATION — user skip qua dialog gợi ý 3 phim
+    cancel-payment: -3   # CANCEL_ORDER_BOOKING — user hủy thanh toan, check order = CANCELLED
+    abandon-seat-selection: -1  # ABANDON_SEAT_SELECTION — user vào chọn ghế rồi quay ra
+    timeout-hold-seat: -2             # TIMEOUT_HOLD_SEAT — user quả thời gian giữ ghế order = EXPIRED
+
+    # Chuỗi hành vi VIEW_SHOWTIME → BOOK_TICKET trong khung thời gian ngắn
+    chain-view-showtime-then-book: 8
+    chain-window-minutes: 30
+
+    # ===== Nhóm 2 — Trục Độ sâu (MAX value), dùng bestValueAt để decay =====
+    # w(a) tra theo giá trị MAX đã từng đạt được qua mọi lần thực hiện (Mục 2.4, v11)
+    watch-trailer:
+      high: 3              # watch_pct > high-threshold
+      medium: 2             # medium-threshold <= watch_pct <= high-threshold
+      low: 1                # low-threshold < watch_pct < medium-threshold
+      bad: -1                # watch_pct <= low-threshold
+      high-threshold: 80
+      medium-threshold: 30
+      low-threshold: 10
+
+    view-detail:
+      high: 2               # duration_sec > high-threshold
+      mid: 1                 # low-threshold <= duration_sec <= high-threshold
+      low: 0                 # duration_sec < low-threshold
+      high-threshold: 30
+      low-threshold: 5
+
+    # ===== Nhóm 3 — Trục Tần suất (occurrence_count), dùng updatedAt để decay =====
+    # w_hiệu_dụng(a) = w_base(a) × c(a),  c(a) = 1 + alpha × occurrence_count
+    # Nguồn: Hu, Koren, Volinsky (2008) — Collaborative Filtering for Implicit
+    # Feedback Datasets. alpha KHÔNG dùng giá trị gốc của paper (alpha=40, hiệu
+    # chỉnh cho dữ liệu xem TV tần suất hàng trăm lần) — đã tính lại cho hệ
+    # thống này theo công thức alpha = 1 / median(occurrence_count thật, count >= 2).
+    # GIÁ TRỊ DƯỚI ĐÂY LÀ PLACEHOLDER — thay bằng số liệu thật trước khi viết báo cáo.
+    book-ticket:
+      base: 4
+    share-movie:
+      base: 2
+  # ===== Time Decay — decay(Δt) = e^(−λ × Δt), Δt tính theo ngày (Mục 2.4, v11) =====
+  # λ = 0.01 → còn 74% sau 30 ngày, 37% sau 100 ngày, 3% sau 365 ngày
+  decay:
+    lambda: 0.01
+
+  # ===== Quy đổi implicit score về thang [1.5, 4.5] — hàm tanh (Mục 2.5, v11) =====
+  # y_{u,i} = 3 + A × tanh(S_{u,i} / S_0)
+  tanh-conversion:
+    amplitude: 1.5         # A — biên độ, output luôn nằm trong (1.5, 4.5)
+    neutral-point: 2.5     # điểm trung lập khi S_{u,i} = 0
+    # S_0 — hệ số bão hòa, PHẢI tính từ dữ liệu thật: median |S_{u,i}| của toàn
+    # bộ cặp (user, movie) có implicit signal trong utility_matrix. KHÔNG đoán số.
+  # ===== Tham số CF — Cosine Similarity + Top-K Neighbor (Mục III, v11) =====
+  cf:
+    top-k: 20                     # K — số neighbor tối đa lấy ra sau khi sort similarity
+    min-co-rated-items: 2         # ngưỡng |I_u ∩ I_v| tối thiểu để tính sim(u,v)
+    min-similarity: 0.0           # chỉ lấy neighbor có sim > giá trị này (loại sim âm)
+
+  # ===== Cold-Start Fallback — Popularity Score (Mục 5.2, v11) =====
+  cold-start:
+    min-interactions-threshold: 3   # K_u < 3 → kích hoạt fallback, không chạy CF
+    popularity-alpha: 0.5           # Score_Popularity(i) = alpha×Norm_Rating + (1-alpha)×Norm_Tickets

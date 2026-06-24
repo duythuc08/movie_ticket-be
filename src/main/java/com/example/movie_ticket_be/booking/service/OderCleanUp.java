@@ -34,7 +34,7 @@ public class OderCleanUp {
 
 			for (Orders order : expiredOrders) {
 				try {
-					paymentService.processFail(order);
+					paymentService.processFail(order, OrderStatus.EXPIRED);
 					successCount++;
 				} catch (Exception e) {
 					failCount++;

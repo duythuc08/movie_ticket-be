@@ -1,6 +1,6 @@
-package com.example.movie_ticket_be.cf.dto.request;
+package com.example.movie_ticket_be.recommendation.dto.request;
 
-import com.example.movie_ticket_be.cf.enums.ActionType;
+import com.example.movie_ticket_be.recommendation.enums.ActionType;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -31,4 +31,23 @@ public interface ReviewRepository extends JpaRepository<Reviews, Long>, JpaSpeci
 
     @Query("SELECT r.rating, COUNT(r) FROM Reviews r WHERE r.movies = :movie AND r.reviewStatus = :status GROUP BY r.rating")
     List<Object[]> countGroupByRating(@Param("movie") Movies movie, @Param("status") ReviewStatus status);
+
+    @Query("""
+        SELECT r from Reviews r
+        WHERE r.users.userId = :userId AND r.movies.movieId = :movieId 
+            AND r.reviewStatus = 'APPROVED'
+    """)
+    Optional<Reviews> findApprovalReview(@Param("userId") String userId, @Param("movieId") Long movieId);
+
+    @Query("""
+        SELECT r from Reviews r
+        WHERE r.users.userId = :userId AND r.reviewStatus = 'APPROVED'
+    """)
+    List<Reviews> findApprovalReviewsByUserId(@Param("userId") String userId);
+
+    @Query("""
+        SELECT COUNT(r) from Reviews r
+        WHERE r.users.userId = :userId AND r.reviewStatus = 'APPROVED'
+    """)
+    Long countApprovalReviewsByUser(@Param("userId") String userId);
 }

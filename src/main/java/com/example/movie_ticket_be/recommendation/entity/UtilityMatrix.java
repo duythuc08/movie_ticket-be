@@ -1,28 +1,34 @@
-package com.example.movie_ticket_be.cf.entity;
+package com.example.movie_ticket_be.recommendation.entity;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+
+import com.example.movie_ticket_be.core.entity.BaseEntity;
 import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.user.entity.Users;
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-
 @Entity
-@Table(name = "user_preference")
+@Table(name = "utility_matrix")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserPreference {
-    @EmbeddedId
-    UserPreferenceId preferenceId;
+public class UtilityMatrix extends BaseEntity {
 
-    BigDecimal predictedScore;
-    Integer neighborCount;
+    @EmbeddedId
+    UtilityMatrixId matrixId;
+
+    @Column(name = "y_score", precision = 4, scale = 2)
+    BigDecimal yScore;
+
+    @Column(name = "has_explicit", nullable = false)
+    Boolean hasExplicit;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
@@ -39,13 +45,12 @@ public class UserPreference {
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class UserPreferenceId implements Serializable {
+    public static class UtilityMatrixId implements Serializable {
 
         @Column(name = "user_id")
-        String userId;
+        private String userId;
 
         @Column(name = "movie_id")
-        Long movieId;
-
+        private Long movieId;
     }
 }

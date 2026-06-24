@@ -15,9 +15,9 @@ import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.booking.repository.OrderFoodRepository;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
-import com.example.movie_ticket_be.cf.dto.request.ActivityLogRequest;
-import com.example.movie_ticket_be.cf.enums.ActionType;
-import com.example.movie_ticket_be.cf.service.UserActivityLogService;
+import com.example.movie_ticket_be.recommendation.dto.request.ActivityLogRequest;
+import com.example.movie_ticket_be.recommendation.enums.ActionType;
+import com.example.movie_ticket_be.recommendation.service.UserActivityLogService;
 import com.example.movie_ticket_be.cinema.entity.Foods;
 import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.cinema.repository.FoodRepository;
@@ -62,9 +62,8 @@ public class PaymentService {
 	UserRepository userRepository;
 	MembershipTierRepository membershipTierRepository;
 	LoyaltyPointsHistoryRepository pointsHistoryRepository;
-
+    UserActivityLogService userActivityLogService;
 	EmailService emailService;
-	UserActivityLogService userActivityLogService;
 
 	@Transactional
 	public void createPendingPayment(Long orderId, PaymentType paymentType) {
@@ -146,8 +145,14 @@ public class PaymentService {
 
 	@Transactional
 	public void processFail(Orders order) {
+		processFail(order, OrderStatus.CANCELLED);
+	}
+
+	@Transactional
+	public void processFail(Orders order, OrderStatus status) {
+		if (order.getOrderStatus() != OrderStatus.PENDING) return;
 		// a. Cập nhật Order
-		order.setOrderStatus(OrderStatus.CANCELLED);
+		order.setOrderStatus(status);
 		orderRepository.save(order);
 
 		// a2. Cập nhật Payment PENDING → FAILED
@@ -182,6 +187,16 @@ public class PaymentService {
 			}
 		}
 		foodRepository.saveAll(orderFoods.stream().map(OrderFoods::getFoods).toList());
+
+		// d. Log tín hiệu âm
+		ActionType actionType = (status == OrderStatus.EXPIRED)
+				? ActionType.TIMEOUT_HOLD_SEATS
+				: ActionType.CANCEL_PAYMENT;
+		tickets.stream().findFirst()
+				.map(t -> t.getSeatShowTime().getShowTimes().getMovies().getMovieId())
+				.ifPresent(movieId -> userActivityLogService.logInternal(
+						ActivityLogRequest.builder().actionType(actionType).movieId(movieId).build(),
+						order.getUsers()));
 	}
 
 	private void handleUserLoyalty(Orders order) {

@@ -1,4 +1,4 @@
-package com.example.movie_ticket_be.cf.mapper;
+package com.example.movie_ticket_be.recommendation.mapper;
 
 import org.mapstruct.Mapper;
 

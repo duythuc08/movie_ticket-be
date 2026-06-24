@@ -1,7 +1,7 @@
-package com.example.movie_ticket_be.cf.controller;
+package com.example.movie_ticket_be.recommendation.controller;
 
-import com.example.movie_ticket_be.cf.dto.request.ActivityLogRequest;
-import com.example.movie_ticket_be.cf.service.UserActivityLogService;
+import com.example.movie_ticket_be.recommendation.dto.request.ActivityLogRequest;
+import com.example.movie_ticket_be.recommendation.service.UserActivityLogService;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
-package com.example.movie_ticket_be.cf.entity;
+package com.example.movie_ticket_be.recommendation.entity;
 
-import com.example.movie_ticket_be.cf.enums.ActionType;
+import com.example.movie_ticket_be.recommendation.enums.ActionType;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
 import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.user.entity.Users;

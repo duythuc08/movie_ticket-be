@@ -1,4 +1,4 @@
-package com.example.movie_ticket_be.cf.enums;
+package com.example.movie_ticket_be.recommendation.enums;
 
 public enum ActionType {
     BOOK_TICKET,
@@ -9,4 +9,7 @@ public enum ActionType {
     SEARCH,
     SHARE_MOVIE,
     SKIP_RECOMMENDATION,
+    CANCEL_PAYMENT,
+    ABANDON_SEAT_SELECTION,
+    TIMEOUT_HOLD_SEATS,
 }

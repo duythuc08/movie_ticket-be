@@ -1,4 +1,4 @@
-package com.example.movie_ticket_be.cf.service;
+package com.example.movie_ticket_be.recommendation.service;
 
 import java.time.LocalDateTime;
 import java.util.EnumSet;
@@ -9,10 +9,10 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.example.movie_ticket_be.cf.dto.request.ActivityLogRequest;
-import com.example.movie_ticket_be.cf.entity.UserActivityLog;
-import com.example.movie_ticket_be.cf.enums.ActionType;
-import com.example.movie_ticket_be.cf.repository.UserActivityLogRepository;
+import com.example.movie_ticket_be.recommendation.dto.request.ActivityLogRequest;
+import com.example.movie_ticket_be.recommendation.entity.UserActivityLog;
+import com.example.movie_ticket_be.recommendation.enums.ActionType;
+import com.example.movie_ticket_be.recommendation.repository.UserActivityLogRepository;
 import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.movie.repository.MovieRepository;
 import com.example.movie_ticket_be.user.entity.Users;
@@ -39,7 +39,8 @@ public class UserActivityLogService {
             ActionType.VIEW_SHOWTIMES,
             ActionType.SEARCH,
             ActionType.SHARE_MOVIE,
-            ActionType.SKIP_RECOMMENDATION
+            ActionType.SKIP_RECOMMENDATION,
+            ActionType.ABANDON_SEAT_SELECTION
     );
 
     // So sánh MAX — cập nhật metadata + bestValueAt khi giá trị mới lớn hơn hoặc bằng

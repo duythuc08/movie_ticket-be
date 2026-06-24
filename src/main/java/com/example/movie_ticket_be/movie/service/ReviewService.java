@@ -15,9 +15,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
-import com.example.movie_ticket_be.cf.dto.request.ActivityLogRequest;
-import com.example.movie_ticket_be.cf.enums.ActionType;
-import com.example.movie_ticket_be.cf.service.UserActivityLogService;
+import com.example.movie_ticket_be.recommendation.dto.request.ActivityLogRequest;
+import com.example.movie_ticket_be.recommendation.enums.ActionType;
+import com.example.movie_ticket_be.recommendation.service.UserActivityLogService;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.dto.request.ReviewRequest;
