@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,6 +19,6 @@ public class PersonResponse {
 	private Long id;
 	private String name;
 	private String avatarUrl;
-	private MovieRole movieRole;
+	private List<MovieRole> movieRole;
 	private EntityStatus entityStatus;
 }

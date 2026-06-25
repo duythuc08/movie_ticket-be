@@ -32,7 +32,7 @@ public class AdminPersonService {
 
 	@Transactional
 	public PersonResponse createPerson(PersonRequest request) {
-		if (personRepository.existsByNameAndMovieRole(request.getName(), request.getMovieRole())) {
+		if (personRepository.existsByName(request.getName())) {
 			throw new AppException(ErrorCode.PERSON_EXISTED);
 		}
 		Person person = personMapper.toPerson(request);
@@ -42,11 +42,10 @@ public class AdminPersonService {
 	@Transactional
 	public List<PersonResponse> createPersons(List<PersonRequest> requests) {
 		List<Person> persons = requests.stream().map(request -> {
-			if (personRepository.existsByNameAndMovieRole(request.getName(), request.getMovieRole())) {
+			if (personRepository.existsByName(request.getName())) {
 				throw new AppException(ErrorCode.PERSON_EXISTED);
 			}
-			Person person = personMapper.toPerson(request);
-			return person;
+			return personMapper.toPerson(request);
 		}).toList();
 
 		return personRepository.saveAll(persons).stream().map(personMapper::toPersonResponse).toList();
@@ -59,6 +58,23 @@ public class AdminPersonService {
 	public PersonResponse getPersonById(long id) {
 		return personMapper.toPersonResponse(
 				personRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND)));
+	}
+
+	@Transactional
+	public PersonResponse updatePerson(long id, PersonRequest request) {
+		Person person = personRepository.findById(id)
+				.orElseThrow(() -> new AppException(ErrorCode.PERSON_NOT_FOUND));
+
+		if (request.getName() != null && !request.getName().equals(person.getName())
+				&& personRepository.existsByNameAndIdNot(request.getName(), id)) {
+			throw new AppException(ErrorCode.PERSON_EXISTED);
+		}
+
+		if (request.getName() != null) person.setName(request.getName());
+		if (request.getAvatarUrl() != null) person.setAvatarUrl(request.getAvatarUrl());
+		if (request.getMovieRole() != null) person.setMovieRole(request.getMovieRole());
+
+		return personMapper.toPersonResponse(personRepository.save(person));
 	}
 
 	@Transactional

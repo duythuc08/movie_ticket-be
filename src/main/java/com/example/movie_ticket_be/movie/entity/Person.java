@@ -7,6 +7,9 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
+import java.util.List;
+import java.util.ArrayList;
+
 @Entity
 @Table(name = "persons")
 @Data
@@ -22,8 +25,11 @@ public class Person extends BaseEntity {
 	private String name;
 	private String avatarUrl;
 
+	@Builder.Default
+	@ElementCollection(fetch = FetchType.EAGER)
+	@CollectionTable(name = "person_roles", joinColumns = @JoinColumn(name = "person_id"))
 	@Enumerated(EnumType.STRING)
 	@Column(name = "movie_role")
-	private MovieRole movieRole;
+	private List<MovieRole> movieRole = new ArrayList<>();
 
 }

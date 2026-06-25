@@ -61,6 +61,13 @@ public class AdminPersonController {
 				.message("Lấy thông tin chi tiết thành công").build();
 	}
 
+	@PutMapping("/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<PersonResponse> updatePerson(@PathVariable long id, @RequestBody PersonRequest request) {
+		return ApiResponse.<PersonResponse>builder().result(adminPersonService.updatePerson(id, request))
+				.message("Cập nhật thành công").build();
+	}
+
 	@PutMapping("/{id}/activate")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ApiResponse<Void> activate(@PathVariable long id) {

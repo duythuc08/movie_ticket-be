@@ -88,7 +88,7 @@ public class MovieService {
 
 	private PagedMovieResponse buildPagedResponse(MovieStatus status, int page, int size) {
 		Page<Movies> result = movieRepository.findByEntityStatusAndMovieStatus(EntityStatus.ACTIVE, status,
-				PageRequest.of(page, size, Sort.by("createdAt").descending()));
+				PageRequest.of(page, size, Sort.by("createdAt").descending().and(Sort.by("movieId").descending())));
 		return PagedMovieResponse.builder()
 				.content(result.getContent().stream().map(movieMapper::toMovieResponse).toList()).currentPage(page)
 				.pageSize(size).totalPages(result.getTotalPages()).totalElements(result.getTotalElements()).build();

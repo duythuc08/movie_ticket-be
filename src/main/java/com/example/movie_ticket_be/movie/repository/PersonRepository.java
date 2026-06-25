@@ -1,7 +1,6 @@
 package com.example.movie_ticket_be.movie.repository;
 
 import com.example.movie_ticket_be.movie.entity.Person;
-import com.example.movie_ticket_be.movie.enums.MovieRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -12,5 +11,5 @@ import java.util.Optional;
 public interface PersonRepository extends JpaRepository<Person, Long>, JpaSpecificationExecutor<Person> {
 	Optional<Person> findByName(String name);
 	boolean existsByName(String name);
-	boolean existsByNameAndMovieRole(String name, MovieRole movieRole);
+	boolean existsByNameAndIdNot(String name, Long id);
 }
