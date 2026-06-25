@@ -27,6 +27,7 @@ import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.core.utils.QRCodeUtils;
 import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.payment.dto.request.PaymentConfirmRequest;
+import com.example.movie_ticket_be.promotion.repository.PromotionRepository;
 import com.example.movie_ticket_be.payment.entity.Payments;
 import com.example.movie_ticket_be.payment.enums.PaymentStatus;
 import com.example.movie_ticket_be.payment.enums.PaymentType;
@@ -62,8 +63,9 @@ public class PaymentService {
 	UserRepository userRepository;
 	MembershipTierRepository membershipTierRepository;
 	LoyaltyPointsHistoryRepository pointsHistoryRepository;
-    UserActivityLogService userActivityLogService;
+	UserActivityLogService userActivityLogService;
 	EmailService emailService;
+	PromotionRepository promotionRepository;
 
 	@Transactional
 	public void createPendingPayment(Long orderId, PaymentType paymentType) {
@@ -82,6 +84,8 @@ public class PaymentService {
 	public void processSuccess(PaymentConfirmRequest request) {
 		Orders order = orderRepository.findByOrderId(request.getOrderId())
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		if (order.getOrderStatus() != OrderStatus.PENDING
+				&& order.getOrderStatus() != OrderStatus.IN_PROGRESS) return;
 		// a. Cập nhật bản ghi PENDING → SUCCESS (hoặc tạo mới nếu không tồn tại)
 		Payments payment = paymentRepository
 				.findByOrder_OrderIdAndPaymentStatus(order.getOrderId(), PaymentStatus.PENDING)
@@ -150,7 +154,8 @@ public class PaymentService {
 
 	@Transactional
 	public void processFail(Orders order, OrderStatus status) {
-		if (order.getOrderStatus() != OrderStatus.PENDING) return;
+		if (order.getOrderStatus() != OrderStatus.PENDING
+				&& order.getOrderStatus() != OrderStatus.IN_PROGRESS) return;
 		// a. Cập nhật Order
 		order.setOrderStatus(status);
 		orderRepository.save(order);
@@ -187,6 +192,15 @@ public class PaymentService {
 			}
 		}
 		foodRepository.saveAll(orderFoods.stream().map(OrderFoods::getFoods).toList());
+
+		// d. Hoàn lại useLimit của promotion nếu có
+		if (order.getPromotionCode() != null) {
+			promotionRepository.findByCode(order.getPromotionCode())
+					.ifPresent(p -> {
+						p.setUseLimit(p.getUseLimit() + 1);
+						promotionRepository.save(p);
+					});
+		}
 
 		// d. Log tín hiệu âm
 		ActionType actionType = (status == OrderStatus.EXPIRED)

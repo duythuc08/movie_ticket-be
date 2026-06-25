@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.showtime.repository;
 
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
+import com.example.movie_ticket_be.user.entity.Users;
 import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -37,6 +38,17 @@ public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long
 
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	List<SeatShowTime> findAllBySeatShowTimeIdIn(Collection<Long> seatShowTimeIds);
+
+	@Modifying
+	@Transactional
+	@Query("UPDATE SeatShowTime ss SET ss.seatShowTimeStatus = 'RESERVED', ss.users = :user, ss.lockedUntil = :lockedUntil "
+			+ "WHERE ss.seatShowTimeId IN :ids "
+			+ "AND (ss.seatShowTimeStatus = 'AVAILABLE' "
+			+ "  OR (ss.seatShowTimeStatus = 'RESERVED' AND ss.lockedUntil < :now))")
+	int atomicReserveSeats(@Param("ids") List<Long> ids,
+	                       @Param("user") Users user,
+	                       @Param("lockedUntil") LocalDateTime lockedUntil,
+	                       @Param("now") LocalDateTime now);
 
 	@Query("SELECT ss FROM SeatShowTime ss JOIN FETCH ss.showTimes st WHERE ss.seats.seatId = :seatId AND st.startTime > :now AND ss.seatShowTimeStatus = 'BLOCKED'")
 	List<SeatShowTime> findBlockedUpcomingBySeat(@Param("seatId") Long seatId, @Param("now") LocalDateTime now);

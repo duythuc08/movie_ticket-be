@@ -1,0 +1,15 @@
+package com.example.movie_ticket_be.booking.dto.request;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class AddFoodsRequest {
+	List<OrderFoodsRequest> foods;
+}

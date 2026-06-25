@@ -343,6 +343,14 @@ public enum ErrorCode {
 	MOVIE_NOT_STOPPED(
 			1086,
 			"Phim chưa được tạm dừng, không thể chiếu lại",
+			HttpStatus.BAD_REQUEST),
+	SEAT_ALREADY_RESERVED(
+			1087,
+			"Seat is already reserved by another user",
+			HttpStatus.CONFLICT),
+	ORDER_NOT_PENDING(
+			1088,
+			"Order is not in PENDING status",
 			HttpStatus.BAD_REQUEST);
 
 	// Constructor để gán giá trị cho từng phần tử enum

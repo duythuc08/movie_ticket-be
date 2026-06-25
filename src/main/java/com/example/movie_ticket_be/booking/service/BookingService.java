@@ -1,11 +1,10 @@
 package com.example.movie_ticket_be.booking.service;
 
-import com.example.movie_ticket_be.booking.dto.request.BookingRequest;
+import com.example.movie_ticket_be.booking.dto.request.AddFoodsRequest;
+import com.example.movie_ticket_be.booking.dto.request.CheckoutRequest;
+import com.example.movie_ticket_be.booking.dto.request.InitiateBookingRequest;
 import com.example.movie_ticket_be.booking.dto.request.OrderFoodsRequest;
-import com.example.movie_ticket_be.booking.dto.response.OrderFoodResponse;
-import com.example.movie_ticket_be.booking.dto.response.OrderResponse;
-import com.example.movie_ticket_be.booking.dto.response.OrderTicketResponse;
-import com.example.movie_ticket_be.booking.dto.response.ShowTimeInfo;
+import com.example.movie_ticket_be.booking.dto.response.*;
 import com.example.movie_ticket_be.cinema.entity.Foods;
 import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.cinema.repository.FoodRepository;
@@ -21,6 +20,9 @@ import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
 import com.example.movie_ticket_be.cinema.enums.SeatType;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
+import com.example.movie_ticket_be.payment.enums.PaymentType;
+import com.example.movie_ticket_be.payment.service.PaymentService;
+import com.example.movie_ticket_be.payment.service.VNPayService;
 import com.example.movie_ticket_be.promotion.entity.Promotion;
 import com.example.movie_ticket_be.promotion.enums.PromotionType;
 import com.example.movie_ticket_be.promotion.repository.PromotionRepository;
@@ -31,6 +33,7 @@ import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
 import com.example.movie_ticket_be.showtime.service.ShowTimePriceService;
 import com.example.movie_ticket_be.user.entity.Users;
 import com.example.movie_ticket_be.user.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -56,74 +59,171 @@ public class BookingService {
 	UserRepository userRepository;
 	ShowTimePriceService showTimePriceService;
 	PromotionRepository promotionRepository;
+	PaymentService paymentService;
+	VNPayService vnPayService;
 
 	private static final int HOLD_SEAT_MINUTES = 5;
+	private static final int PAYMENT_WINDOW_MINUTES = 10;
 
+	// ──────────────────────────────────────────────────────────────────────────
+	// ENDPOINT 1: Khóa ghế + tạo Order + OrderTickets
+	// ──────────────────────────────────────────────────────────────────────────
 	@Transactional(rollbackOn = Exception.class)
-	public OrderResponse createBooking(BookingRequest request) {
+	public InitiateBookingResponse initiateBooking(InitiateBookingRequest request) {
 		LocalDateTime now = LocalDateTime.now();
 		LocalDateTime expirationTime = now.plusMinutes(HOLD_SEAT_MINUTES);
 
 		Users user = userRepository.findByUserId(request.getUserId())
 				.orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
 
-		// LOCK SEAT
-		List<SeatShowTime> seats = seatShowTimeRepository.findAllBySeatShowTimeIdIn(request.getSeatShowTimeIds());
-		if (seats.size() != request.getSeatShowTimeIds().size()) {
-			throw new AppException(ErrorCode.SIZE_MISMATCH);
+		List<Long> ids = request.getSeatShowTimeIds();
+		if (ids == null || ids.isEmpty()) {
+			throw new AppException(ErrorCode.INVALID_SEAT_SELECTION);
 		}
-		for (SeatShowTime seat : seats) {
-			boolean isAvailable = false;
 
-			if (seat.getSeatShowTimeStatus() == SeatShowTimeStatus.AVAILABLE) {
-				isAvailable = true;
-			} else if (seat.getSeatShowTimeStatus() == SeatShowTimeStatus.RESERVED) {
-				if (seat.getLockedUntil() != null && seat.getLockedUntil().isBefore(now)) {
-					isAvailable = true;
-				}
-			}
-
-			if (!isAvailable) {
-				throw new RuntimeException("Ghế " + seat.getSeats().getSeatRow() + seat.getSeats().getSeatNumber()
-						+ " đã có người đặt hoặc đang được giữ!");
-			}
-
-			seat.setUsers(user);
-			seat.setSeatShowTimeStatus(SeatShowTimeStatus.RESERVED);
-			seat.setLockedUntil(expirationTime);
+		// Atomic UPDATE — trả về số dòng bị ảnh hưởng
+		int affected = seatShowTimeRepository.atomicReserveSeats(ids, user, expirationTime, now);
+		if (affected != ids.size()) {
+			throw new AppException(ErrorCode.SEAT_ALREADY_RESERVED);
 		}
-		seatShowTimeRepository.saveAll(seats);
 
-		// ORDER
-		Orders order = Orders.builder().users(user).bookingTime(now).createdAt(now).expiredTime(expirationTime)
-				.orderStatus(OrderStatus.PENDING).build();
+		// Tạo Order
+		Orders order = Orders.builder()
+				.users(user)
+				.bookingTime(now)
+				.createdAt(now)
+				.expiredTime(expirationTime)
+				.orderStatus(OrderStatus.PENDING)
+				.totalTicketPrice(BigDecimal.ZERO)
+				.totalFoodPrice(BigDecimal.ZERO)
+				.memberDiscountAmount(BigDecimal.ZERO)
+				.discountAmount(BigDecimal.ZERO)
+				.finalPrice(BigDecimal.ZERO)
+				.build();
 		orderRepository.save(order);
 
-		// ODER TICKET
-		BigDecimal totalTicketPrice = BigDecimal.ZERO;
-		List<OrderTickets> tickets = new ArrayList<>();
+		// Tạo OrderTickets
+		List<SeatShowTime> seats = seatShowTimeRepository.findAllBySeatShowTimeIdIn(ids);
 		Long showTimeId = seats.get(0).getShowTimes().getShowTimeId();
 		Map<SeatType, BigDecimal> priceMap = showTimePriceService.getPriceMapByShowTime(showTimeId);
 
+		BigDecimal totalTicketPrice = BigDecimal.ZERO;
+		List<OrderTickets> tickets = new ArrayList<>();
 		for (SeatShowTime seat : seats) {
 			SeatType currentSeatType = seat.getSeats().getSeatType();
 			BigDecimal price = priceMap.get(currentSeatType);
 			if (price == null) {
 				throw new AppException(ErrorCode.SEAT_TYPE_NOT_FOUND);
 			}
-
-			OrderTickets ticket = OrderTickets.builder().orders(order).seatShowTime(seat).price(price)
-					.ticketStatus(TicketStatus.RESERVED).createdAt(now).build();
+			OrderTickets ticket = OrderTickets.builder()
+					.orders(order)
+					.seatShowTime(seat)
+					.price(price)
+					.ticketStatus(TicketStatus.RESERVED)
+					.createdAt(now)
+					.build();
 			tickets.add(ticket);
 			totalTicketPrice = totalTicketPrice.add(price);
 		}
 		orderTicketRepository.saveAll(tickets);
 
-		// ODER FOOD
-		Long cinemaId = seats.get(0).getShowTimes().getRooms().getCinemas().getCinemaId();
+		order.setTotalTicketPrice(totalTicketPrice);
+		order.setFinalPrice(totalTicketPrice);
+		order.setUpdatedAt(now);
+		orderRepository.save(order);
+
+		// Build showTimeInfo
+		ShowTimes showTimes = seats.get(0).getShowTimes();
+		ShowTimeInfo showTimeInfo = buildShowTimeInfo(showTimes);
+
+		List<OrderTicketResponse> ticketResponses = tickets.stream()
+				.map(t -> OrderTicketResponse.builder()
+						.orderTicketId(t.getOrderTicketId())
+						.seatName(t.getSeatShowTime().getSeats().getSeatRow()
+								+ t.getSeatShowTime().getSeats().getSeatNumber())
+						.price(t.getPrice())
+						.seatType(t.getSeatShowTime().getSeats().getSeatType())
+						.build())
+				.toList();
+
+		return InitiateBookingResponse.builder()
+				.orderId(order.getOrderId())
+				.totalTicketPrice(totalTicketPrice)
+				.expiredTime(expirationTime)
+				.bookingTime(now)
+				.showTimeInfo(showTimeInfo)
+				.tickets(ticketResponses)
+				.build();
+	}
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// ENDPOINT NGOẠI LỆ: Thả ghế khi user bấm Back
+	// ──────────────────────────────────────────────────────────────────────────
+	@Transactional(rollbackOn = Exception.class)
+	public void releaseBooking(Long orderId) {
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		if (order.getOrderStatus() != OrderStatus.PENDING) {
+			throw new AppException(ErrorCode.ORDER_NOT_PENDING);
+		}
+
+		// Thả ghế về AVAILABLE
+		List<OrderTickets> tickets = orderTicketRepository.findByOrders_OrderId(orderId);
+		for (OrderTickets t : tickets) {
+			SeatShowTime sst = t.getSeatShowTime();
+			sst.setSeatShowTimeStatus(SeatShowTimeStatus.AVAILABLE);
+			sst.setUsers(null);
+			sst.setLockedUntil(null);
+			seatShowTimeRepository.save(sst);
+		}
+
+		// Xóa OrderTickets
+		orderTicketRepository.deleteAll(tickets);
+
+		// Huỷ Order
+		order.setOrderStatus(OrderStatus.CANCELLED);
+		order.setUpdatedAt(LocalDateTime.now());
+		orderRepository.save(order);
+	}
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// ENDPOINT 2: Thêm Food & Drink vào đơn hàng
+	// ──────────────────────────────────────────────────────────────────────────
+	@Transactional(rollbackOn = Exception.class)
+	public OrderResponse addFoods(Long orderId, AddFoodsRequest request) {
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		if (order.getOrderStatus() != OrderStatus.PENDING) {
+			throw new AppException(ErrorCode.ORDER_NOT_PENDING);
+		}
+
+		// Xóa food cũ nếu có (để idempotent khi gọi lại)
+		List<OrderFoods> existingFoods = orderFoodRepository.findByOrders_OrderId(orderId);
+		if (!existingFoods.isEmpty()) {
+			// Hoàn tồn kho trước khi ghi đè
+			for (OrderFoods of : existingFoods) {
+				Foods food = of.getFoods();
+				food.setStockQuantity(food.getStockQuantity() + of.getQuantity());
+				if (food.getFoodStatus() == FoodStatus.OUT_OF_STOCK) {
+					food.setFoodStatus(FoodStatus.IN_STOCK);
+					food.setEntityStatus(EntityStatus.ACTIVE);
+				}
+				foodRepository.save(food);
+			}
+			orderFoodRepository.deleteAll(existingFoods);
+		}
+
+		// Lấy cinemaId từ showtime
+		List<OrderTickets> tickets = orderTicketRepository.findByOrders_OrderId(orderId);
+		if (tickets.isEmpty()) {
+			throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+		}
+		Long cinemaId = tickets.get(0).getSeatShowTime().getShowTimes().getRooms().getCinemas().getCinemaId();
+
 		List<OrderFoods> orderFoods = new ArrayList<>();
 		List<Foods> updatedFoods = new ArrayList<>();
 		BigDecimal totalFoodPrice = BigDecimal.ZERO;
+
 		if (request.getFoods() != null) {
 			for (OrderFoodsRequest foodReq : request.getFoods()) {
 				Foods food = foodRepository.findByFoodId(foodReq.getFoodId())
@@ -144,37 +244,63 @@ public class BookingService {
 				updatedFoods.add(food);
 
 				BigDecimal totalItem = food.getPrice().multiply(BigDecimal.valueOf(foodReq.getQuantity()));
-				OrderFoods item = OrderFoods.builder().orders(order).foods(food).quantity(foodReq.getQuantity())
-						.unitPrice(food.getPrice()).totalPrice(totalItem).build();
-				orderFoods.add(item);
+				orderFoods.add(OrderFoods.builder()
+						.orders(order)
+						.foods(food)
+						.quantity(foodReq.getQuantity())
+						.unitPrice(food.getPrice())
+						.totalPrice(totalItem)
+						.build());
 				totalFoodPrice = totalFoodPrice.add(totalItem);
 			}
 		}
+
 		foodRepository.saveAll(updatedFoods);
 		orderFoodRepository.saveAll(orderFoods);
 
-		// ƯU ĐÃI (HẠNG THÀNH VIÊN & MÃ GIẢM GIÁ)
-		BigDecimal provisionalTotal = totalTicketPrice.add(totalFoodPrice);
+		LocalDateTime now = LocalDateTime.now();
+		order.setTotalFoodPrice(totalFoodPrice);
+		order.setFinalPrice(order.getTotalTicketPrice().add(totalFoodPrice));
+		order.setUpdatedAt(now);
+		orderRepository.save(order);
 
+		return buildOrderResponse(order, tickets, orderFoods);
+	}
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// ENDPOINT 3: Checkout — áp dụng giảm giá, đóng băng đơn, trả VNPay URL
+	// ──────────────────────────────────────────────────────────────────────────
+	@Transactional(rollbackOn = Exception.class)
+	public CheckoutResponse checkout(Long orderId, CheckoutRequest request, HttpServletRequest httpRequest) {
+		LocalDateTime now = LocalDateTime.now();
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		if (order.getOrderStatus() != OrderStatus.PENDING) {
+			throw new AppException(ErrorCode.ORDER_NOT_PENDING);
+		}
+
+		Users user = order.getUsers();
+		BigDecimal provisionalTotal = order.getTotalTicketPrice().add(order.getTotalFoodPrice());
+
+		// Giảm giá thành viên
 		BigDecimal memberDiscountAmount = BigDecimal.ZERO;
 		if (user.getMembershipTier() != null) {
 			BigDecimal applicablePercent = BigDecimal.ZERO;
-
 			if (user.getBirthday() != null && user.getBirthday().getMonth() == now.getMonth()) {
 				applicablePercent = user.getMembershipTier().getBirthdayDiscount();
 			} else {
 				applicablePercent = user.getMembershipTier().getDiscountPercent();
 			}
-
 			if (applicablePercent.compareTo(BigDecimal.ZERO) > 0) {
-				memberDiscountAmount = provisionalTotal.multiply(applicablePercent).divide(new BigDecimal(100),
-						RoundingMode.HALF_UP);
+				memberDiscountAmount = provisionalTotal
+						.multiply(applicablePercent)
+						.divide(new BigDecimal(100), RoundingMode.HALF_UP);
 			}
 		}
 
 		BigDecimal amountAfterMemberDiscount = provisionalTotal.subtract(memberDiscountAmount);
 
-		// MÃ GIẢM GIÁ
+		// Mã giảm giá
 		BigDecimal promotionDiscount = BigDecimal.ZERO;
 		String appliedPromotionCode = null;
 		if (request.getPromotionCode() != null && !request.getPromotionCode().trim().isEmpty()) {
@@ -211,27 +337,43 @@ public class BookingService {
 			appliedPromotionCode = promotion.getCode();
 		}
 
-		// CẬP NHẬT VÀ LƯU ORDER CUỐI CÙNG
 		BigDecimal finalPrice = amountAfterMemberDiscount.subtract(promotionDiscount);
-		if (finalPrice.compareTo(BigDecimal.ZERO) < 0)
-			finalPrice = BigDecimal.ZERO;
+		if (finalPrice.compareTo(BigDecimal.ZERO) < 0) finalPrice = BigDecimal.ZERO;
 
-		// --- Tính điểm tích lũyd
 		int pointsEarned = finalPrice.divide(new BigDecimal(1000), 0, RoundingMode.FLOOR).intValue();
 
-		order.setTotalFoodPrice(totalFoodPrice);
-		order.setTotalTicketPrice(totalTicketPrice);
+		// Đóng băng đơn → IN_PROGRESS, extend expiredTime thêm 10 phút
 		order.setMemberDiscountAmount(memberDiscountAmount);
 		order.setDiscountAmount(promotionDiscount);
 		order.setPromotionCode(appliedPromotionCode);
 		order.setFinalPrice(finalPrice);
 		order.setPointsEarned(pointsEarned);
+		order.setOrderStatus(OrderStatus.IN_PROGRESS);
+		order.setExpiredTime(now.plusMinutes(PAYMENT_WINDOW_MINUTES));
 		order.setUpdatedAt(now);
+		orderRepository.save(order);
 
-		Orders savedOrder = orderRepository.save(order);
+		// Tạo Payment PENDING
+		paymentService.createPendingPayment(orderId, PaymentType.VNPAY);
 
-		// SHOWTIME INFO (built from in-memory seat data, no extra query)
-		ShowTimes showTimes = seats.get(0).getShowTimes();
+		// Tạo VNPay URL
+		String paymentUrl = vnPayService.createPaymentUrl(httpRequest, orderId, finalPrice);
+
+		return CheckoutResponse.builder()
+				.orderId(orderId)
+				.paymentUrl(paymentUrl)
+				.totalTicketPrice(order.getTotalTicketPrice())
+				.totalFoodPrice(order.getTotalFoodPrice())
+				.memberDiscountAmount(memberDiscountAmount)
+				.discountAmount(promotionDiscount)
+				.finalPrice(finalPrice)
+				.build();
+	}
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// Helpers
+	// ──────────────────────────────────────────────────────────────────────────
+	private ShowTimeInfo buildShowTimeInfo(ShowTimes showTimes) {
 		String roomName = null, cinemaName = null, cinemaAddress = null;
 		if (showTimes.getRooms() != null) {
 			roomName = showTimes.getRooms().getName();
@@ -240,34 +382,58 @@ public class BookingService {
 				cinemaAddress = showTimes.getRooms().getCinemas().getAddress();
 			}
 		}
-		ShowTimeInfo showTimeInfo = ShowTimeInfo.builder()
-				.movieName(showTimes.getMovies() != null ? showTimes.getMovies().getTitle() : null).roomName(roomName)
-				.showTime(showTimes.getStartTime()).cinemaName(cinemaName).cinemaAddress(cinemaAddress).build();
+		return ShowTimeInfo.builder()
+				.movieName(showTimes.getMovies() != null ? showTimes.getMovies().getTitle() : null)
+				.roomName(roomName)
+				.showTime(showTimes.getStartTime())
+				.cinemaName(cinemaName)
+				.cinemaAddress(cinemaAddress)
+				.build();
+	}
 
-		// RESPONSE
+	private OrderResponse buildOrderResponse(Orders order, List<OrderTickets> tickets, List<OrderFoods> orderFoods) {
+		ShowTimes showTimes = tickets.get(0).getSeatShowTime().getShowTimes();
+
 		List<OrderTicketResponse> ticketResponses = tickets.stream()
-				.map(ticket -> OrderTicketResponse.builder().orderTicketId(ticket.getOrderTicketId())
-						.seatName(ticket.getSeatShowTime().getSeats().getSeatRow()
-								+ ticket.getSeatShowTime().getSeats().getSeatNumber())
-						.price(ticket.getPrice()).seatType(ticket.getSeatShowTime().getSeats().getSeatType()).build())
+				.map(t -> OrderTicketResponse.builder()
+						.orderTicketId(t.getOrderTicketId())
+						.seatName(t.getSeatShowTime().getSeats().getSeatRow()
+								+ t.getSeatShowTime().getSeats().getSeatNumber())
+						.price(t.getPrice())
+						.seatType(t.getSeatShowTime().getSeats().getSeatType())
+						.build())
 				.toList();
 
 		List<OrderFoodResponse> foodResponses = orderFoods.stream()
-				.map(food -> OrderFoodResponse.builder().foodId(food.getFoods().getFoodId())
-						.name(food.getFoods().getName()).quantity(food.getQuantity()).unitPrice(food.getUnitPrice())
-						.totalPrice(food.getTotalPrice()).build())
+				.map(f -> OrderFoodResponse.builder()
+						.foodId(f.getFoods().getFoodId())
+						.name(f.getFoods().getName())
+						.quantity(f.getQuantity())
+						.unitPrice(f.getUnitPrice())
+						.totalPrice(f.getTotalPrice())
+						.build())
 				.toList();
 
-		return OrderResponse.builder().orderId(savedOrder.getOrderId()).userId(savedOrder.getUsers().getUserId())
-				.fullName(savedOrder.getUsers().getFirstname() + " " + savedOrder.getUsers().getLastname())
-				.showTimeInfo(showTimeInfo).totalTicketPrice(savedOrder.getTotalTicketPrice())
-				.totalFoodPrice(savedOrder.getTotalFoodPrice())
-				.memberDiscountAmount(savedOrder.getMemberDiscountAmount())
-				.discountAmount(savedOrder.getDiscountAmount()).promotionCode(savedOrder.getPromotionCode())
-				.finalPrice(savedOrder.getFinalPrice()).pointsEarned(savedOrder.getPointsEarned())
-				.bookingTime(savedOrder.getBookingTime()).expiredTime(savedOrder.getExpiredTime())
-				.createdAt(savedOrder.getCreatedAt()).updatedAt(savedOrder.getUpdatedAt())
-				.orderStatus(savedOrder.getOrderStatus()).tickets(ticketResponses).foods(foodResponses)
-				.qrCode(savedOrder.getQrCode()).build();
+		return OrderResponse.builder()
+				.orderId(order.getOrderId())
+				.userId(order.getUsers().getUserId())
+				.fullName(order.getUsers().getFirstname() + " " + order.getUsers().getLastname())
+				.showTimeInfo(buildShowTimeInfo(showTimes))
+				.totalTicketPrice(order.getTotalTicketPrice())
+				.totalFoodPrice(order.getTotalFoodPrice())
+				.memberDiscountAmount(order.getMemberDiscountAmount())
+				.discountAmount(order.getDiscountAmount())
+				.promotionCode(order.getPromotionCode())
+				.finalPrice(order.getFinalPrice())
+				.pointsEarned(order.getPointsEarned())
+				.bookingTime(order.getBookingTime())
+				.expiredTime(order.getExpiredTime())
+				.createdAt(order.getCreatedAt())
+				.updatedAt(order.getUpdatedAt())
+				.orderStatus(order.getOrderStatus())
+				.tickets(ticketResponses)
+				.foods(foodResponses)
+				.qrCode(order.getQrCode())
+				.build();
 	}
 }

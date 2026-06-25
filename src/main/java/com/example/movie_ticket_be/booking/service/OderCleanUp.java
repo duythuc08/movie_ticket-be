@@ -10,6 +10,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -22,28 +23,25 @@ public class OderCleanUp {
 	@Scheduled(fixedRate = 60000)
 	public void cleanupExpiredOrders() {
 		try {
-			List<Orders> expiredOrders = orderRepo.findAllByOrderStatusAndExpiredTimeBefore(OrderStatus.PENDING,
-					LocalDateTime.now());
+			LocalDateTime now = LocalDateTime.now();
+			List<Orders> expiredOrders = new ArrayList<>();
+			expiredOrders.addAll(orderRepo.findAllByOrderStatusAndExpiredTimeBefore(OrderStatus.PENDING, now));
+			expiredOrders.addAll(orderRepo.findAllByOrderStatusAndExpiredTimeBefore(OrderStatus.IN_PROGRESS, now));
 
 			if (expiredOrders.isEmpty()) {
 				return;
 			}
 
-			int successCount = 0;
-			int failCount = 0;
-
 			for (Orders order : expiredOrders) {
 				try {
 					paymentService.processFail(order, OrderStatus.EXPIRED);
-					successCount++;
 				} catch (Exception e) {
-					failCount++;
-					log.error("Failed to process expired order {}:  {}", order.getOrderId(), e.getMessage(), e);
+					log.error("Failed to process expired order {}: {}", order.getOrderId(), e.getMessage(), e);
 				}
 			}
 
 		} catch (Exception e) {
-			log.error("Error during cleanup process:  {}", e.getMessage(), e);
+			log.error("Error during cleanup process: {}", e.getMessage(), e);
 		}
 	}
 }

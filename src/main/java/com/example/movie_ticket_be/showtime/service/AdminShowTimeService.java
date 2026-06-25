@@ -16,6 +16,7 @@ import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.movie.entity.Movies;
+import com.example.movie_ticket_be.movie.enums.MovieStatus;
 import com.example.movie_ticket_be.movie.repository.MovieRepository;
 import com.example.movie_ticket_be.showtime.dto.request.ShowTimePriceRequest;
 import com.example.movie_ticket_be.showtime.dto.request.ShowTimeRequest;
@@ -60,6 +61,10 @@ public class AdminShowTimeService {
 				.orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
 		Movies movie = movieRepository.findByMovieId(request.getMovieId())
 				.orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+
+		if (movie.getMovieStatus() == MovieStatus.STOPPED) {
+			throw new AppException(ErrorCode.MOVIE_STOPPED);
+		}
 
 		int totalMinutes = movie.getDuration() + BUFFER_MINUTES;
 
@@ -129,6 +134,9 @@ public class AdminShowTimeService {
 		if (request.getMovieId() != null) {
 			Movies movie = movieRepository.findByMovieId(request.getMovieId())
 					.orElseThrow(() -> new AppException(ErrorCode.MOVIE_NOT_FOUND));
+			if (movie.getMovieStatus() == MovieStatus.STOPPED) {
+				throw new AppException(ErrorCode.MOVIE_STOPPED);
+			}
 			showTime.setMovies(movie);
 		}
 		if (request.getRoomId() != null) {
