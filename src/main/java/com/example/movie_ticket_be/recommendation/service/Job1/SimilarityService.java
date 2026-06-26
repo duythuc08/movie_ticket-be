@@ -1,4 +1,4 @@
-package com.example.movie_ticket_be.recommendation.service.Step1;
+package com.example.movie_ticket_be.recommendation.service.Job1;
 
 import java.math.BigDecimal;
 import java.util.Collection;

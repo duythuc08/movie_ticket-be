@@ -1,4 +1,4 @@
-package com.example.movie_ticket_be.recommendation.service.Step1;
+package com.example.movie_ticket_be.recommendation.service.Job1;
 
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -26,8 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Component
 /**
- * Step 1 — UtilityMatrixBuilderStep (Mục VI/Bước 3 batch, DAC_TA).
- *
  * Đọc tất cả user eligible (K_u >= ngưỡng cold-start), với MỖI (user, movie)
  * mà user có ít nhất 1 dòng activity_log hoặc 1 review -> gọi
  * ScoringService.calculateY() -> UPSERT vào utility_matrix. Tính cho TẤT CẢ
