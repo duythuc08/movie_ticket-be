@@ -55,15 +55,25 @@ public class SimilarityComputationTasklet implements Tasklet {
         }
         log.info("[SimilarityComputationStep] Tính cosine similarity cho mọi cặp user...");
 
+        // Pre-compute norm 1 lần/user — tránh tính lại N lần trong nested loop
+        Map<String, Double> normPerUser = new HashMap<>();
+        for (String userId : eligibleUserIds) {
+            double norm = Math.sqrt(normalizeRows.get(userId).values().stream()
+                    .mapToDouble(v -> v.doubleValue() * v.doubleValue()).sum());
+            normPerUser.put(userId, norm);
+        }
+
         //2. Với mỗi user tính similarity với mọi user khác, lấy top-K
         Map<String,List<Map.Entry<String,Double>>> topNeighborsPerUser = new HashMap<>();
         for(String userId : eligibleUserIds){
             Map<Long,BigDecimal> rowA = normalizeRows.get(userId);
+            double normA = normPerUser.get(userId);
             Map<String,Double> simWithOthers = new HashMap<>();
             for (String otherId : eligibleUserIds){
                 if (otherId.equals(userId)) continue;
                 Map<Long,BigDecimal> rowB = normalizeRows.get(otherId);
-                Double sim = similarityService.computeCosineSimilarity(rowA,rowB);
+                double normB = normPerUser.get(otherId);
+                Double sim = similarityService.computeCosineSimilarity(rowA, normA, rowB, normB);
                 if (sim != null) {
                     simWithOthers.put(otherId,sim);
                 }

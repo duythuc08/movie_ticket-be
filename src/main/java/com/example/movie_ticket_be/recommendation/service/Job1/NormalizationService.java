@@ -48,12 +48,16 @@ public class NormalizationService {
      */
     public Map<Long, BigDecimal> normalizeUserRow(String userId) {
         List<UtilityMatrix> rows = utilityMatrixRepository.findAllByUserId(userId);
-        BigDecimal mean = computeUserMean(userId);
+        if (rows.isEmpty()) {
+            log.warn("[NormalizationService] No rows found for userId: {}", userId);
+            return new HashMap<>();
+        }
+        BigDecimal sum = rows.stream().map(UtilityMatrix::getYScore).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal mean = sum.divide(BigDecimal.valueOf(rows.size()), 6, BigDecimal.ROUND_HALF_UP);
 
         Map<Long, BigDecimal> normalized = new HashMap<>();
         for (UtilityMatrix row : rows) {
-            BigDecimal centered = row.getYScore().subtract(mean);
-            normalized.put(row.getMatrixId().getMovieId(), centered);
+            normalized.put(row.getMatrixId().getMovieId(), row.getYScore().subtract(mean));
         }
         return normalized;
     }

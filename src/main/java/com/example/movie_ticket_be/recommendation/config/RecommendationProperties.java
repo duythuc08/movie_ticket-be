@@ -15,6 +15,7 @@ public class RecommendationProperties {
     private TanhConversion tanhConversion = new TanhConversion();
     private Cf cf = new Cf();
     private ColdStart coldStart = new ColdStart();
+    private Prediction prediction = new Prediction();
 
     @Data
     public static class Weights {
@@ -84,5 +85,10 @@ public class RecommendationProperties {
     public static class ColdStart {
         private int minInteractionsThreshold;
         private double popularityAlpha;
+    }
+
+    @Data
+    public static class Prediction {
+        private int topN;
     }
 }

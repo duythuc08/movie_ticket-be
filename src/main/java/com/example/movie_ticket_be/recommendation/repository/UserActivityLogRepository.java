@@ -4,6 +4,7 @@ import com.example.movie_ticket_be.recommendation.entity.UserActivityLog;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -18,6 +19,9 @@ public interface UserActivityLogRepository
      */
 
     List<UserActivityLog> findAllByUser_UserIdAndMovie_MovieId(String userUserId, Long movieMovieId);
+
+    @Query(value = "SELECT * FROM user_activity_logs WHERE user_id = :userId", nativeQuery = true)
+    List<UserActivityLog> findAllByUserId(@Param("userId") String userId);
 
 
     // dùng để tính median(occurrence_count) -> alpha = 1 / median (Hu et al. 2008).

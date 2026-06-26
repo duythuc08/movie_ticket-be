@@ -6,21 +6,26 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface UtilityMatrixRepository extends JpaRepository<UtilityMatrix, UtilityMatrix.UtilityMatrixId> {
 
     @Query("SELECT u FROM UtilityMatrix u WHERE u.matrixId.userId = :userId")
     List<UtilityMatrix> findAllByUserId(String userId);
 
+    @Modifying
+    @Transactional
     @Query(value = """
-            INSERT INTO utility_matrix (user_id, movie_id, yscore, has_explicit, created_at, updated_at,entity_status)
-            VALUES (:userId, :movieId, :yscore, :hasExplicit, NOW(), NOW(), 'ACTIVE')
-            ON DUPLICATE KEY UPDATE yscore = :yscore, has_explicit = :hasExplicit, updated_at = NOW()
+            INSERT INTO utility_matrix (user_id, movie_id, y_score, has_explicit, has_implicit, created_at, updated_at, entity_status)
+            VALUES (:userId, :movieId, :yScore, :hasExplicit, :hasImplicit, NOW(), NOW(), 'ACTIVE')
+            ON DUPLICATE KEY UPDATE y_score = :yScore, has_explicit = :hasExplicit, has_implicit = :hasImplicit, updated_at = NOW()
             """, nativeQuery = true)
     void upsert(@Param("userId") String userId, @Param("movieId") Long movieId,
-                @Param("yscore") BigDecimal yscore, @Param("hasExplicit") Boolean hasExplicit);
+                @Param("yScore") BigDecimal yScore, @Param("hasExplicit") Boolean hasExplicit,
+                @Param("hasImplicit") Boolean hasImplicit);
 
     /**
      * Danh sách userId eligible cho CF — K_{u,i} >= minInteractions, với K_{u,i} =
@@ -54,5 +59,4 @@ public interface UtilityMatrixRepository extends JpaRepository<UtilityMatrix, Ut
             ) AS interacted
             """, nativeQuery = true)
     List<Long> findInteractedMovieIds(@Param("userId") String userId);
-
 }

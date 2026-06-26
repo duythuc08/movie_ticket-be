@@ -1,14 +1,24 @@
 package com.example.movie_ticket_be.booking.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import com.example.movie_ticket_be.booking.dto.request.AddFoodsRequest;
 import com.example.movie_ticket_be.booking.dto.request.CheckoutRequest;
 import com.example.movie_ticket_be.booking.dto.request.InitiateBookingRequest;
 import com.example.movie_ticket_be.booking.dto.request.OrderFoodsRequest;
-import com.example.movie_ticket_be.booking.dto.response.*;
-import com.example.movie_ticket_be.cinema.entity.Foods;
-import com.example.movie_ticket_be.cinema.enums.FoodStatus;
-import com.example.movie_ticket_be.cinema.repository.FoodRepository;
-import com.example.movie_ticket_be.core.enums.EntityStatus;
+import com.example.movie_ticket_be.booking.dto.response.CheckoutResponse;
+import com.example.movie_ticket_be.booking.dto.response.InitiateBookingResponse;
+import com.example.movie_ticket_be.booking.dto.response.OrderFoodResponse;
+import com.example.movie_ticket_be.booking.dto.response.OrderResponse;
+import com.example.movie_ticket_be.booking.dto.response.OrderTicketResponse;
+import com.example.movie_ticket_be.booking.dto.response.ShowTimeInfo;
 import com.example.movie_ticket_be.booking.entity.OrderFoods;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
@@ -17,7 +27,11 @@ import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.booking.repository.OrderFoodRepository;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
+import com.example.movie_ticket_be.cinema.entity.Foods;
+import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.cinema.enums.SeatType;
+import com.example.movie_ticket_be.cinema.repository.FoodRepository;
+import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.payment.enums.PaymentType;
@@ -27,25 +41,18 @@ import com.example.movie_ticket_be.promotion.entity.Promotion;
 import com.example.movie_ticket_be.promotion.enums.PromotionType;
 import com.example.movie_ticket_be.promotion.repository.PromotionRepository;
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
-import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.showtime.entity.ShowTimes;
+import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
 import com.example.movie_ticket_be.showtime.service.ShowTimePriceService;
 import com.example.movie_ticket_be.user.entity.Users;
 import com.example.movie_ticket_be.user.repository.UserRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -304,13 +311,14 @@ public class BookingService {
 		BigDecimal promotionDiscount = BigDecimal.ZERO;
 		String appliedPromotionCode = null;
 		if (request.getPromotionCode() != null && !request.getPromotionCode().trim().isEmpty()) {
-			Promotion promotion = promotionRepository.findByCode(request.getPromotionCode())
+			String promotionCode = request.getPromotionCode().trim();
+			Promotion promotion = promotionRepository.findByCodeIgnoreCase(promotionCode)
 					.orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
 
 			if (promotion.getEndTime().isBefore(now) || promotion.getStartTime().isAfter(now)) {
 				throw new AppException(ErrorCode.PROMOTION_EXPIRED);
 			}
-			if (promotion.getUseLimit() <= 0) {
+			if (promotion.getUseLimit() != null && promotion.getUseLimit() <= 0) {
 				throw new AppException(ErrorCode.PROMOTION_OUT_OF_STOCK);
 			}
 			if (amountAfterMemberDiscount.compareTo(promotion.getMinOrderValue()) < 0) {
@@ -332,7 +340,7 @@ public class BookingService {
 				promotionDiscount = amountAfterMemberDiscount;
 			}
 
-			promotion.setUseLimit(promotion.getUseLimit() - 1);
+			if (promotion.getUseLimit() != null) promotion.setUseLimit(promotion.getUseLimit() - 1);
 			promotionRepository.save(promotion);
 			appliedPromotionCode = promotion.getCode();
 		}

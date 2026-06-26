@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.recommendation.service;
 
 import com.example.movie_ticket_be.movie.entity.Reviews;
 import com.example.movie_ticket_be.movie.repository.ReviewRepository;
+import java.util.Map;
 import com.example.movie_ticket_be.recommendation.config.RecommendationProperties;
 import com.example.movie_ticket_be.recommendation.entity.UserActivityLog;
 import com.example.movie_ticket_be.recommendation.enums.ActionType;
@@ -29,6 +30,47 @@ public class ScoringService {
     final ScoringParamRepository scoringParamRepository;
     final ReviewRepository reviewRepository;
     final RecommendationProperties properties;
+
+    public record YResult(BigDecimal yScore, boolean hasExplicit, boolean hasImplicit) {}
+
+    /** Dùng khi đã pre-load review + logs theo user — không tốn thêm query DB. */
+    public YResult computeYFromPreloaded(Long movieId,
+                                         Map<Long, Reviews> reviewsByMovie,
+                                         Map<Long, List<UserActivityLog>> logsByMovie) {
+        Reviews review = reviewsByMovie.get(movieId);
+        List<UserActivityLog> logs = logsByMovie.getOrDefault(movieId, List.of());
+        boolean hasExplicit = review != null;
+        boolean hasImplicit = !logs.isEmpty();
+        BigDecimal yScore;
+        if (hasExplicit) {
+            yScore = BigDecimal.valueOf(review.getRating());
+        } else {
+            double s = calculateRawScoreFromLogs(logs);
+            double s0 = readParam(ParamName.S0, 1.0);
+            double amplitude = properties.getTanhConversion().getAmplitude();
+            double neutralPoint = properties.getTanhConversion().getNeutralPoint();
+            yScore = BigDecimal.valueOf(neutralPoint + amplitude * Math.tanh(s / s0));
+        }
+        return new YResult(yScore, hasExplicit, hasImplicit);
+    }
+
+    public YResult computeY(String userId, Long movieId) {
+        Optional<Reviews> explicit = reviewRepository.findApprovalReview(userId, movieId);                       // query 1
+        List<UserActivityLog> logs = userActivityLogRepository.findAllByUser_UserIdAndMovie_MovieId(userId, movieId); // query 2
+        boolean hasExplicit = explicit.isPresent();
+        boolean hasImplicit = !logs.isEmpty();
+        BigDecimal yScore;
+        if (hasExplicit) {
+            yScore = BigDecimal.valueOf(explicit.get().getRating());
+        } else {
+            double s = calculateRawScoreFromLogs(logs);
+            double s0 = readParam(ParamName.S0, 1.0);
+            double amplitude = properties.getTanhConversion().getAmplitude();
+            double neutralPoint = properties.getTanhConversion().getNeutralPoint();
+            yScore = BigDecimal.valueOf(neutralPoint + amplitude * Math.tanh(s / s0));
+        }
+        return new YResult(yScore, hasExplicit, hasImplicit);
+    }
 
     //True nếu user đã có đánh giá (review) cho movie -> set has_explicit cho matrix Y
     public boolean hasExplicitRating(String userId, Long movieId) {
@@ -61,15 +103,18 @@ public class ScoringService {
      *   - Nhóm 2: trục Độ sâu, dùng bestValueAt (WATCH_TRAILER, VIEW_DETAILS)
      *   - Nhóm 3: trục Tần suất, dùng occurrenceCount (BOOK_TICKET, SHARE_MOVIE)
      */
-    public double calculateRawScore(String userId, Long movieId){
+    public double calculateRawScore(String userId, Long movieId) {
         List<UserActivityLog> logs = userActivityLogRepository.findAllByUser_UserIdAndMovie_MovieId(userId, movieId);
+        return calculateRawScoreFromLogs(logs);
+    }
 
+    private double calculateRawScoreFromLogs(List<UserActivityLog> logs) {
         double alpha = readParam(ParamName.ALPHA, 0.5);
         double now = nowEpochDays();
         double lambda = properties.getDecay().getLambda();
 
         double total = 0.0;
-        for(UserActivityLog log : logs){
+        for (UserActivityLog log : logs) {
             ActionType actionType = log.getUserActivityLogId().getActionType();
             double w = baseWeight(log, actionType);
             double decay = decayFactor(log, actionType, now, lambda);

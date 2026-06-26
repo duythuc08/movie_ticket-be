@@ -5,12 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public interface UserPreferenceRepository extends JpaRepository<UserPreference, UserPreference.UserPreferenceId>{
     @Modifying
+    @Transactional
     @Query(value = """
             INSERT INTO user_preference (user_id, movie_id, predicted_score, neighbor_count, created_at, updated_at, entity_status)
             VALUES (:userId, :movieId, :predictedScore, :neighborCount, NOW(), NOW(), 'ACTIVE')
@@ -39,7 +41,7 @@ public interface UserPreferenceRepository extends JpaRepository<UserPreference, 
      * mới, không tự xóa phim không còn xuất hiện.
      */
     @Modifying
+    @Transactional
     @Query(value = "DELETE FROM user_preference WHERE user_id = :userId", nativeQuery = true)
     void deleteAllByUserId(@Param("userId") String userId);
-
 }

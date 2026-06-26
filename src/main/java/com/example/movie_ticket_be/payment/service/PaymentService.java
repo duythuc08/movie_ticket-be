@@ -15,9 +15,6 @@ import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.booking.repository.OrderFoodRepository;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
-import com.example.movie_ticket_be.recommendation.dto.request.ActivityLogRequest;
-import com.example.movie_ticket_be.recommendation.enums.ActionType;
-import com.example.movie_ticket_be.recommendation.service.UserActivityLogService;
 import com.example.movie_ticket_be.cinema.entity.Foods;
 import com.example.movie_ticket_be.cinema.enums.FoodStatus;
 import com.example.movie_ticket_be.cinema.repository.FoodRepository;
@@ -27,11 +24,14 @@ import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.core.utils.QRCodeUtils;
 import com.example.movie_ticket_be.movie.entity.Movies;
 import com.example.movie_ticket_be.payment.dto.request.PaymentConfirmRequest;
-import com.example.movie_ticket_be.promotion.repository.PromotionRepository;
 import com.example.movie_ticket_be.payment.entity.Payments;
 import com.example.movie_ticket_be.payment.enums.PaymentStatus;
 import com.example.movie_ticket_be.payment.enums.PaymentType;
 import com.example.movie_ticket_be.payment.repository.PaymentRepository;
+import com.example.movie_ticket_be.promotion.repository.PromotionRepository;
+import com.example.movie_ticket_be.recommendation.dto.request.ActivityLogRequest;
+import com.example.movie_ticket_be.recommendation.enums.ActionType;
+import com.example.movie_ticket_be.recommendation.service.UserActivityLogService;
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
@@ -195,9 +195,9 @@ public class PaymentService {
 
 		// d. Hoàn lại useLimit của promotion nếu có
 		if (order.getPromotionCode() != null) {
-			promotionRepository.findByCode(order.getPromotionCode())
+			promotionRepository.findByCodeIgnoreCase(order.getPromotionCode())
 					.ifPresent(p -> {
-						p.setUseLimit(p.getUseLimit() + 1);
+						if (p.getUseLimit() != null) p.setUseLimit(p.getUseLimit() + 1);
 						promotionRepository.save(p);
 					});
 		}

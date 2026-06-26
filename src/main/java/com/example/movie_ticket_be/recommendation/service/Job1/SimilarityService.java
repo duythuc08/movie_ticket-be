@@ -34,25 +34,26 @@ public class SimilarityService {
      * — chỉ tính trên tập GIAO của 2 user (Σ chỉ chạy qua movie cả 2 cùng có),
      */
     public Double computeCosineSimilarity(Map<Long, BigDecimal> userA, Map<Long, BigDecimal> userB) {
-        Set<Long> intersection = userA.keySet().stream()
-                .filter(userB::containsKey)
-                .collect(java.util.stream.Collectors.toSet());
+        return computeCosineSimilarity(userA, norm(userA.values()), userB, norm(userB.values()));
+    }
 
-        if (intersection.size() < properties.getCf().getMinCoRatedItems()) {
-            return null;
-        }
+    /** Overload nhận norm đã pre-compute — dùng trong nested loop để tránh tính norm lại N lần/user. */
+    public Double computeCosineSimilarity(Map<Long, BigDecimal> userA, double normA,
+                                          Map<Long, BigDecimal> userB, double normB) {
+        if (normA == 0.0 || normB == 0.0) return null;
 
+        int coRated = 0;
         double dotProduct = 0.0;
-        for (Long movieId : intersection) {
-            dotProduct += userA.get(movieId).doubleValue() * userB.get(movieId).doubleValue();
+        for (Long movieId : userA.keySet()) {
+            BigDecimal bVal = userB.get(movieId);
+            if (bVal == null) continue;
+            dotProduct += userA.get(movieId).doubleValue() * bVal.doubleValue();
+            coRated++;
         }
-        double normA = norm(userA.values());
-        double normB = norm(userB.values());
-        if (normA == 0.0 || normB == 0.0)
-            return null; // tránh chia 0 (user có y_score đồng nhất với mean)
+
+        if (coRated < properties.getCf().getMinCoRatedItems()) return null;
 
         return dotProduct / (normA * normB);
-
     }
 
     private double norm(Collection<BigDecimal> values) {

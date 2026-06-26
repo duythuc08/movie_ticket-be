@@ -1,17 +1,21 @@
 package com.example.movie_ticket_be.recommendation.service.Job1;
 
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+import com.example.movie_ticket_be.movie.entity.Reviews;
+import com.example.movie_ticket_be.movie.repository.ReviewRepository;
 import com.example.movie_ticket_be.recommendation.config.RecommendationProperties;
+import com.example.movie_ticket_be.recommendation.entity.UserActivityLog;
+import com.example.movie_ticket_be.recommendation.repository.UserActivityLogRepository;
 import com.example.movie_ticket_be.recommendation.repository.UtilityMatrixRepository;
 import com.example.movie_ticket_be.recommendation.service.ScoringService;
 
@@ -34,6 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 
 public class UtilityMatrixBuilderTasklet implements Tasklet {
     final UtilityMatrixRepository utilityMatrixRepository;
+    final UserActivityLogRepository userActivityLogRepository;
+    final ReviewRepository reviewRepository;
     final ScoringService scoringService;
     final RecommendationProperties properties;
 
@@ -52,10 +58,16 @@ public class UtilityMatrixBuilderTasklet implements Tasklet {
         int totalUpserted = 0;
         for (String userId : eligibleUserIds) {
             List<Long> interactedMovieIds = utilityMatrixRepository.findInteractedMovieIds(userId);
+
+            // Pre-load toàn bộ review + activity log của user này 1 lần — tránh N+1
+            Map<Long, Reviews> reviewsByMovie = reviewRepository.findApprovalReviewsByUserId(userId)
+                    .stream().collect(Collectors.toMap(r -> r.getMovies().getMovieId(), r -> r));
+            Map<Long, List<UserActivityLog>> logsByMovie = userActivityLogRepository.findAllByUserId(userId)
+                    .stream().collect(Collectors.groupingBy(l -> l.getUserActivityLogId().getMovieId()));
+
             for (Long movieId : interactedMovieIds) {
-                BigDecimal y = scoringService.calculateY(userId, movieId);
-                Boolean hasExplicit = scoringService.hasExplicitRating(userId, movieId);
-                utilityMatrixRepository.upsert(userId, movieId, y, hasExplicit);
+                ScoringService.YResult r = scoringService.computeYFromPreloaded(movieId, reviewsByMovie, logsByMovie);
+                utilityMatrixRepository.upsert(userId, movieId, r.yScore(), r.hasExplicit(), r.hasImplicit());
                 totalUpserted++;
             }
         }

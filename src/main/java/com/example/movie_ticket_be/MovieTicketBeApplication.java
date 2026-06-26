@@ -6,7 +6,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
 @EnableScheduling
-public class MovieTicketBeApplication {
+public class  MovieTicketBeApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(MovieTicketBeApplication.class, args);

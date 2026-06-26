@@ -30,6 +30,9 @@ public class UtilityMatrix extends BaseEntity {
     @Column(name = "has_explicit", nullable = false)
     Boolean hasExplicit;
 
+    @Column(name = "has_implicit", nullable = false)
+    Boolean hasImplicit;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id",nullable = false)
