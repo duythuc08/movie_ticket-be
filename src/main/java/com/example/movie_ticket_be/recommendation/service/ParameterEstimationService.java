@@ -23,7 +23,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 /**
  * Ước lượng alpha (trục Tần suất, Hu et al. 2008) và S0 (hệ số bão hòa hàm tanh)
-*/
+ */
 public class ParameterEstimationService {
     final UserActivityLogRepository userActivityLogRepository;
     final ScoringParamRepository scoringParamRepository;
@@ -47,7 +47,7 @@ public class ParameterEstimationService {
     public BigDecimal estimateAlpha() {
         List<Integer> occurrenceCounts = userActivityLogRepository.findOccurrenceCountsForFrequencyAxis();
         if (occurrenceCounts.isEmpty()) {
-            log.warn("[ParameterEstimation] Không có dòng BOOK_TICKET/SHARE_MOVIE với occurrence_count >= 2 "
+            log.warn("[ParameterEstimation] Không có dòng BOOK_TICKET/SHARE_MOVIE/ với occurrence_count >= 2 "
                     + "- giữ nguyên alpha cũ trong scoring_params (nếu có), không ghi đè.");
             return scoringParamRepository.findById(ParamName.ALPHA)
                     .map(ScoringParam::getParamValue)

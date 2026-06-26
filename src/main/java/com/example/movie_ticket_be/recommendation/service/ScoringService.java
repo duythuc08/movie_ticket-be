@@ -164,10 +164,7 @@ public class ScoringService {
 
     private boolean isFrequencyAxis(ActionType action) {
         return action == ActionType.BOOK_TICKET
-                || action == ActionType.SHARE_MOVIE
-                || action == ActionType.CANCEL_PAYMENT
-                || action == ActionType.TIMEOUT_HOLD_SEATS
-                || action == ActionType.ABANDON_SEAT_SELECTION;
+                || action == ActionType.SHARE_MOVIE;
     }
 
     private double toDouble(Object value, double fallback) {
