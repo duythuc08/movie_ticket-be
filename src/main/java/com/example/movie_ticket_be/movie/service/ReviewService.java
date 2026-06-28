@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.movie.service;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -173,31 +174,26 @@ public class ReviewService {
         return userRepository.findByUsername(auth.getName()).orElse(null);
     }
 
-    public UnreviewedMovieResponse getRecentUnreviewedMovie() {
+    public List<UnreviewedMovieResponse> getRecentUnreviewedMovie() {
         Users currentUser = getCurrentUser();
         if (currentUser == null) {
-            return null;
+            return Collections.emptyList();
         }
 
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime threeDaysAgo = now.minusDays(3);
 
-        List<Movies> unreviewedMovies = movieRepository.findRecentUnreviewedMovies(
+        List<Movies> unreviewedMovies = movieRepository.findUnreviewedActiveMovies(
                 currentUser.getUserId(),
-                threeDaysAgo,
                 now,
-                PageRequest.of(0, 1)
+                PageRequest.of(0, 10) // fetch up to 10 unreviewed movies
         );
 
-        if (unreviewedMovies.isEmpty()) {
-            return null;
-        }
-
-        Movies movie = unreviewedMovies.get(0);
-        return UnreviewedMovieResponse.builder()
-                .movieId(movie.getMovieId())
-                .movieName(movie.getTitle())
-                .posterUrl(movie.getPosterUrl())
-                .build();
+        return unreviewedMovies.stream()
+                .map(movie -> UnreviewedMovieResponse.builder()
+                        .movieId(movie.getMovieId())
+                        .movieName(movie.getTitle())
+                        .posterUrl(movie.getPosterUrl())
+                        .build())
+                .collect(Collectors.toList());
     }
 }

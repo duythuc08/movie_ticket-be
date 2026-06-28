@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.Optional;
 
 @Slf4j
@@ -32,6 +33,8 @@ public class ScoringService {
     final RecommendationProperties properties;
 
     public record YResult(BigDecimal yScore, boolean hasExplicit, boolean hasImplicit) {}
+
+    private final ConcurrentHashMap<ParamName, Double> paramCache = new ConcurrentHashMap<>();
 
     /** Dùng khi đã pre-load review + logs theo user — không tốn thêm query DB. */
     public YResult computeYFromPreloaded(Long movieId,
@@ -125,9 +128,10 @@ public class ScoringService {
     }
 
     private double readParam(ParamName paramName, double fallback){
-        return scoringParamRepository.findById(paramName)
-                .map(p -> p.getParamValue().doubleValue())
-                .orElse(fallback);
+        return paramCache.computeIfAbsent(paramName, k ->
+                scoringParamRepository.findById(k)
+                        .map(p -> p.getParamValue().doubleValue())
+                        .orElse(fallback));
     }
 
     /** w_base(a) — tra theo MAX value (trục Độ sâu) hoặc base cố định/Tần suất. */

@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.movie.controller;
 
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,8 +71,8 @@ public class ReviewController {
     }
 
     @GetMapping("/recent-unreviewed")
-    public ApiResponse<UnreviewedMovieResponse> getRecentUnreviewedMovie() {
-        return ApiResponse.<UnreviewedMovieResponse>builder()
+    public ApiResponse<List<UnreviewedMovieResponse>> getRecentUnreviewedMovie() {
+        return ApiResponse.<List<UnreviewedMovieResponse>>builder()
                 .result(reviewService.getRecentUnreviewedMovie())
                 .build();
     }

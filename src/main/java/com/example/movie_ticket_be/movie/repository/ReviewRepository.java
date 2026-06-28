@@ -41,6 +41,7 @@ public interface ReviewRepository extends JpaRepository<Reviews, Long>, JpaSpeci
 
     @Query("""
         SELECT r from Reviews r
+        JOIN FETCH r.movies
         WHERE r.users.userId = :userId AND r.reviewStatus = 'APPROVED'
     """)
     List<Reviews> findApprovalReviewsByUserId(@Param("userId") String userId);

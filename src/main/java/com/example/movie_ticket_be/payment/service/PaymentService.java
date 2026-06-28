@@ -97,9 +97,28 @@ public class PaymentService {
 		payment.setPaymentStatus(PaymentStatus.SUCCESS);
 		paymentRepository.save(payment);
 
-		// b. cập nhật order tạo qrCode
 		order.setOrderStatus(OrderStatus.PAID);
-		String qrCode = "INF-" + order.getOrderId() + "-" + System.currentTimeMillis() % 10000;
+		
+		// Nâng cấp Data QR Code thành JSON
+		String movieName = order.getOrderTickets().stream().findFirst().map(t -> t.getSeatShowTime().getShowTimes().getMovies().getTitle()).orElse("N/A");
+		String cinemaName = order.getOrderTickets().stream().findFirst().map(t -> t.getSeatShowTime().getShowTimes().getRooms().getCinemas().getName()).orElse("N/A");
+		String seats = order.getOrderTickets().stream().map(t -> t.getSeatShowTime().getSeats().getSeatRow() + t.getSeatShowTime().getSeats().getSeatNumber()).collect(java.util.stream.Collectors.joining(","));
+		String showTime = order.getOrderTickets().stream().findFirst().map(t -> {
+			java.time.LocalDateTime st = t.getSeatShowTime().getShowTimes().getStartTime();
+			return st.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm dd/MM/yyyy"));
+		}).orElse("N/A");
+		
+		movieName = movieName.length() > 50 ? movieName.substring(0, 50) : movieName;
+		cinemaName = cinemaName.length() > 50 ? cinemaName.substring(0, 50) : cinemaName;
+		seats = seats.length() > 50 ? seats.substring(0, 50) + "..." : seats;
+		
+		String qrCode = String.format("{\"id\":%d,\"movie\":\"%s\",\"cinema\":\"%s\",\"time\":\"%s\",\"seats\":\"%s\"}", 
+				order.getOrderId(), 
+				movieName.replace("\"", "\\\""), 
+				cinemaName.replace("\"", "\\\""), 
+				showTime,
+				seats);
+				
 		String qrBase64 = qrCodeUtils.generateQRCodeImage(qrCode, 300, 300);
 		order.setQrCode(qrCode);
 		orderRepository.save(order);
@@ -266,21 +285,37 @@ public class PaymentService {
 		orderTicketRepository.saveAll(tickets);
 	}
 	private void sendPaymentSuccessMail(Users user, Orders order, String bookingCode, String qrBase64) {
+		String movieName = order.getOrderTickets().stream().findFirst().map(t -> t.getSeatShowTime().getShowTimes().getMovies().getTitle()).orElse("---");
+		String cinemaName = order.getOrderTickets().stream().findFirst().map(t -> t.getSeatShowTime().getShowTimes().getRooms().getCinemas().getName()).orElse("---");
+		String showTime = order.getOrderTickets().stream().findFirst().map(t -> {
+			java.time.LocalDateTime st = t.getSeatShowTime().getShowTimes().getStartTime();
+			return st.format(java.time.format.DateTimeFormatter.ofPattern("HH:mm - dd/MM/yyyy"));
+		}).orElse("---");
+		String seats = order.getOrderTickets().stream().map(t -> t.getSeatShowTime().getSeats().getSeatRow() + t.getSeatShowTime().getSeats().getSeatNumber()).collect(java.util.stream.Collectors.joining(", "));
+
 		String htmlMessage = "<html>"
 				+ "<body style=\"font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;\">"
-				+ "<div style=\"max-width: 600px; margin: auto; background-color: #fff; padding: 20px; border-radius: 8px; "
-				+ "box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
-				+ "<h2 style=\"color: #007bff; text-align: center;\">Thanh toán thành công 🎉</h2>" + "<p>Xin chào <b>"
-				+ user.getFirstname() + " " + user.getLastname() + "</b>,</p>"
-				+ "<p>Cảm ơn bạn đã đặt vé tại <b>Infinity Cinema</b>. Dưới đây là thông tin đơn hàng của bạn:</p>"
-				+ "<ul>" + "<li><b>Mã đơn hàng:</b> " + order.getOrderId() + "</li>" + "<li><b>Mã booking:</b> "
-				+ bookingCode + "</li>" + "<li><b>Số tiền:</b> " + order.getFinalPrice() + " VND</li>"
-				+ "<li><b>Thời gian thanh toán:</b> " + LocalDateTime.now() + "</li>" + "</ul>"
-				+ "<p>Vui lòng sử dụng mã QR dưới đây để check-in tại rạp:</p>"
-				+ "<div style=\"text-align: center; margin: 20px;\">"
-				+ "<img src=\"cid:qrCodeImage\" alt=\"QR Code\" style=\"width:200px;height:200px;\"/>" // Thay đổi ở đây
+				+ "<div style=\"max-width: 600px; margin: auto; background-color: #fff; padding: 20px; border-radius: 12px; "
+				+ "box-shadow: 0 4px 15px rgba(0,0,0,0.1);\">"
+				+ "<div style=\"text-align: center; border-bottom: 2px dashed #eee; padding-bottom: 20px; margin-bottom: 20px;\">"
+				+ "<h2 style=\"color: #007bff; margin: 0;\">Thanh Toán Thành Công 🎉</h2>"
+				+ "<p style=\"color: #666; margin-top: 10px;\">Mã đặt vé: <b>" + bookingCode + "</b></p>"
 				+ "</div>"
-				+ "<p style=\"text-align: center; font-size: 14px; color: #555;\">Chúc bạn có trải nghiệm xem phim tuyệt vời!</p>"
+				+ "<p>Xin chào <b>" + user.getFirstname() + " " + user.getLastname() + "</b>,</p>"
+				+ "<p>Cảm ơn bạn đã lựa chọn <b>Infinity Cinema</b>. Dưới đây là thông tin vé của bạn:</p>"
+				+ "<div style=\"background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;\">"
+				+ "<p style=\"margin: 5px 0;\">🎬 <b>Phim:</b> <span style=\"color: #007bff; font-weight: bold;\">" + movieName + "</span></p>"
+				+ "<p style=\"margin: 5px 0;\">📍 <b>Rạp:</b> " + cinemaName + "</p>"
+				+ "<p style=\"margin: 5px 0;\">⏰ <b>Suất chiếu:</b> " + showTime + "</p>"
+				+ "<p style=\"margin: 5px 0;\">🎟 <b>Ghế ngồi:</b> " + seats + "</p>"
+				+ "<p style=\"margin: 5px 0;\">💰 <b>Tổng tiền:</b> " + order.getFinalPrice() + " VND</p>"
+				+ "</div>"
+				+ "<p style=\"text-align: center; margin-top: 30px; font-weight: bold;\">MÃ QR QUÉT VÉ (BOARDING PASS)</p>"
+				+ "<div style=\"text-align: center; margin: 10px;\">"
+				+ "<img src=\"cid:qrCodeImage\" alt=\"QR Code\" style=\"width:250px;height:250px; border: 4px solid #f8f9fa; border-radius: 12px;\"/>"
+				+ "</div>"
+				+ "<p style=\"text-align: center; font-size: 14px; color: #555;\">Vui lòng đưa mã QR này cho nhân viên soát vé khi tới rạp.</p>"
+				+ "<p style=\"text-align: center; font-size: 14px; color: #555;\">Chúc bạn xem phim vui vẻ!</p>"
 				+ "</div>" + "</body>" + "</html>";
 
 		try {

@@ -17,7 +17,6 @@ import com.example.movie_ticket_be.recommendation.config.RecommendationPropertie
 import com.example.movie_ticket_be.recommendation.entity.UserActivityLog;
 import com.example.movie_ticket_be.recommendation.repository.UserActivityLogRepository;
 import com.example.movie_ticket_be.recommendation.repository.UtilityMatrixRepository;
-import com.example.movie_ticket_be.recommendation.service.ScoringService;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +39,7 @@ public class UtilityMatrixBuilderTasklet implements Tasklet {
     final UtilityMatrixRepository utilityMatrixRepository;
     final UserActivityLogRepository userActivityLogRepository;
     final ReviewRepository reviewRepository;
-    final ScoringService scoringService;
+    final UtilityMatrixUpsertService upsertService;
     final RecommendationProperties properties;
 
     /**
@@ -65,11 +64,7 @@ public class UtilityMatrixBuilderTasklet implements Tasklet {
             Map<Long, List<UserActivityLog>> logsByMovie = userActivityLogRepository.findAllByUserId(userId)
                     .stream().collect(Collectors.groupingBy(l -> l.getUserActivityLogId().getMovieId()));
 
-            for (Long movieId : interactedMovieIds) {
-                ScoringService.YResult r = scoringService.computeYFromPreloaded(movieId, reviewsByMovie, logsByMovie);
-                utilityMatrixRepository.upsert(userId, movieId, r.yScore(), r.hasExplicit(), r.hasImplicit());
-                totalUpserted++;
-            }
+            totalUpserted += upsertService.upsertForUser(userId, interactedMovieIds, reviewsByMovie, logsByMovie);
         }
 
         log.info("[UtilityMatrixBuilderStep] Hoàn tất — {} ô utility_matrix đã upsert", totalUpserted);

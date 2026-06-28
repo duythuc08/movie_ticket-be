@@ -42,14 +42,13 @@ public interface MovieRepository extends JpaRepository<Movies, Long>, JpaSpecifi
 	@Query("SELECT DISTINCT ot.seatShowTime.showTimes.movies FROM OrderTickets ot " +
 			"WHERE ot.orders.users.userId = :userId " +
 			"AND ot.seatShowTime.showTimes.showTimeStatus = 'COMPLETED' " +
-			"AND ot.seatShowTime.showTimes.startTime >= :threeDaysAgo " +
+			"AND ot.seatShowTime.showTimes.movies.movieStatus = 'NOW_SHOWING' " +
 			"AND ot.seatShowTime.showTimes.startTime <= :now " +
 			"AND ot.seatShowTime.showTimes.movies.movieId NOT IN (" +
 			"    SELECT r.movies.movieId FROM Reviews r WHERE r.users.userId = :userId" +
 			")")
-	List<Movies> findRecentUnreviewedMovies(
+	List<Movies> findUnreviewedActiveMovies(
 			@Param("userId") String userId,
-			@Param("threeDaysAgo") LocalDateTime threeDaysAgo,
 			@Param("now") LocalDateTime now,
 			Pageable pageable
 	);

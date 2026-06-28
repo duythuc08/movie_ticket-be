@@ -1,5 +1,15 @@
 package com.example.movie_ticket_be.showtime.service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.movie_ticket_be.cinema.dto.response.CinemaResponse;
 import com.example.movie_ticket_be.cinema.mapper.CinemaMapper;
 import com.example.movie_ticket_be.movie.dto.response.MovieResponse;
@@ -11,18 +21,11 @@ import com.example.movie_ticket_be.showtime.entity.ShowTimes;
 import com.example.movie_ticket_be.showtime.enums.ShowTimeStatus;
 import com.example.movie_ticket_be.showtime.mapper.ShowTimeMapper;
 import com.example.movie_ticket_be.showtime.repository.ShowTimeRepository;
+
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Comparator;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -37,11 +40,42 @@ public class ShowTimeService {
 	@Transactional
 	public void autoUpdateShowTimeStatus() {
 		LocalDateTime now = LocalDateTime.now();
-		showTimeRepository.findByShowTimeStatusAndStartTimeLessThanEqual(ShowTimeStatus.SCHEDULED, now)
-				.forEach(st -> st.setShowTimeStatus(ShowTimeStatus.ONGOING));
-		showTimeRepository.findByShowTimeStatusAndEndTimeLessThanEqual(ShowTimeStatus.ONGOING, now)
-				.forEach(st -> st.setShowTimeStatus(ShowTimeStatus.COMPLETED));
-		showTimeRepository.findFullyBookedCandidates().forEach(st -> st.setShowTimeStatus(ShowTimeStatus.FULLY_BOOKED));
+
+		// SCHEDULED -> ONGOING
+		List<ShowTimes> toOngoing = showTimeRepository.findByShowTimeStatusAndStartTimeLessThanEqual(ShowTimeStatus.SCHEDULED, now);
+		toOngoing.forEach(st -> st.setShowTimeStatus(ShowTimeStatus.ONGOING));
+		if (!toOngoing.isEmpty()) {
+		    log.info("autoUpdateShowTimeStatus: Updated {} showtime(s) to ONGOING: {}",
+			    toOngoing.size(),
+			    toOngoing.stream()
+				    .map(st -> st.getShowTimeId() + "(" + (st.getMovies() != null ? st.getMovies().getTitle() : "-") + "," + st.getStartTime() + ")")
+				    .collect(Collectors.joining(", "))
+		    );
+		}
+
+		// ONGOING -> COMPLETED
+		List<ShowTimes> toCompleted = showTimeRepository.findByShowTimeStatusAndEndTimeLessThanEqual(ShowTimeStatus.ONGOING, now);
+		toCompleted.forEach(st -> st.setShowTimeStatus(ShowTimeStatus.COMPLETED));
+		if (!toCompleted.isEmpty()) {
+		    log.info("autoUpdateShowTimeStatus: Updated {} showtime(s) to COMPLETED: {}",
+			    toCompleted.size(),
+			    toCompleted.stream()
+				    .map(st -> st.getShowTimeId() + "(" + (st.getMovies() != null ? st.getMovies().getTitle() : "-") + "," + st.getEndTime() + ")")
+				    .collect(Collectors.joining(", "))
+		    );
+		}
+
+		// Mark fully booked candidates
+		List<ShowTimes> toFullyBooked = showTimeRepository.findFullyBookedCandidates();
+		toFullyBooked.forEach(st -> st.setShowTimeStatus(ShowTimeStatus.FULLY_BOOKED));
+		if (!toFullyBooked.isEmpty()) {
+		    log.info("autoUpdateShowTimeStatus: Updated {} showtime(s) to FULLY_BOOKED: {}",
+			    toFullyBooked.size(),
+			    toFullyBooked.stream()
+				    .map(st -> st.getShowTimeId() + "(" + (st.getMovies() != null ? st.getMovies().getTitle() : "-") + "," + st.getStartTime() + ")")
+				    .collect(Collectors.joining(", "))
+		    );
+		}
 	}
 
 	@Transactional(readOnly = true)

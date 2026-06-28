@@ -324,15 +324,15 @@ public class AuthenticationService {
 
 	private void sendMail(Users user, String otp) {
 		// Send Email
-		String verificationCode = "VERIFICATION CODE " + otp;
-		String htmlMessage = "<html>" + "<body style=\"font-family: Arial, sans-serif;\">"
-				+ "<div style=\"background-color: #f5f5f5; padding: 20px;\">"
-				+ "<h2 style=\"color: #333;\">Welcome to our app!</h2>"
-				+ "<p style=\"font-size: 16px;\">Please enter the verification code below to continue:</p>"
-				+ "<div style=\"background-color: #fff; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1);\">"
-				+ "<h3 style=\"color: #333;\">Verification Code:</h3>"
-				+ "<p style=\"font-size: 18px; font-weight: bold; color: #007bff;\">" + verificationCode + "</p>"
-				+ "</div>" + "</div>" + "</body>" + "</html>";
+		String htmlMessage = "<html>" + "<body style=\"font-family: Arial, sans-serif; background-color: #f5f5f5; padding: 20px;\">"
+				+ "<div style=\"max-width: 500px; margin: auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center;\">"
+				+ "<h2 style=\"color: #007bff; margin-bottom: 20px;\">Infinity Cinema</h2>"
+				+ "<p style=\"font-size: 16px; color: #333; margin-bottom: 30px;\">Chào mừng bạn! Dưới đây là mã xác thực tài khoản của bạn:</p>"
+				+ "<div style=\"background-color: #f8f9fa; padding: 15px; border-radius: 8px; border: 2px dashed #007bff; display: inline-block; margin-bottom: 20px;\">"
+				+ "<span style=\"font-size: 24px; font-weight: bold; color: #007bff; letter-spacing: 5px;\">" + otp + "</span>"
+				+ "</div>"
+				+ "<p style=\"font-size: 14px; color: #777;\">Mã này có hiệu lực trong vòng 1 phút. Vui lòng không chia sẻ cho bất kỳ ai.</p>"
+				+ "</div>" + "</body>" + "</html>";
 
 		try {
 			emailService.sendEmail(user.getUsername(), "Xác thực tài khoản", htmlMessage);
