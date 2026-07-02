@@ -51,4 +51,12 @@ public interface ReviewRepository extends JpaRepository<Reviews, Long>, JpaSpeci
         WHERE r.users.userId = :userId AND r.reviewStatus = 'APPROVED'
     """)
     Long countApprovalReviewsByUser(@Param("userId") String userId);
+
+    @Query(value = """
+        SELECT movie_id, AVG(rating) as avg_rating
+        FROM review
+        WHERE movie_id IN (:movieIds) AND entity_status = 'ACTIVE' AND review_status = 'APPROVED'
+        GROUP BY movie_id
+        """, nativeQuery = true)
+    List<Object[]> findAvgRatingByMovieIds(@Param("movieIds") List<Long> movieIds);
 }

@@ -91,4 +91,6 @@ public class RecommendationProperties {
     public static class Prediction {
         private int topN;
     }
+
+    private String pythonServiceUrl = "http://localhost:8000";
 }

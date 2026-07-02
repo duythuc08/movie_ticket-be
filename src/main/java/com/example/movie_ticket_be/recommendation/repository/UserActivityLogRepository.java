@@ -61,4 +61,12 @@ public interface UserActivityLogRepository
             )
     """, nativeQuery = true)
     List<Object[]> findUserMoviePairsWithoutExplicitRating();
+
+    @Query(value = """
+        SELECT movie_id, COUNT(*) as ticket_count
+        FROM user_activity_logs
+        WHERE movie_id IN (:movieIds) AND action_type = 'BOOK_TICKET' AND entity_status = 'ACTIVE'
+        GROUP BY movie_id
+        """, nativeQuery = true)
+    List<Object[]> findBookTicketCountByMovieIds(@Param("movieIds") List<Long> movieIds);
 }

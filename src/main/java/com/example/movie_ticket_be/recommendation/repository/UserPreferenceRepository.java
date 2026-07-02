@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.recommendation.repository;
 
 import com.example.movie_ticket_be.recommendation.entity.UserPreference;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,6 +33,18 @@ public interface UserPreferenceRepository extends JpaRepository<UserPreference, 
             ORDER BY p.predictedScore DESC
             """)
     List<UserPreference> findTopByUserId(@Param("userId") String userId);
+
+    /**
+     * Đọc top-N preference của user, JOIN FETCH movie để tránh N+1 khi lấy title/posterUrl.
+     * Dùng Pageable để giới hạn số dòng theo prediction.top-n trong config.
+     */
+    @Query("""
+            SELECT p FROM UserPreference p
+            JOIN FETCH p.movie
+            WHERE p.preferenceId.userId = :userId
+            ORDER BY p.predictedScore DESC
+            """)
+    List<UserPreference> findTopByUserIdFetchMovie(@Param("userId") String userId, Pageable pageable);
 
     /**
      * Xóa toàn bộ dòng cũ của user trước khi UPSERT lượt predict mới — tránh
