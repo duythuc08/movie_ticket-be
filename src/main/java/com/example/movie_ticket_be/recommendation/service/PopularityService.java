@@ -80,8 +80,11 @@ public class PopularityService {
                             .movieId(m.getMovieId())
                             .title(m.getTitle())
                             .posterUrl(m.getPosterUrl())
+                            .description(m.getDescription())
+                            .duration(m.getDuration())
                             .predictedScore(BigDecimal.valueOf(scores.get(id)))
                             .neighborCount(0)
+                            .averageRating(ratingMap.getOrDefault(id, 0.0))
                             .source("cold_start_popularity")
                             .build();
                 })

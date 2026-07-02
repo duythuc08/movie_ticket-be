@@ -14,6 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import com.example.movie_ticket_be.movie.repository.ReviewRepository;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -23,6 +27,7 @@ public class RecommendationService {
     UserPreferenceRepository userPreferenceRepository;
     PopularityService popularityService;
     RecommendationProperties properties;
+    ReviewRepository reviewRepository;
 
     /**
      * Đọc top-N từ user_preference (đã được Python ghi sẵn lúc train 3AM).
@@ -40,13 +45,23 @@ public class RecommendationService {
             return popularityService.getTopMoviesForUser(userId);
         }
 
+        List<Long> movieIds = prefs.stream().map(p -> p.getMovie().getMovieId()).toList();
+        Map<Long, Double> avgRatings = reviewRepository.findAvgRatingByMovieIds(movieIds).stream()
+                .collect(Collectors.toMap(
+                        row -> ((Number) row[0]).longValue(),
+                        row -> ((Number) row[1]).doubleValue()
+                ));
+
         return prefs.stream()
                 .map(p -> RecommendationItemResponse.builder()
                         .movieId(p.getMovie().getMovieId())
                         .title(p.getMovie().getTitle())
                         .posterUrl(p.getMovie().getPosterUrl())
+                        .description(p.getMovie().getDescription())
+                        .duration(p.getMovie().getDuration())
                         .predictedScore(p.getPredictedScore())
                         .neighborCount(p.getNeighborCount())
+                        .averageRating(avgRatings.getOrDefault(p.getMovie().getMovieId(), 0.0))
                         .source("cf")
                         .build())
                 .toList();

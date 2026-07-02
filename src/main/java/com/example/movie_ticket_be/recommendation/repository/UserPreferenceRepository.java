@@ -15,12 +15,11 @@ public interface UserPreferenceRepository extends JpaRepository<UserPreference, 
     @Modifying
     @Transactional
     @Query(value = """
-            INSERT INTO user_preference (user_id, movie_id, predicted_score, neighbor_count, created_at, updated_at, entity_status)
-            VALUES (:userId, :movieId, :predictedScore, :neighborCount, NOW(), NOW(), 'ACTIVE')
+            INSERT INTO user_preference (user_id, movie_id, predicted_score, neighbor_count)
+            VALUES (:userId, :movieId, :predictedScore, :neighborCount)
             ON DUPLICATE KEY UPDATE
                 predicted_score = :predictedScore,
-                neighbor_count = :neighborCount,
-                updated_at = NOW()
+                neighbor_count = :neighborCount
             """, nativeQuery = true)
     void upsert(@Param("userId") String userId,
                 @Param("movieId") Long movieId,

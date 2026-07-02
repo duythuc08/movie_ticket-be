@@ -14,7 +14,11 @@ public class RecommendationItemResponse {
     Long movieId;
     String title;
     String posterUrl;
+    String description; // For synopsis
+    Integer duration;   // For durationText
+
     BigDecimal predictedScore;
     Integer neighborCount;
+    Double averageRating;
     String source;  // "cf" hoặc "cold_start_popularity"
 }
