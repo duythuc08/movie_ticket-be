@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
@@ -21,6 +23,11 @@ public interface OrderTicketRepository extends JpaRepository<OrderTickets, Long>
 	Optional<OrderTickets> findBySeatShowTime_SeatShowTimeId(Long seatShowTimeId);
 
 	void deleteByOrders_OrderId(Long ordersOrderId);
+
+	@Modifying
+	@Transactional
+	@Query(value = "DELETE FROM order_ticket WHERE order_id = :orderId", nativeQuery = true)
+	void deleteByOrderIdNative(@Param("orderId") Long orderId);
 
 	@Query("SELECT COUNT(ot) FROM OrderTickets ot " +
 			"WHERE ot.orders.users = :user " +

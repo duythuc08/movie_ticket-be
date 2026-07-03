@@ -1,6 +1,8 @@
 package com.example.movie_ticket_be.recommendation.repository;
 
-import com.example.movie_ticket_be.recommendation.entity.UserPreference;
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,8 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.List;
+import com.example.movie_ticket_be.recommendation.entity.UserPreference;
 
 public interface UserPreferenceRepository extends JpaRepository<UserPreference, UserPreference.UserPreferenceId>{
     @Modifying
@@ -34,13 +35,26 @@ public interface UserPreferenceRepository extends JpaRepository<UserPreference, 
     List<UserPreference> findTopByUserId(@Param("userId") String userId);
 
     /**
-     * Đọc top-N preference của user, JOIN FETCH movie để tránh N+1 khi lấy title/posterUrl.
-     * Dùng Pageable để giới hạn số dòng theo prediction.top-n trong config.
+     * Đọc top-N preference của user, loại phim user đã đánh giá hoặc đã đặt vé.
+     * Lọc real-time tại DB để tránh gợi ý phim user đã tương tác sau lần batch 3AM.
      */
     @Query("""
             SELECT p FROM UserPreference p
             JOIN FETCH p.movie
             WHERE p.preferenceId.userId = :userId
+              AND NOT EXISTS (
+                  SELECT 1 FROM Reviews r
+                  WHERE r.users.userId = :userId
+                    AND r.movies.movieId = p.preferenceId.movieId
+                    AND r.reviewStatus = 'APPROVED'
+              )
+              AND NOT EXISTS (
+                  SELECT 1 FROM UserActivityLog l
+                  WHERE l.user.userId = :userId
+                    AND l.movie.movieId = p.preferenceId.movieId
+                    AND l.userActivityLogId.actionType = 'BOOK_TICKET'
+                    AND l.entityStatus = 'ACTIVE'
+              )
             ORDER BY p.predictedScore DESC
             """)
     List<UserPreference> findTopByUserIdFetchMovie(@Param("userId") String userId, Pageable pageable);

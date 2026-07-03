@@ -5,8 +5,10 @@ import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -33,6 +35,17 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
 	List<Orders> findByUsers_UserIdAndOrderStatus(String usersUserId, OrderStatus orderStatus);
 
 	List<Orders> findAllByOrderStatusAndExpiredTimeBefore(OrderStatus orderStatus, LocalDateTime expiredTimeBefore);
+
+	/** Load order không kèm EntityGraph — dùng trong releaseBooking để tránh eager-load orderTickets */
+	@Query("SELECT o FROM Orders o WHERE o.orderId = :orderId")
+	Optional<Orders> findByOrderIdPlain(@Param("orderId") Long orderId);
+
+	@Modifying
+	@Transactional
+	@Query("UPDATE Orders o SET o.orderStatus = :status, o.updatedAt = :now WHERE o.orderId = :orderId")
+	void updateOrderStatus(@Param("orderId") Long orderId,
+	                       @Param("status") OrderStatus status,
+	                       @Param("now") LocalDateTime now);
 
 	@Query("SELECT SUM(o.finalPrice) FROM Orders o WHERE o.orderStatus = :status AND o.bookingTime >= :from AND o.bookingTime <= :to")
 	BigDecimal sumRevenue(@Param("status") OrderStatus status, @Param("from") LocalDateTime from,

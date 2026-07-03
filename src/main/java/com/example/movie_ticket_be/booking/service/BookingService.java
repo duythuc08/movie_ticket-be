@@ -168,7 +168,9 @@ public class BookingService {
 	// ──────────────────────────────────────────────────────────────────────────
 	@Transactional(rollbackOn = Exception.class)
 	public void releaseBooking(Long orderId) {
-		Orders order = orderRepository.findByOrderId(orderId)
+		// findByOrderIdPlain không dùng EntityGraph → orderTickets KHÔNG được eager-load,
+		// tránh cascade merge vào tickets đã xoá gây ObjectDeletedException.
+		Orders order = orderRepository.findByOrderIdPlain(orderId)
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 		if (order.getOrderStatus() != OrderStatus.PENDING) {
 			throw new AppException(ErrorCode.ORDER_NOT_PENDING);
@@ -184,13 +186,11 @@ public class BookingService {
 			seatShowTimeRepository.save(sst);
 		}
 
-		// Xóa OrderTickets
-		orderTicketRepository.deleteAll(tickets);
+		// Native DELETE — bypass Hibernate entity lifecycle, không trigger cascade trên Orders
+		orderTicketRepository.deleteByOrderIdNative(orderId);
 
-		// Huỷ Order
-		order.setOrderStatus(OrderStatus.CANCELLED);
-		order.setUpdatedAt(LocalDateTime.now());
-		orderRepository.save(order);
+		// JPQL UPDATE — không gọi merge, không cascade vào tickets vừa xoá
+		orderRepository.updateOrderStatus(orderId, OrderStatus.CANCELLED, LocalDateTime.now());
 	}
 
 	// ──────────────────────────────────────────────────────────────────────────
