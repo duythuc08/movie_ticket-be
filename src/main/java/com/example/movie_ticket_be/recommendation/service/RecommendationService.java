@@ -62,7 +62,7 @@ public class RecommendationService {
                         .predictedScore(p.getPredictedScore())
                         .neighborCount(p.getNeighborCount())
                         .averageRating(avgRatings.getOrDefault(p.getMovie().getMovieId(), 0.0))
-                        .source("cf")
+                        .source(p.getSource())
                         .build())
                 .toList();
     }

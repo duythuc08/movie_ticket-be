@@ -23,6 +23,7 @@ public class UserPreference {
 
     BigDecimal predictedScore;
     Integer neighborCount;
+    String source;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
