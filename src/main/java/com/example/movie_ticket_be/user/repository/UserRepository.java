@@ -13,6 +13,7 @@ public interface UserRepository extends JpaRepository<Users, String>, JpaSpecifi
 	boolean existsByUsername(String username);
 	Optional<Users> findByUsername(String username);
 	List<Users> findAllByEnabledFalseAndCreatedAtBefore(LocalDateTime time);
+	List<Users> findAllByEnabledTrue();
 
 	Optional<Users> findByUserId(String userId);
 }

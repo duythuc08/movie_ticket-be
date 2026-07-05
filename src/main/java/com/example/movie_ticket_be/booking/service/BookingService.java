@@ -35,6 +35,7 @@ import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.payment.enums.PaymentType;
+import com.example.movie_ticket_be.payment.service.MomoService;
 import com.example.movie_ticket_be.payment.service.PaymentService;
 import com.example.movie_ticket_be.payment.service.VNPayService;
 import com.example.movie_ticket_be.promotion.entity.Promotion;
@@ -68,6 +69,7 @@ public class BookingService {
 	PromotionRepository promotionRepository;
 	PaymentService paymentService;
 	VNPayService vnPayService;
+	MomoService momoService;
 
 	private static final int HOLD_SEAT_MINUTES = 5;
 	private static final int PAYMENT_WINDOW_MINUTES = 10;
@@ -361,11 +363,16 @@ public class BookingService {
 		order.setUpdatedAt(now);
 		orderRepository.save(order);
 
-		// Tạo Payment PENDING
-		paymentService.createPendingPayment(orderId, PaymentType.VNPAY);
+		// Tạo Payment PENDING + URL theo phương thức thanh toán
+		PaymentType paymentType = (request.getPaymentType() != null) ? request.getPaymentType() : PaymentType.VNPAY;
+		paymentService.createPendingPayment(orderId, paymentType);
 
-		// Tạo VNPay URL
-		String paymentUrl = vnPayService.createPaymentUrl(httpRequest, orderId, finalPrice);
+		String paymentUrl;
+		if (paymentType == PaymentType.MOMO) {
+			paymentUrl = momoService.createPaymentUrl(orderId, finalPrice);
+		} else {
+			paymentUrl = vnPayService.createPaymentUrl(httpRequest, orderId, finalPrice);
+		}
 
 		return CheckoutResponse.builder()
 				.orderId(orderId)

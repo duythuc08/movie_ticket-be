@@ -66,6 +66,7 @@ public class PaymentService {
 	UserActivityLogService userActivityLogService;
 	EmailService emailService;
 	PromotionRepository promotionRepository;
+	MomoService momoService;
 
 	@Transactional
 	public void createPendingPayment(Long orderId, PaymentType paymentType) {
@@ -112,13 +113,15 @@ public class PaymentService {
 		cinemaName = cinemaName.length() > 50 ? cinemaName.substring(0, 50) : cinemaName;
 		seats = seats.length() > 50 ? seats.substring(0, 50) + "..." : seats;
 		
-		String qrCode = String.format("{\"id\":%d,\"movie\":\"%s\",\"cinema\":\"%s\",\"time\":\"%s\",\"seats\":\"%s\"}", 
-				order.getOrderId(), 
-				movieName.replace("\"", "\\\""), 
-				cinemaName.replace("\"", "\\\""), 
+		String bookingCode = order.getQrCode();
+		String qrCode = String.format("{\"id\":%d,\"code\":\"%s\",\"movie\":\"%s\",\"cinema\":\"%s\",\"time\":\"%s\",\"seats\":\"%s\"}",
+				order.getOrderId(),
+				bookingCode,
+				movieName.replace("\"", "\\\""),
+				cinemaName.replace("\"", "\\\""),
 				showTime,
 				seats);
-				
+
 		String qrBase64 = qrCodeUtils.generateQRCodeImage(qrCode, 300, 300);
 		order.setQrCode(qrCode);
 		orderRepository.save(order);
@@ -141,7 +144,7 @@ public class PaymentService {
 
 		// .e Gửi mail thông báo đặt vé
 		if (order.getUsers() != null) {
-			sendPaymentSuccessMail(order.getUsers(), order, qrCode, qrBase64);
+			sendPaymentSuccessMail(order.getUsers(), order, bookingCode, qrBase64);
 		}
 
 	}
@@ -284,8 +287,67 @@ public class PaymentService {
 		}
 		orderTicketRepository.saveAll(tickets);
 	}
+	@Transactional
+	public String retryMomoPayment(Long orderId) {
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+		if (order.getOrderStatus() != OrderStatus.CANCELLED) {
+			throw new AppException(ErrorCode.ORDER_NOT_FOUND);
+		}
+
+		List<OrderTickets> tickets = orderTicketRepository.findByOrders_OrderId(orderId);
+		for (OrderTickets ticket : tickets) {
+			if (ticket.getSeatShowTime().getSeatShowTimeStatus() != SeatShowTimeStatus.AVAILABLE) {
+				throw new AppException(ErrorCode.SEAT_ALREADY_BOOKED);
+			}
+		}
+
+		List<OrderFoods> orderFoods = orderFoodRepository.findByOrders_OrderId(orderId);
+		for (OrderFoods of : orderFoods) {
+			if (of.getFoods().getStockQuantity() < of.getQuantity()) {
+				throw new AppException(ErrorCode.FOOD_OUT_OF_STOCK);
+			}
+		}
+
+		LocalDateTime expiredTime = LocalDateTime.now().plusMinutes(10);
+
+		for (OrderTickets ticket : tickets) {
+			ticket.setTicketStatus(TicketStatus.RESERVED);
+			SeatShowTime sst = ticket.getSeatShowTime();
+			sst.setSeatShowTimeStatus(SeatShowTimeStatus.RESERVED);
+			sst.setLockedUntil(expiredTime);
+			seatShowTimeRepository.save(sst);
+		}
+		orderTicketRepository.saveAll(tickets);
+
+		for (OrderFoods of : orderFoods) {
+			Foods food = of.getFoods();
+			food.setStockQuantity(food.getStockQuantity() - of.getQuantity());
+			if (food.getStockQuantity() <= 0) food.setFoodStatus(FoodStatus.OUT_OF_STOCK);
+		}
+		foodRepository.saveAll(orderFoods.stream().map(OrderFoods::getFoods).toList());
+
+		if (order.getPromotionCode() != null) {
+			promotionRepository.findByCodeIgnoreCase(order.getPromotionCode())
+					.ifPresent(p -> {
+						if (p.getUseLimit() != null) p.setUseLimit(p.getUseLimit() - 1);
+						promotionRepository.save(p);
+					});
+		}
+
+		order.setOrderStatus(OrderStatus.IN_PROGRESS);
+		order.setExpiredTime(expiredTime);
+		orderRepository.save(order);
+
+		createPendingPayment(orderId, PaymentType.MOMO);
+
+		return momoService.createPaymentUrl(orderId, order.getFinalPrice());
+	}
+
 	private void sendPaymentSuccessMail(Users user, Orders order, String bookingCode, String qrBase64) {
 		String movieName = order.getOrderTickets().stream().findFirst().map(t -> t.getSeatShowTime().getShowTimes().getMovies().getTitle()).orElse("---");
+		String code = bookingCode != null ? bookingCode : "---";
 		String cinemaName = order.getOrderTickets().stream().findFirst().map(t -> t.getSeatShowTime().getShowTimes().getRooms().getCinemas().getName()).orElse("---");
 		String showTime = order.getOrderTickets().stream().findFirst().map(t -> {
 			java.time.LocalDateTime st = t.getSeatShowTime().getShowTimes().getStartTime();
@@ -299,7 +361,7 @@ public class PaymentService {
 				+ "box-shadow: 0 4px 15px rgba(0,0,0,0.1);\">"
 				+ "<div style=\"text-align: center; border-bottom: 2px dashed #eee; padding-bottom: 20px; margin-bottom: 20px;\">"
 				+ "<h2 style=\"color: #007bff; margin: 0;\">Thanh Toán Thành Công 🎉</h2>"
-				+ "<p style=\"color: #666; margin-top: 10px;\">Mã đặt vé: <b>" + bookingCode + "</b></p>"
+				+ "<p style=\"color: #666; margin-top: 10px;\">Mã đặt vé: <b>" + code + "</b></p>"
 				+ "</div>"
 				+ "<p>Xin chào <b>" + user.getFirstname() + " " + user.getLastname() + "</b>,</p>"
 				+ "<p>Cảm ơn bạn đã lựa chọn <b>Infinity Cinema</b>. Dưới đây là thông tin vé của bạn:</p>"
@@ -310,7 +372,7 @@ public class PaymentService {
 				+ "<p style=\"margin: 5px 0;\">🎟 <b>Ghế ngồi:</b> " + seats + "</p>"
 				+ "<p style=\"margin: 5px 0;\">💰 <b>Tổng tiền:</b> " + order.getFinalPrice() + " VND</p>"
 				+ "</div>"
-				+ "<p style=\"text-align: center; margin-top: 30px; font-weight: bold;\">MÃ QR QUÉT VÉ (BOARDING PASS)</p>"
+				+ "<p style=\"text-align: center; margin-top: 30px; font-weight: bold;\">MÃ QR QUÉT VÉ</p>"
 				+ "<div style=\"text-align: center; margin: 10px;\">"
 				+ "<img src=\"cid:qrCodeImage\" alt=\"QR Code\" style=\"width:250px;height:250px; border: 4px solid #f8f9fa; border-radius: 12px;\"/>"
 				+ "</div>"

@@ -1,36 +1,54 @@
 package com.example.movie_ticket_be.payment.controller;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.view.RedirectView;
+
 import com.example.movie_ticket_be.booking.entity.Orders;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
-import com.example.movie_ticket_be.core.config.VNPayConfig;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
+import com.example.movie_ticket_be.payment.config.VnpayConfig;
 import com.example.movie_ticket_be.payment.dto.request.PaymentConfirmRequest;
 import com.example.movie_ticket_be.payment.enums.PaymentType;
+import com.example.movie_ticket_be.payment.service.MomoService;
 import com.example.movie_ticket_be.payment.service.PaymentService;
 import com.example.movie_ticket_be.payment.service.VNPayService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.view.RedirectView;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
-@Slf4j
 @RestController
 @RequestMapping("/payment")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PaymentController {
+
 	PaymentService paymentService;
 	VNPayService vnPayService;
+	VnpayConfig vnpayConfig;
+	MomoService momoService;
 	OrderRepository orderRepository;
+
+	// ===================== VNPAY =====================
 
 	@GetMapping("/create-vnpay-url")
 	public ApiResponse<String> createVnPayUrl(HttpServletRequest request, @RequestParam Long orderId) {
@@ -53,23 +71,23 @@ public class PaymentController {
 				fields.put(fieldName, fieldValue);
 			}
 		}
-		if (fields.containsKey("vnp_SecureHashType")) fields.remove("vnp_SecureHashType");
+		fields.remove("vnp_SecureHashType");
 		String vnp_SecureHash = request.getParameter("vnp_SecureHash");
-		if (fields.containsKey("vnp_SecureHash")) fields.remove("vnp_SecureHash");
+		fields.remove("vnp_SecureHash");
 
-		String signValue = VNPayConfig.hmacSHA512(VNPayConfig.secretKey, hashAllFields(fields));
+		String signValue = VnpayConfig.hmacSHA512(vnpayConfig.getSecretKey(), hashAllFields(fields));
 
 		if (signValue.equals(vnp_SecureHash)) {
 			if ("00".equals(status)) {
 				PaymentConfirmRequest confirmReq = new PaymentConfirmRequest();
-				confirmReq.setOrderId(Long.parseLong(txnRef));
+				confirmReq.setOrderId(Long.valueOf(txnRef));
 				confirmReq.setTransactionId(request.getParameter("vnp_TransactionNo"));
 				confirmReq.setPaymentInfo(request.getParameter("vnp_OrderInfo"));
 				confirmReq.setPaymentType(PaymentType.VNPAY);
 				paymentService.processSuccess(confirmReq);
 				return new RedirectView("http://localhost:3000/payment-success/" + txnRef);
 			} else {
-				Orders order = orderRepository.findByOrderId(Long.parseLong(txnRef)).orElse(null);
+				Orders order = orderRepository.findByOrderId(Long.valueOf(txnRef)).orElse(null);
 				if (order != null) paymentService.processFail(order);
 				return new RedirectView(
 						"http://localhost:3000/payment-fail/" + txnRef + "?vnp_ResponseCode=" + status);
@@ -78,6 +96,81 @@ public class PaymentController {
 			return new RedirectView("http://localhost:3000/payment-error");
 		}
 	}
+
+	// ===================== MOMO =====================
+
+	@GetMapping("/create-momo-url")
+	public ApiResponse<String> createMomoUrl(@RequestParam Long orderId) {
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		String paymentUrl = momoService.createPaymentUrl(order.getOrderId(), order.getFinalPrice());
+		return ApiResponse.<String>builder().message("Tạo URL thanh toán MoMo thành công").result(paymentUrl).build();
+	}
+
+	// MoMo redirect user về sau khi thanh toán (giống vnpay-callback)
+	@GetMapping("/momo/callback")
+	public RedirectView momoCallback(HttpServletRequest request) {
+		Map<String, String> params = new HashMap<>();
+		for (Enumeration<String> names = request.getParameterNames(); names.hasMoreElements();) {
+			String name = names.nextElement();
+			params.put(name, request.getParameter(name));
+		}
+
+		if (!momoService.verifyCallback(params)) {
+			return new RedirectView("http://localhost:3000/payment-error");
+		}
+
+		String orderId = params.get("orderId");
+		String resultCode = params.get("resultCode");
+
+		if ("0".equals(resultCode)) {
+			PaymentConfirmRequest confirmReq = new PaymentConfirmRequest();
+			confirmReq.setOrderId(Long.valueOf(orderId));
+			confirmReq.setTransactionId(params.get("transId"));
+			confirmReq.setPaymentInfo(params.get("orderInfo"));
+			confirmReq.setPaymentType(PaymentType.MOMO);
+			paymentService.processSuccess(confirmReq);
+			return new RedirectView("http://localhost:3000/payment-success/" + orderId);
+		} else {
+			Orders order = orderRepository.findByOrderId(Long.valueOf(orderId)).orElse(null);
+			if (order != null) paymentService.processFail(order);
+			return new RedirectView(
+					"http://localhost:3000/payment-fail/" + orderId + "?resultCode=" + resultCode);
+		}
+	}
+
+	// MoMo IPN — server-to-server, xử lý dự phòng nếu user đóng tab trước khi redirect
+	@PostMapping("/momo/ipn")
+	public ResponseEntity<Map<String, Object>> momoIpn(@RequestBody Map<String, String> params) {
+		if (!momoService.verifyCallback(params)) {
+			return ResponseEntity.ok(Map.of("resultCode", 1, "message", "Invalid signature"));
+		}
+
+		String orderId = params.get("orderId");
+		String resultCode = params.get("resultCode");
+
+		if ("0".equals(resultCode)) {
+			PaymentConfirmRequest confirmReq = new PaymentConfirmRequest();
+			confirmReq.setOrderId(Long.valueOf(orderId));
+			confirmReq.setTransactionId(params.get("transId"));
+			confirmReq.setPaymentInfo(params.get("orderInfo"));
+			confirmReq.setPaymentType(PaymentType.MOMO);
+			paymentService.processSuccess(confirmReq);
+		} else {
+			Orders order = orderRepository.findByOrderId(Long.valueOf(orderId)).orElse(null);
+			if (order != null) paymentService.processFail(order);
+		}
+
+		return ResponseEntity.ok(Map.of("resultCode", 0, "message", "OK"));
+	}
+
+	@PostMapping("/momo/retry")
+	public ApiResponse<String> retryMomoPayment(@RequestParam Long orderId) {
+		String payUrl = paymentService.retryMomoPayment(orderId);
+		return ApiResponse.<String>builder().result(payUrl).build();
+	}
+
+	// ===================== HELPER =====================
 
 	private String hashAllFields(Map<String, String> fields) {
 		List<String> fieldNames = new ArrayList<>(fields.keySet());
@@ -88,12 +181,8 @@ public class PaymentController {
 			String fieldName = itr.next();
 			String fieldValue = fields.get(fieldName);
 			if ((fieldValue != null) && (fieldValue.length() > 0)) {
-				sb.append(fieldName).append("=");
-				try {
-					sb.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
-				} catch (Exception e) {
-					log.error("Error encoding field {}", fieldName, e);
-				}
+				sb.append(fieldName).append("=")
+				  .append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
 				if (itr.hasNext()) sb.append("&");
 			}
 		}

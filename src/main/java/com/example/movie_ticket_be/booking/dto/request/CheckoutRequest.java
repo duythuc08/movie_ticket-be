@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.booking.dto.request;
 
+import com.example.movie_ticket_be.payment.enums.PaymentType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CheckoutRequest {
 	String promotionCode;
+	PaymentType paymentType;
 }
