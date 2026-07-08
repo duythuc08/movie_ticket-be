@@ -93,7 +93,9 @@ public class UserPromotionService {
 
 	public List<UserVoucherResponse> getMyVouchers() {
 		String userId = getCurrentUserId();
+		LocalDateTime now = LocalDateTime.now();
 		return userPromotionRepository.findByUsers_UserIdAndIsUsedFalse(userId).stream()
+				.filter(up -> !now.isAfter(up.getPromotion().getEndTime()))
 				.map(up -> toVoucherResponse(up, null)).collect(Collectors.toList());
 	}
 
@@ -103,6 +105,7 @@ public class UserPromotionService {
 		DayOfWeek today = DayOfWeek.values()[now.getDayOfWeek().ordinal()];
 
 		return userPromotionRepository.findByUsers_UserIdAndIsUsedFalse(userId).stream()
+				.filter(up -> !now.isAfter(up.getPromotion().getEndTime()))
 				.map(up -> toVoucherResponse(up, checkEligible(up.getPromotion(), movieId, totalAmount, now, today)))
 				.collect(Collectors.toList());
 	}

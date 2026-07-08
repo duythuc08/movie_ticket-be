@@ -21,9 +21,14 @@ public class WeeklyRecommendationEmailService {
     public Map<String, Integer> sendToAllUsers(List<Users> users) {
         int success = 0, skip = 0, fail = 0;
         for (Users user : users) {
+            String username = user.getUsername();
+            if (username != null && username.startsWith("cf_user")) {
+                skip++;
+                continue;
+            }
             try {
-                sendTo(user);
-                success++;
+                if (sendTo(user)) success++;
+                else              skip++;
             } catch (Exception e) {
                 log.warn("[WeeklyEmail] Gửi thất bại cho userId={}: {}", user.getUserId(), e.getMessage());
                 fail++;
@@ -33,18 +38,19 @@ public class WeeklyRecommendationEmailService {
         return Map.of("success", success, "skip", skip, "fail", fail);
     }
 
-    public void sendTo(Users user) {
+    public boolean sendTo(Users user) {
         List<RecommendationItemResponse> movies =
                 recommendationService.getRecommendationsForUser(user.getUserId());
 
         if (movies.isEmpty()) {
             log.debug("[WeeklyEmail] userId={} không có gợi ý, bỏ qua", user.getUserId());
-            return;
+            return false;
         }
 
         String html = buildHtml(user, movies);
         emailService.sendEmail(user.getUsername(), "🎬 Phim gợi ý cho bạn tuần này", html);
         log.info("[WeeklyEmail] Đã gửi mail cho userId={} ({} phim)", user.getUserId(), movies.size());
+        return true;
     }
 
     private String buildHtml(Users user, List<RecommendationItemResponse> movies) {
@@ -52,7 +58,10 @@ public class WeeklyRecommendationEmailService {
 
         StringBuilder movieCards = new StringBuilder();
         for (RecommendationItemResponse m : movies) {
-            String stars = buildStars(m.getAverageRating() != null ? m.getAverageRating() : 0.0);
+            Double rawRating = m.getAverageRating();
+            double avgRating = 0.0;
+            if (rawRating != null) avgRating = rawRating;
+            String stars = buildStars(avgRating);
             String duration = m.getDuration() != null ? m.getDuration() + " phút" : "";
             movieCards.append("""
                     <tr>
