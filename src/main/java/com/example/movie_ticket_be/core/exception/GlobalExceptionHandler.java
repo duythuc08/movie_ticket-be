@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
 		ApiResponse apiRespone = new ApiResponse();
 		apiRespone.setCode(errorCode.getCode());
 		apiRespone.setMessage(errorCode.getMessage());
-		return ResponseEntity.badRequest().body(apiRespone);
+		return ResponseEntity.status(errorCode.getStatusCode()).body(apiRespone);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,6 +35,7 @@ public class PopularityService {
      * tính Score_Popularity = alpha*Norm_Rating + (1-alpha)*Norm_Tickets,
      * trả top-N theo config.
      */
+    @Transactional(readOnly = true)
     public List<RecommendationItemResponse> getTopMoviesForUser(String userId) {
         List<Long> candidateIds = candidateMovieRepository.findCandidateMovieIds(userId);
         if (candidateIds.isEmpty()) {
@@ -68,13 +70,13 @@ public class PopularityService {
                 .map(e -> e.getKey())
                 .toList();
 
-        List<Movies> movies = new ArrayList<>(candidateMovieRepository.findAllById(topIds));
+        List<Movies> movies = new ArrayList<>(candidateMovieRepository.findAllByIdWithGenres(topIds));
         Map<Long, Movies> movieMap = new HashMap<>();
         movies.forEach(m -> movieMap.put(m.getMovieId(), m));
 
         return topIds.stream()
                 .filter(movieMap::containsKey)
-                .map(id -> {
+                .<RecommendationItemResponse>map(id -> {
                     Movies m = movieMap.get(id);
                     return RecommendationItemResponse.builder()
                             .movieId(m.getMovieId())
@@ -82,6 +84,8 @@ public class PopularityService {
                             .posterUrl(m.getPosterUrl())
                             .description(m.getDescription())
                             .duration(m.getDuration())
+                            .genres(m.getGenre() == null ? List.of() :
+                                    m.getGenre().stream().map(g -> g.getName()).sorted().toList())
                             .predictedScore(BigDecimal.valueOf(scores.get(id)))
                             .neighborCount(0)
                             .averageRating(ratingMap.getOrDefault(id, 0.0))

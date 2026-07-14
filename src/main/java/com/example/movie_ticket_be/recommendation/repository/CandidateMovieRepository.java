@@ -36,4 +36,7 @@ public interface CandidateMovieRepository extends JpaRepository<Movies, Long> {
               )
             """, nativeQuery = true)
     List<Long> findCandidateMovieIds(@Param("userId") String userId);
+
+    @Query("SELECT m FROM Movies m LEFT JOIN FETCH m.genre WHERE m.movieId IN :ids")
+    List<Movies> findAllByIdWithGenres(@Param("ids") List<Long> ids);
 }

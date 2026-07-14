@@ -40,7 +40,8 @@ public interface UserPreferenceRepository extends JpaRepository<UserPreference, 
      */
     @Query("""
             SELECT p FROM UserPreference p
-            JOIN FETCH p.movie
+            JOIN FETCH p.movie m
+            LEFT JOIN FETCH m.genre
             WHERE p.preferenceId.userId = :userId
               AND p.source IS NOT NULL
               AND NOT EXISTS (

@@ -29,6 +29,9 @@ public interface OrderTicketRepository extends JpaRepository<OrderTickets, Long>
 	@Query(value = "DELETE FROM order_ticket WHERE order_id = :orderId", nativeQuery = true)
 	void deleteByOrderIdNative(@Param("orderId") Long orderId);
 
+	@Query("SELECT COUNT(ot) FROM OrderTickets ot WHERE ot.seatShowTime.seats.rooms.roomId = :roomId")
+	long countByRoomId(@Param("roomId") Long roomId);
+
 	@Query("SELECT COUNT(ot) FROM OrderTickets ot " +
 			"WHERE ot.orders.users = :user " +
 			"AND ot.seatShowTime.showTimes.movies = :movie " +

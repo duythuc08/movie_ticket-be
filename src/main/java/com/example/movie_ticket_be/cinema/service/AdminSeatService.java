@@ -24,11 +24,14 @@ import com.example.movie_ticket_be.showtime.dto.response.ShowTimeResponse;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.cinema.dto.request.AdminSeatStatusUpdateRequest;
 import java.time.LocalDateTime;
+import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
 import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.cinema.repository.SeatRepository;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
+import com.example.movie_ticket_be.showtime.enums.ShowTimeStatus;
+import com.example.movie_ticket_be.showtime.repository.ShowTimeRepository;
 
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +48,8 @@ public class AdminSeatService {
 	SeatMapper seatMapper;
 	SeatShowTimeRepository seatShowTimeRepository;
 	ShowTimeMapper showTimeMapper;
+	ShowTimeRepository showTimeRepository;
+	OrderTicketRepository orderTicketRepository;
 
 	public List<SeatResponse> getSeatsByRoom(Long roomId) {
 		return seatRepository.findByRooms_RoomId(roomId).stream().map(seatMapper::toSeatResponse).toList();
@@ -95,11 +100,29 @@ public class AdminSeatService {
 	public List<SeatResponse> setUpSeatsForRoom(Long roomId, SeatSetupRequest request) {
 		Rooms room = roomRepository.findByRoomId(roomId).orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
 
-		seatRepository.deleteAllByRoomId(roomId);
-
 		int totalRows = request.getRows();
 		int totalCols = request.getCols();
 		SeatType[][] seatTypes = request.getSeatTypes();
+
+		if (totalRows <= 0 || totalCols <= 0 || seatTypes == null
+				|| seatTypes.length != totalRows
+				|| (totalRows > 0 && seatTypes[0].length != totalCols)) {
+			throw new AppException(ErrorCode.INVALID_SEAT_SETUP_REQUEST);
+		}
+
+		boolean hasFutureShowTimes = showTimeRepository.existsByRooms_RoomIdAndShowTimeStatusIn(
+				roomId,
+				List.of(ShowTimeStatus.SCHEDULED, ShowTimeStatus.ONGOING, ShowTimeStatus.FULLY_BOOKED));
+		if (hasFutureShowTimes) {
+			throw new AppException(ErrorCode.ROOM_HAS_ACTIVE_SHOWTIME);
+		}
+
+		if (orderTicketRepository.countByRoomId(roomId) > 0) {
+			throw new AppException(ErrorCode.ROOM_HAS_SOLD_TICKETS);
+		}
+
+		seatShowTimeRepository.deleteAllByRoomId(roomId);
+		seatRepository.deleteAllByRoomId(roomId);
 
 		double idealRow = (totalRows - 1) * 0.6;
 		double centerCol = (totalCols - 1) / 2.0;
@@ -130,7 +153,12 @@ public class AdminSeatService {
 			}
 		}
 
-		return seatRepository.saveAll(seats).stream().map(seatMapper::toSeatResponse).toList();
+		List<Seats> saved = seatRepository.saveAll(seats);
+
+		room.setCapacity(saved.size());
+		roomRepository.save(room);
+
+		return saved.stream().map(seatMapper::toSeatResponse).toList();
 	}
 
 	@Transactional

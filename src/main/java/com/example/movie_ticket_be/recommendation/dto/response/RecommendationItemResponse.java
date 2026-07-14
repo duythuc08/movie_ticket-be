@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -14,11 +15,12 @@ public class RecommendationItemResponse {
     Long movieId;
     String title;
     String posterUrl;
-    String description; // For synopsis
-    Integer duration;   // For durationText
+    String description;
+    Integer duration;
+    List<String> genres;
 
     BigDecimal predictedScore;
     Integer neighborCount;
     Double averageRating;
-    String source;  // "cf" hoặc "cold_start_popularity"
+    String source;
 }

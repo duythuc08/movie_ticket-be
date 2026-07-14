@@ -48,6 +48,10 @@ public enum ErrorCode {
 			1009,
 			"Unauthenticated",
 			HttpStatus.UNAUTHORIZED),
+	INVALID_CREDENTIALS(
+			1089,
+			"Invalid username or password",
+			HttpStatus.BAD_REQUEST),
 	OTP_NOT_VERIFIED(
 			1013,
 			"OTP is not verified",
@@ -250,7 +254,7 @@ public enum ErrorCode {
 			HttpStatus.BAD_REQUEST),
 	ROOM_HAS_ACTIVE_SHOWTIME(
 			1063,
-			"Room has active showtimes, cannot change room type",
+			"Room has active showtimes, cannot change room",
 			HttpStatus.BAD_REQUEST),
 	SEATS_ALREADY_EXIST_FOR_ROOM(
 			1064,
@@ -351,6 +355,14 @@ public enum ErrorCode {
 	ORDER_NOT_PENDING(
 			1088,
 			"Order is not in PENDING status",
+			HttpStatus.BAD_REQUEST),
+	ROOM_HAS_SOLD_TICKETS(
+			1091,
+			"Room has sold tickets, cannot reset seats",
+			HttpStatus.BAD_REQUEST),
+	INVALID_SEAT_SETUP_REQUEST(
+			1092,
+			"Seat setup request is invalid: rows/cols must be positive and seatTypes size must match",
 			HttpStatus.BAD_REQUEST);
 
 	// Constructor để gán giá trị cho từng phần tử enum

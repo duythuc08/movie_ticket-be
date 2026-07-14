@@ -66,6 +66,14 @@ public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long
 
 	boolean existsBySeatShowTimeId(Long seatShowTimeId);
 
+	@Query("SELECT COUNT(ss) FROM SeatShowTime ss WHERE ss.seats.rooms.roomId = :roomId AND ss.seatShowTimeStatus = 'SOLD'")
+	long countSoldByRoomId(@Param("roomId") Long roomId);
+
+	@Modifying
+	@Transactional
+	@Query("DELETE FROM SeatShowTime ss WHERE ss.seats.rooms.roomId = :roomId")
+	void deleteAllByRoomId(@Param("roomId") Long roomId);
+
 	boolean existsByShowTimes_ShowTimeIdAndSeatShowTimeStatusIn(Long showTimeId,
 			Collection<SeatShowTimeStatus> statuses);
 

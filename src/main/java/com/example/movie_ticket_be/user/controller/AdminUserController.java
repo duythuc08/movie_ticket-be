@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
+import com.example.movie_ticket_be.recommendation.dto.response.AdminUserRecommendationResponse;
+import com.example.movie_ticket_be.recommendation.service.AdminRecommendationService;
 import com.example.movie_ticket_be.user.dto.request.UserUpdateRequest;
 import com.example.movie_ticket_be.user.dto.request.UsersCreationRequest;
 import com.example.movie_ticket_be.user.dto.response.LoyaltyPointsHistoryResponse;
@@ -40,6 +42,7 @@ import lombok.experimental.FieldDefaults;
 public class AdminUserController {
 	AdminUserService adminUserService;
 	AdminLoyaltyPointsHistoryService adminLoyaltyPointsHistoryService;
+	AdminRecommendationService adminRecommendationService;
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
@@ -102,5 +105,13 @@ public class AdminUserController {
 	public ApiResponse<Void> banUser(@PathVariable String userId) {
 		adminUserService.banUser(userId);
 		return ApiResponse.<Void>builder().message("Người dùng đã bị cấm").build();
+	}
+
+	@GetMapping("/{userId}/recommendations")
+	@PreAuthorize("hasRole('ADMIN')")
+	public ApiResponse<AdminUserRecommendationResponse> getUserRecommendations(@PathVariable String userId) {
+		return ApiResponse.<AdminUserRecommendationResponse>builder()
+				.result(adminRecommendationService.getRecommendationsForAdmin(userId))
+				.build();
 	}
 }

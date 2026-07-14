@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.recommendation.repository;
 
 import com.example.movie_ticket_be.recommendation.entity.UserActivityLog;
+import com.example.movie_ticket_be.recommendation.repository.projection.GenreProfileRow;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -69,4 +70,18 @@ public interface UserActivityLogRepository
         GROUP BY movie_id
         """, nativeQuery = true)
     List<Object[]> findBookTicketCountByMovieIds(@Param("movieIds") List<Long> movieIds);
+
+    @Query(value = """
+        SELECT g.name AS genreName,
+               COUNT(*) AS likedCount,
+               ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY r.user_id), 1) AS weightPct
+        FROM review r
+        JOIN movie_genres mg ON r.movie_id = mg.movie_id
+        JOIN genre g ON mg.genre_id = g.genre_id
+        WHERE r.user_id = :userId AND r.rating >= 3.5
+        GROUP BY g.genre_id, g.name
+        ORDER BY likedCount DESC
+        LIMIT 5
+        """, nativeQuery = true)
+    List<GenreProfileRow> getUserGenreProfile(@Param("userId") String userId);
 }
