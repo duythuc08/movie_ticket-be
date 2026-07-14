@@ -163,6 +163,7 @@ public class AdminSeatService {
 
 	@Transactional
 	public List<SeatResponse> updateSeatTypes(Long roomId, List<AdminSeatUpdate> requests) {
+		roomRepository.findByRoomId(roomId).orElseThrow(() -> new AppException(ErrorCode.ROOM_NOT_FOUND));
 		List<Seats> seats = new ArrayList<>();
 		for (AdminSeatUpdate r : requests) {
 			Seats seat = seatRepository

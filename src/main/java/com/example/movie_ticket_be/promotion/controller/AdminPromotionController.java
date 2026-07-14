@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.promotion.controller;
 
+import jakarta.validation.Valid;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.promotion.dto.request.PromotionRequest;
 import com.example.movie_ticket_be.promotion.dto.response.AdminPromotionResponse;
@@ -29,7 +30,7 @@ public class AdminPromotionController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<AdminPromotionResponse> createPromotion(@RequestBody PromotionRequest request) {
+	public ApiResponse<AdminPromotionResponse> createPromotion(@Valid @RequestBody PromotionRequest request) {
 		return ApiResponse.<AdminPromotionResponse>builder().result(adminPromotionService.createPromotion(request))
 				.message("Tạo khuyến mãi thành công").build();
 	}
@@ -52,7 +53,7 @@ public class AdminPromotionController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ApiResponse<AdminPromotionResponse> updatePromotion(@PathVariable Long id,
-			@RequestBody PromotionRequest request) {
+			@Valid @RequestBody PromotionRequest request) {
 		return ApiResponse.<AdminPromotionResponse>builder().result(adminPromotionService.updatePromotion(id, request))
 				.message("Cập nhật khuyến mãi thành công").build();
 	}

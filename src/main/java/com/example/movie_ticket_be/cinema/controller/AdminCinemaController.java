@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.cinema.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,7 +44,7 @@ public class AdminCinemaController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<CinemaResponse> createCinema(@RequestBody CinemaRequest request) {
+	public ApiResponse<CinemaResponse> createCinema(@Valid @RequestBody CinemaRequest request) {
 		return ApiResponse.<CinemaResponse>builder().result(adminCinemaService.createCinema(request))
 				.message("Thêm rạp chiếu thành công").build();
 	}
@@ -80,7 +81,7 @@ public class AdminCinemaController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ApiResponse<AdminCinemaResponse> updateCinema(@PathVariable long id,
-			@RequestBody AdminCinemaUpdateRequest request) {
+			@Valid @RequestBody AdminCinemaUpdateRequest request) {
 		return ApiResponse.<AdminCinemaResponse>builder().result(adminCinemaService.updateCinema(id, request))
 				.message("Cập nhật rạp chiếu thành công").build();
 	}

@@ -45,6 +45,10 @@ public class AdminMembershipTierService {
 
 	public MembershipTierResponse updateTier(Long id, MembershipTierRequest request) {
 		MembershipTier tier = findById(id);
+		if (!tier.getName().equals(request.getName())
+				&& membershipTierRepository.findByName(request.getName()).isPresent()) {
+			throw new AppException(ErrorCode.MEMBERSHIP_TIER_EXISTED);
+		}
 		tier.setName(request.getName());
 		tier.setDescription(request.getDescription());
 		tier.setPointsRequired(request.getPointsRequired());

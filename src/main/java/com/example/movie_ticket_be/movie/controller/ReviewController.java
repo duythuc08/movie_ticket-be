@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.movie.dto.request.ReviewRequest;
 import com.example.movie_ticket_be.movie.dto.response.MovieReviewPageResponse;
@@ -35,7 +36,7 @@ public class ReviewController {
     ReviewInteractionService reviewInteractionService;
 
     @PostMapping
-    public ApiResponse<ReviewResponse> createReview(@RequestBody ReviewRequest request) {
+    public ApiResponse<ReviewResponse> createReview(@Valid @RequestBody ReviewRequest request) {
         return ApiResponse.<ReviewResponse>builder()
                 .result(reviewService.createReview(request))
                 .build();

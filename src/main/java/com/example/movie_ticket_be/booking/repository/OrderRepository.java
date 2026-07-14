@@ -34,6 +34,10 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
 			"orderFoods.foods"})
 	List<Orders> findByUsers_UserIdAndOrderStatus(String usersUserId, OrderStatus orderStatus);
 
+	boolean existsByOrderIdAndUsers_Username(Long orderId, String username);
+
+	boolean existsByUsers_UserIdAndUsers_Username(String userId, String username);
+
 	List<Orders> findAllByOrderStatusAndExpiredTimeBefore(OrderStatus orderStatus, LocalDateTime expiredTimeBefore);
 
 	/** Load order không kèm EntityGraph — dùng trong releaseBooking để tránh eager-load orderTickets */

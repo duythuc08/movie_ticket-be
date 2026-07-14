@@ -2,6 +2,7 @@ package com.example.movie_ticket_be.cinema.controller;
 
 import java.util.List;
 
+import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,7 +41,7 @@ public class AdminFoodController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<FoodResponse> createFood(@RequestParam Long cinemaId, @RequestBody FoodRequest request) {
+	public ApiResponse<FoodResponse> createFood(@RequestParam Long cinemaId, @Valid @RequestBody FoodRequest request) {
 		return ApiResponse.<FoodResponse>builder().result(adminFoodService.createFood(cinemaId, request))
 				.message("Thêm food thành công").build();
 	}
@@ -64,7 +65,7 @@ public class AdminFoodController {
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<FoodResponse> updateFood(@PathVariable long id, @RequestBody FoodRequest request) {
+	public ApiResponse<FoodResponse> updateFood(@PathVariable long id, @Valid @RequestBody FoodRequest request) {
 		return ApiResponse.<FoodResponse>builder().result(adminFoodService.updateFood(id, request))
 				.message("Cập nhật food thành công").build();
 	}

@@ -14,6 +14,14 @@ public interface CinemaRepository extends JpaRepository<Cinemas, Long>, JpaSpeci
 
 	boolean existsByNameAndCinemaIdNot(String name, Long cinemaId);
 
+	boolean existsByPhoneNumber(String phoneNumber);
+
+	boolean existsByPhoneNumberAndCinemaIdNot(String phoneNumber, Long cinemaId);
+
+	boolean existsByEmail(String email);
+
+	boolean existsByEmailAndCinemaIdNot(String email, Long cinemaId);
+
 	List<Cinemas> findByCinemaStatus(CinemaStatus status);
 
 	Optional<Cinemas> findByCinemaId(Long cinemaId);

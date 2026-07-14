@@ -42,6 +42,12 @@ public class AdminCinemaService {
 		if (cinemaRepository.existsByName(request.getName())) {
 			throw new AppException(ErrorCode.CINEMA_EXISTED);
 		}
+		if (request.getPhoneNumber() != null && cinemaRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+			throw new AppException(ErrorCode.CINEMA_PHONE_EXISTED);
+		}
+		if (request.getEmail() != null && cinemaRepository.existsByEmail(request.getEmail())) {
+			throw new AppException(ErrorCode.CINEMA_EMAIL_EXISTED);
+		}
 		Cinemas cinemas = cinemaMapper.toCinemas(request);
 		return cinemaMapper.toCinemasResponse(cinemaRepository.save(cinemas));
 	}
@@ -75,6 +81,14 @@ public class AdminCinemaService {
 		if (!cinema.getName().equals(request.getName())
 				&& cinemaRepository.existsByNameAndCinemaIdNot(request.getName(), cinemaId)) {
 			throw new AppException(ErrorCode.CINEMA_EXISTED);
+		}
+		if (request.getPhoneNumber() != null
+				&& cinemaRepository.existsByPhoneNumberAndCinemaIdNot(request.getPhoneNumber(), cinemaId)) {
+			throw new AppException(ErrorCode.CINEMA_PHONE_EXISTED);
+		}
+		if (request.getEmail() != null
+				&& cinemaRepository.existsByEmailAndCinemaIdNot(request.getEmail(), cinemaId)) {
+			throw new AppException(ErrorCode.CINEMA_EMAIL_EXISTED);
 		}
 
 		cinemaMapper.updateCinema(request, cinema);

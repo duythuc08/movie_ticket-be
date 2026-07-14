@@ -2,6 +2,8 @@ package com.example.movie_ticket_be.cinema.dto.request;
 
 import com.example.movie_ticket_be.cinema.enums.RoomStatus;
 import com.example.movie_ticket_be.cinema.enums.RoomType;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -12,7 +14,9 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AdminRoomRequest {
 	Long roomId;
+	@NotBlank
 	String name;
+	@Min(1)
 	Integer capacity;
 	RoomType roomType;
 	RoomStatus roomStatus;

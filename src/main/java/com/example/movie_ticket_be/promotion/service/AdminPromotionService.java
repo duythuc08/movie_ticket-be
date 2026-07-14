@@ -8,6 +8,7 @@ import com.example.movie_ticket_be.promotion.dto.request.PromotionRequest;
 import com.example.movie_ticket_be.promotion.dto.response.AdminPromotionResponse;
 import com.example.movie_ticket_be.promotion.entity.Promotion;
 import com.example.movie_ticket_be.promotion.enums.PromotionStatus;
+import com.example.movie_ticket_be.promotion.enums.PromotionType;
 import com.example.movie_ticket_be.promotion.mapper.PromotionMapper;
 import com.example.movie_ticket_be.promotion.repository.PromotionRepository;
 import lombok.AccessLevel;
@@ -19,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,9 +35,11 @@ public class AdminPromotionService {
 	MovieRepository movieRepository;
 
 	public AdminPromotionResponse createPromotion(PromotionRequest request) {
-		if (promotionRepository.existsByCode(request.getCode())) {
+		validatePromotionRequest(request);
+		if (promotionRepository.existsByCode(request.getCode().toUpperCase())) {
 			throw new AppException(ErrorCode.PROMOTION_EXISTED);
 		}
+		request.setCode(request.getCode().toUpperCase());
 		Promotion promotion = promotionMapper.toPromotion(request);
 		promotion.setStatus(PromotionStatus.DRAFT);
 		promotion.setUsedCount(0);
@@ -52,9 +56,13 @@ public class AdminPromotionService {
 	}
 
 	public AdminPromotionResponse updatePromotion(Long id, PromotionRequest request) {
+		validatePromotionRequest(request);
 		Promotion promotion = findById(id);
 		if (promotion.getStatus() != PromotionStatus.DRAFT) {
 			throw new AppException(ErrorCode.PROMOTION_STATUS_INVALID);
+		}
+		if (request.getCode() != null) {
+			request.setCode(request.getCode().toUpperCase());
 		}
 		promotionMapper.updatePromotion(promotion, request);
 		promotion.setApplicableMovies(resolveMovies(request.getApplicableMovieIds()));
@@ -91,6 +99,18 @@ public class AdminPromotionService {
 	private Promotion findById(Long id) {
 		return promotionRepository.findByPromotionId(id)
 				.orElseThrow(() -> new AppException(ErrorCode.PROMOTION_NOT_FOUND));
+	}
+
+	private void validatePromotionRequest(PromotionRequest request) {
+		if (request.getStartTime() != null && request.getEndTime() != null
+				&& !request.getEndTime().isAfter(request.getStartTime())) {
+			throw new AppException(ErrorCode.PROMOTION_TIME_INVALID);
+		}
+		if (request.getType() == PromotionType.PERCENTAGE
+				&& request.getDiscountValue() != null
+				&& request.getDiscountValue().compareTo(BigDecimal.valueOf(100)) > 0) {
+			throw new AppException(ErrorCode.PROMOTION_DISCOUNT_INVALID);
+		}
 	}
 
 	private Set<Movies> resolveMovies(Set<Long> movieIds) {

@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.showtime.controller;
 
+import jakarta.validation.Valid;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.showtime.dto.request.ShowTimeRequest;
 import com.example.movie_ticket_be.showtime.dto.request.UpdateShowTimeRequest;
@@ -30,7 +31,7 @@ public class AdminShowTimeController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<List<ShowTimeResponse>> createShowTimes(@RequestBody ShowTimeRequest request) {
+	public ApiResponse<List<ShowTimeResponse>> createShowTimes(@Valid @RequestBody ShowTimeRequest request) {
 		return ApiResponse.<List<ShowTimeResponse>>builder().result(adminShowTimeService.createShowTimes(request))
 				.message("Thêm suất chiếu mới thành công").build();
 	}

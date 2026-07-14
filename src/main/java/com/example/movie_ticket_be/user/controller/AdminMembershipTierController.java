@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.user.controller;
 
+import jakarta.validation.Valid;
 import com.example.movie_ticket_be.core.dto.ApiResponse;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.user.dto.request.MembershipTierRequest;
@@ -23,7 +24,7 @@ public class AdminMembershipTierController {
 
 	@PostMapping
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<MembershipTierResponse> createTier(@RequestBody MembershipTierRequest request) {
+	public ApiResponse<MembershipTierResponse> createTier(@Valid @RequestBody MembershipTierRequest request) {
 		return ApiResponse.<MembershipTierResponse>builder().result(adminMembershipTierService.createTier(request))
 				.message("Tạo hạng thành viên thành công").build();
 	}
@@ -44,7 +45,7 @@ public class AdminMembershipTierController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ApiResponse<MembershipTierResponse> updateTier(@PathVariable Long id,
-			@RequestBody MembershipTierRequest request) {
+			@Valid @RequestBody MembershipTierRequest request) {
 		return ApiResponse.<MembershipTierResponse>builder().result(adminMembershipTierService.updateTier(id, request))
 				.message("Cập nhật hạng thành viên thành công").build();
 	}

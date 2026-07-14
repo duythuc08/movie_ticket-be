@@ -145,6 +145,9 @@ public class AdminShowTimeService {
 			showTime.setRooms(room);
 		}
 		if (request.getStartTime() != null) {
+			if (request.getStartTime().isBefore(LocalDateTime.now())) {
+				throw new AppException(ErrorCode.SHOWTIME_IN_PAST);
+			}
 			int totalMinutes = showTime.getMovies().getDuration() + BUFFER_MINUTES;
 			showTime.setStartTime(request.getStartTime());
 			showTime.setEndTime(roundUpToNearest5(request.getStartTime().plusMinutes(totalMinutes)));

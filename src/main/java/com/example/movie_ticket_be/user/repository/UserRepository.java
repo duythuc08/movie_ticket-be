@@ -11,6 +11,8 @@ import com.example.movie_ticket_be.user.entity.Users;
 
 public interface UserRepository extends JpaRepository<Users, String>, JpaSpecificationExecutor<Users> {
 	boolean existsByUsername(String username);
+
+	boolean existsByPhoneNumber(String phoneNumber);
 	Optional<Users> findByUsername(String username);
 	List<Users> findAllByEnabledFalseAndCreatedAtBefore(LocalDateTime time);
 	List<Users> findAllByEnabledTrue();

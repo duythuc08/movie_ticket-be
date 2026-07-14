@@ -1,9 +1,11 @@
 package com.example.movie_ticket_be.cinema.dto.request;
 
 import com.example.movie_ticket_be.cinema.enums.CinemaStatus;
-import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -13,11 +15,14 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CinemaRequest {
+	@NotBlank
 	String name;
+	@NotBlank
 	String address;
-	@Column(unique = true)
+	@NotBlank
+	@Pattern(regexp = "^(0[3|5|7|8|9])[0-9]{8}$", message = "Số điện thoại không đúng định dạng Việt Nam")
 	String phoneNumber;
-	@Column(unique = true)
+	@Email
 	String email;
 
 	@Enumerated(EnumType.STRING)

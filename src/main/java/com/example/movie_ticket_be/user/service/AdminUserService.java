@@ -42,6 +42,10 @@ public class AdminUserService {
 		if (userRepository.existsByUsername(request.getUsername())) {
 			throw new AppException(ErrorCode.EMAIL_EXISTED);
 		}
+		if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()
+				&& userRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+			throw new AppException(ErrorCode.USER_PHONE_EXISTED);
+		}
 		Role role = roleRepository.save(Role.builder().name(Roles.USER.name()).build());
 		var roles = new HashSet<Role>();
 		roles.add(role);

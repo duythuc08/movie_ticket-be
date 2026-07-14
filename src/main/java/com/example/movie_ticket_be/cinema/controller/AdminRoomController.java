@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import com.example.movie_ticket_be.cinema.dto.request.AdminRoomRequest;
 import com.example.movie_ticket_be.cinema.dto.request.AdminSeatUpdate;
 import com.example.movie_ticket_be.cinema.dto.request.RoomRequest;
@@ -66,14 +67,14 @@ public class AdminRoomController {
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<RoomResponse> updateRoom(@PathVariable long id, @RequestBody AdminRoomRequest request) {
+	public ApiResponse<RoomResponse> updateRoom(@PathVariable long id, @Valid @RequestBody AdminRoomRequest request) {
 		return ApiResponse.<RoomResponse>builder().result(adminRoomService.updateRoom(id, request))
 				.message("Cập nhật phòng chiếu thành công").build();
 	}
 
 	@PostMapping("/{id}/seats/setup")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ApiResponse<List<SeatResponse>> setupSeats(@PathVariable long id, @RequestBody SeatSetupRequest request) {
+	public ApiResponse<List<SeatResponse>> setupSeats(@PathVariable long id, @RequestBody @Valid SeatSetupRequest request) {
 		return ApiResponse.<List<SeatResponse>>builder().result(adminSeatService.setUpSeatsForRoom(id, request))
 				.message("Thiết lập ghế phòng chiếu thành công").build();
 	}

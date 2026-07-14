@@ -1,5 +1,6 @@
 package com.example.movie_ticket_be.booking.controller;
 
+import jakarta.validation.Valid;
 import com.example.movie_ticket_be.booking.dto.request.AddFoodsRequest;
 import com.example.movie_ticket_be.booking.dto.request.CheckoutRequest;
 import com.example.movie_ticket_be.booking.dto.request.InitiateBookingRequest;
@@ -23,7 +24,7 @@ public class BookingController {
 	BookingService bookingService;
 
 	@PostMapping("/initiate")
-	public ApiResponse<InitiateBookingResponse> initiateBooking(@RequestBody InitiateBookingRequest request) {
+	public ApiResponse<InitiateBookingResponse> initiateBooking(@Valid @RequestBody InitiateBookingRequest request) {
 		return ApiResponse.<InitiateBookingResponse>builder()
 				.code(1000)
 				.message("Khóa ghế và tạo đơn hàng thành công")

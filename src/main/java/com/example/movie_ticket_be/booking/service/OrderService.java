@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -36,6 +37,11 @@ public class OrderService {
 		try {
 			Orders order = orderRepository.findByOrderId(orderId)
 					.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+			String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+			if (!orderRepository.existsByOrderIdAndUsers_Username(orderId, currentUsername)) {
+				throw new AppException(ErrorCode.UNAUTHORIZED);
+			}
 
 			String userId = null;
 			String fullName = "---";
@@ -118,6 +124,10 @@ public class OrderService {
 
 	@PreAuthorize("isAuthenticated()")
 	public List<OrderResponse> getOrdersByUserId(String userId) {
+		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+		if (!orderRepository.existsByUsers_UserIdAndUsers_Username(userId, currentUsername)) {
+			throw new AppException(ErrorCode.UNAUTHORIZED);
+		}
 		return orderRepository.findByUsers_UserIdAndOrderStatus(userId, OrderStatus.PAID).stream()
 				.map(orderMapper::toOrderResponse).toList();
 	}

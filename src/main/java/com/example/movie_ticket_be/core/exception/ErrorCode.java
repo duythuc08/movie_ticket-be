@@ -124,6 +124,18 @@ public enum ErrorCode {
 			1030,
 			"Cinema not found",
 			HttpStatus.NOT_FOUND),
+	CINEMA_PHONE_EXISTED(
+			1095,
+			"Cinema phone number already exists",
+			HttpStatus.BAD_REQUEST),
+	CINEMA_EMAIL_EXISTED(
+			1096,
+			"Cinema email already exists",
+			HttpStatus.BAD_REQUEST),
+	USER_PHONE_EXISTED(
+			1097,
+			"Phone number already exists",
+			HttpStatus.BAD_REQUEST),
 	ROOM_EXISTED(
 			1031,
 			"Room existed",
@@ -363,6 +375,14 @@ public enum ErrorCode {
 	INVALID_SEAT_SETUP_REQUEST(
 			1092,
 			"Seat setup request is invalid: rows/cols must be positive and seatTypes size must match",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_TIME_INVALID(
+			1093,
+			"Promotion end time must be after start time",
+			HttpStatus.BAD_REQUEST),
+	PROMOTION_DISCOUNT_INVALID(
+			1094,
+			"Percentage discount value must not exceed 100",
 			HttpStatus.BAD_REQUEST);
 
 	// Constructor để gán giá trị cho từng phần tử enum

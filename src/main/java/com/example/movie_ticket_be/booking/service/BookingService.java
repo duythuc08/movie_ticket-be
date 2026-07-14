@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.example.movie_ticket_be.booking.dto.request.AddFoodsRequest;
@@ -202,6 +203,7 @@ public class BookingService {
 	public OrderResponse addFoods(Long orderId, AddFoodsRequest request) {
 		Orders order = orderRepository.findByOrderId(orderId)
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		verifyOrderOwnership(order);
 		if (order.getOrderStatus() != OrderStatus.PENDING) {
 			throw new AppException(ErrorCode.ORDER_NOT_PENDING);
 		}
@@ -284,6 +286,7 @@ public class BookingService {
 		LocalDateTime now = LocalDateTime.now();
 		Orders order = orderRepository.findByOrderId(orderId)
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		verifyOrderOwnership(order);
 		if (order.getOrderStatus() != OrderStatus.PENDING) {
 			throw new AppException(ErrorCode.ORDER_NOT_PENDING);
 		}
@@ -388,6 +391,13 @@ public class BookingService {
 	// ──────────────────────────────────────────────────────────────────────────
 	// Helpers
 	// ──────────────────────────────────────────────────────────────────────────
+	private void verifyOrderOwnership(Orders order) {
+		String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+		if (order.getUsers() == null || !order.getUsers().getUsername().equals(currentUsername)) {
+			throw new AppException(ErrorCode.UNAUTHORIZED);
+		}
+	}
+
 	private ShowTimeInfo buildShowTimeInfo(ShowTimes showTimes) {
 		String roomName = null, cinemaName = null, cinemaAddress = null;
 		if (showTimes.getRooms() != null) {

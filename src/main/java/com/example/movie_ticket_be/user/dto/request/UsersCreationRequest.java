@@ -22,6 +22,7 @@ public class UsersCreationRequest {
 	@Email(message = "USERNAME_MUST_BE_EMAIL")
 	String username;
 
+	@NotBlank(message = "PASSWORD_REQUIRED")
 	@Size(min = 8, message = "INVALID_PASSWORD")
 	String password;
 

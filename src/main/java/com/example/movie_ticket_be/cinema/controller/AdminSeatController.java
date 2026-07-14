@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
 import com.example.movie_ticket_be.cinema.dto.request.AdminSeatStatusUpdateRequest;
 import com.example.movie_ticket_be.cinema.dto.response.SeatResponse;
 import com.example.movie_ticket_be.cinema.service.AdminSeatService;
@@ -59,7 +60,7 @@ public class AdminSeatController {
 	@PutMapping("/{id}/status")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ApiResponse<SeatResponse> updateSeatStatus(@PathVariable long id,
-			@RequestBody AdminSeatStatusUpdateRequest request) {
+			@Valid @RequestBody AdminSeatStatusUpdateRequest request) {
 		return ApiResponse.<SeatResponse>builder().result(adminSeatService.updateSeatStatus(id, request))
 				.message("Cập nhật trạng thái ghế thành công").build();
 	}
