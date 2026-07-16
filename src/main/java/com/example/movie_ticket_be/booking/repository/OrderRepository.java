@@ -2,9 +2,11 @@ package com.example.movie_ticket_be.booking.repository;
 
 import com.example.movie_ticket_be.booking.entity.Orders;
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -43,6 +45,11 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
 	/** Load order không kèm EntityGraph — dùng trong releaseBooking để tránh eager-load orderTickets */
 	@Query("SELECT o FROM Orders o WHERE o.orderId = :orderId")
 	Optional<Orders> findByOrderIdPlain(@Param("orderId") Long orderId);
+
+	/** Pessimistic lock — dùng trong checkout để chặn 2 tab gọi đồng thời */
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT o FROM Orders o WHERE o.orderId = :orderId")
+	Optional<Orders> findByOrderIdForUpdate(@Param("orderId") Long orderId);
 
 	@Modifying
 	@Transactional

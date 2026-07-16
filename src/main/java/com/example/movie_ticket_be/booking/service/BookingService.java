@@ -35,6 +35,7 @@ import com.example.movie_ticket_be.cinema.repository.FoodRepository;
 import com.example.movie_ticket_be.core.enums.EntityStatus;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
+import com.example.movie_ticket_be.payment.entity.Payments;
 import com.example.movie_ticket_be.payment.enums.PaymentType;
 import com.example.movie_ticket_be.payment.service.MomoService;
 import com.example.movie_ticket_be.payment.service.PaymentService;
@@ -284,7 +285,9 @@ public class BookingService {
 	@Transactional(rollbackOn = Exception.class)
 	public CheckoutResponse checkout(Long orderId, CheckoutRequest request, HttpServletRequest httpRequest) {
 		LocalDateTime now = LocalDateTime.now();
-		Orders order = orderRepository.findByOrderId(orderId)
+		// PESSIMISTIC_WRITE: chặn 2 tab gọi checkout cùng lúc — tab thứ 2 phải đợi
+		// tab đầu commit xong mới đọc được order, lúc đó status đã là IN_PROGRESS → throw
+		Orders order = orderRepository.findByOrderIdForUpdate(orderId)
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 		verifyOrderOwnership(order);
 		if (order.getOrderStatus() != OrderStatus.PENDING) {
@@ -385,6 +388,45 @@ public class BookingService {
 				.memberDiscountAmount(memberDiscountAmount)
 				.discountAmount(promotionDiscount)
 				.finalPrice(finalPrice)
+				.build();
+	}
+
+	// ──────────────────────────────────────────────────────────────────────────
+	// ENDPOINT 4: Resume Payment — lấy lại URL thanh toán cho đơn IN_PROGRESS
+	// Dùng khi user F5 sau khi đã được redirect sang cổng thanh toán
+	// ──────────────────────────────────────────────────────────────────────────
+	@Transactional(rollbackOn = Exception.class)
+	public CheckoutResponse resumePayment(Long orderId, HttpServletRequest httpRequest) {
+		Orders order = orderRepository.findByOrderId(orderId)
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		verifyOrderOwnership(order);
+		if (order.getOrderStatus() != OrderStatus.IN_PROGRESS) {
+			throw new AppException(ErrorCode.ORDER_NOT_PENDING);
+		}
+
+		// Lấy payment type từ bản ghi cũ trước khi xóa
+		Payments existingPayment = paymentService.getExistingPaymentType(orderId);
+		PaymentType paymentType = (existingPayment != null) ? existingPayment.getPaymentType() : PaymentType.VNPAY;
+
+		// Xóa PENDING payment cũ rồi tạo mới để tránh duplicate
+		paymentService.deletePendingPayment(orderId);
+		paymentService.createPendingPayment(orderId, paymentType);
+
+		String paymentUrl;
+		if (paymentType == PaymentType.MOMO) {
+			paymentUrl = momoService.createPaymentUrl(orderId, order.getFinalPrice());
+		} else {
+			paymentUrl = vnPayService.createPaymentUrl(httpRequest, orderId, order.getFinalPrice());
+		}
+
+		return CheckoutResponse.builder()
+				.orderId(orderId)
+				.paymentUrl(paymentUrl)
+				.totalTicketPrice(order.getTotalTicketPrice())
+				.totalFoodPrice(order.getTotalFoodPrice())
+				.memberDiscountAmount(order.getMemberDiscountAmount())
+				.discountAmount(order.getDiscountAmount())
+				.finalPrice(order.getFinalPrice())
 				.build();
 	}
 

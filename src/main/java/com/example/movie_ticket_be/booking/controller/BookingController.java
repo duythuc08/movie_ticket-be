@@ -61,4 +61,14 @@ public class BookingController {
 				.result(bookingService.checkout(orderId, request, httpRequest))
 				.build();
 	}
+
+	@PostMapping("/{orderId}/resume-payment")
+	public ApiResponse<CheckoutResponse> resumePayment(@PathVariable Long orderId,
+			HttpServletRequest httpRequest) {
+		return ApiResponse.<CheckoutResponse>builder()
+				.code(1000)
+				.message("Lấy lại URL thanh toán thành công")
+				.result(bookingService.resumePayment(orderId, httpRequest))
+				.build();
+	}
 }

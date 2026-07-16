@@ -82,7 +82,23 @@ public class PaymentService {
 	}
 
 	@Transactional
+	public void deletePendingPayment(Long orderId) {
+		paymentRepository.findByOrder_OrderIdAndPaymentStatus(orderId, PaymentStatus.PENDING)
+				.ifPresent(paymentRepository::delete);
+	}
+
+	public Payments getExistingPaymentType(Long orderId) {
+		return paymentRepository.findByOrder_OrderId(orderId).orElse(null);
+	}
+
+	@Transactional
 	public void processSuccess(PaymentConfirmRequest request) {
+		// Idempotency guard: cùng transactionId đã xử lý thành công → bỏ qua
+		if (request.getTransactionId() != null
+				&& paymentRepository.findByTransactionId(request.getTransactionId()).isPresent()) {
+			return;
+		}
+
 		Orders order = orderRepository.findByOrderId(request.getOrderId())
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 		if (order.getOrderStatus() != OrderStatus.PENDING

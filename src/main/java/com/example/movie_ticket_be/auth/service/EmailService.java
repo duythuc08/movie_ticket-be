@@ -1,10 +1,5 @@
 package com.example.movie_ticket_be.auth.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
-import lombok.experimental.FieldDefaults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
@@ -12,21 +7,30 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Value;
+
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class EmailService {
-
+	@NonFinal
+	@Value("${spring.mail.username}")
+	private String fromEmail;
 	private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 	private JavaMailSender mailSender;
-	private final JavaMailSender javaMailSender;
 
 	public void sendEmail(String toEmail, String subject, String body) {
 		try {
 			MimeMessage message = mailSender.createMimeMessage();
 			MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-			helper.setFrom("duythuc08tt@gmail.com");
+			helper.setFrom(fromEmail);
 			helper.setTo(toEmail);
 			helper.setSubject(subject);
 
@@ -40,11 +44,13 @@ public class EmailService {
 			throw new RuntimeException("Failed to send email", e);
 		}
 	}
+
 	public void sendEmailWithInlineImage(String to, String subject, String htmlBody, byte[] imageBytes)
 			throws MessagingException {
-		MimeMessage message = javaMailSender.createMimeMessage();
+		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
+		helper.setFrom(fromEmail);
 		helper.setTo(to);
 		helper.setSubject(subject);
 		helper.setText(htmlBody, true); // true để xác nhận đây là HTML
@@ -53,6 +59,6 @@ public class EmailService {
 		// HTML
 		helper.addInline("qrCodeImage", new ByteArrayResource(imageBytes), "image/png");
 
-		javaMailSender.send(message);
+		mailSender.send(message);
 	}
 }
