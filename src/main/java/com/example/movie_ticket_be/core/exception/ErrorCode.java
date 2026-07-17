@@ -304,6 +304,10 @@ public enum ErrorCode {
 			1072,
 			"Order status does not allow check-in",
 			HttpStatus.BAD_REQUEST),
+	SHOWTIME_ALREADY_ENDED(
+			1098,
+			"Showtime has already ended",
+			HttpStatus.BAD_REQUEST),
 	PROMOTION_ALREADY_CLAIMED(
 			1073,
 			"You have already claimed this promotion",

@@ -32,6 +32,10 @@ public interface OrderTicketRepository extends JpaRepository<OrderTickets, Long>
 	@Query("SELECT COUNT(ot) FROM OrderTickets ot WHERE ot.seatShowTime.seats.rooms.roomId = :roomId")
 	long countByRoomId(@Param("roomId") Long roomId);
 
+	@Query("SELECT COUNT(ot) FROM OrderTickets ot WHERE ot.seatShowTime.seats.rooms.roomId = :roomId " +
+			"AND ot.orders.orderStatus IN :statuses")
+	long countActiveByRoomId(@Param("roomId") Long roomId, @Param("statuses") Collection<OrderStatus> statuses);
+
 	@Query("SELECT COUNT(ot) FROM OrderTickets ot " +
 			"WHERE ot.orders.users = :user " +
 			"AND ot.seatShowTime.showTimes.movies = :movie " +

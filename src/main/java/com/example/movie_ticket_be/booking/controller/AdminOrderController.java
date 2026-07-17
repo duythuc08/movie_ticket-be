@@ -47,9 +47,9 @@ public class AdminOrderController {
 		return ApiResponse.<OrderResponse>builder().result(adminOrderService.getOrderDetail(orderId)).build();
 	}
 
-	@PostMapping("/{orderId}/checkin")
-	public ApiResponse<String> checkin(@PathVariable Long orderId, @RequestParam String qrCode) {
-		adminOrderService.checkin(orderId, qrCode);
+	@PostMapping("/checkin")
+	public ApiResponse<String> checkin(@RequestParam String qrCode) {
+		adminOrderService.checkin(qrCode);
 		return ApiResponse.<String>builder().message("Check-in thành công").result("OK").build();
 	}
 

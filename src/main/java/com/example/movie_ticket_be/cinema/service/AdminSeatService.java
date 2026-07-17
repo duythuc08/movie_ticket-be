@@ -24,6 +24,7 @@ import com.example.movie_ticket_be.showtime.dto.response.ShowTimeResponse;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.cinema.dto.request.AdminSeatStatusUpdateRequest;
 import java.time.LocalDateTime;
+import com.example.movie_ticket_be.booking.enums.OrderStatus;
 import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
 import com.example.movie_ticket_be.cinema.repository.RoomRepository;
 import com.example.movie_ticket_be.cinema.repository.SeatRepository;
@@ -117,7 +118,8 @@ public class AdminSeatService {
 			throw new AppException(ErrorCode.ROOM_HAS_ACTIVE_SHOWTIME);
 		}
 
-		if (orderTicketRepository.countByRoomId(roomId) > 0) {
+		if (orderTicketRepository.countActiveByRoomId(roomId,
+				List.of(OrderStatus.PENDING, OrderStatus.IN_PROGRESS, OrderStatus.PAID)) > 0) {
 			throw new AppException(ErrorCode.ROOM_HAS_SOLD_TICKETS);
 		}
 

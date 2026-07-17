@@ -4,13 +4,17 @@ import com.example.movie_ticket_be.booking.dto.response.*;
 import com.example.movie_ticket_be.booking.entity.OrderTickets;
 import com.example.movie_ticket_be.booking.entity.Orders;
 import com.example.movie_ticket_be.booking.enums.OrderStatus;
+import com.example.movie_ticket_be.booking.enums.TicketStatus;
 import com.example.movie_ticket_be.booking.repository.OrderRepository;
+import com.example.movie_ticket_be.booking.repository.OrderTicketRepository;
 import com.example.movie_ticket_be.cinema.entity.Seats;
 import com.example.movie_ticket_be.core.exception.AppException;
 import com.example.movie_ticket_be.core.exception.ErrorCode;
 import com.example.movie_ticket_be.payment.repository.PaymentRepository;
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.showtime.entity.ShowTimes;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +35,7 @@ import java.util.Optional;
 public class AdminOrderService {
 
 	OrderRepository orderRepository;
+	OrderTicketRepository orderTicketRepository;
 	PaymentRepository paymentRepository;
 
 	@Transactional
@@ -73,20 +78,51 @@ public class AdminOrderService {
 	}
 
 	@Transactional
-	public void checkin(Long orderId, String qrCode) {
+	public void checkin(String rawQrCode) {
+		long orderId;
+		String code;
+		try {
+			JsonNode node = new ObjectMapper().readTree(rawQrCode);
+			orderId = node.get("id").asLong();
+			code = node.get("code").asText();
+		} catch (Exception e) {
+			throw new AppException(ErrorCode.INVALID_QR_CODE);
+		}
+
 		Orders order = orderRepository.findByOrderId(orderId)
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+		try {
+			JsonNode stored = new ObjectMapper().readTree(order.getQrCode());
+			if (!code.equals(stored.get("code").asText())) {
+				throw new AppException(ErrorCode.INVALID_QR_CODE);
+			}
+		} catch (AppException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new AppException(ErrorCode.INVALID_QR_CODE);
+		}
+
 		if (order.getOrderStatus() == OrderStatus.USED) {
 			throw new AppException(ErrorCode.ORDER_ALREADY_USED);
 		}
 		if (order.getOrderStatus() != OrderStatus.PAID) {
 			throw new AppException(ErrorCode.ORDER_CANNOT_CHECKIN);
 		}
-		if (!qrCode.equals(order.getQrCode())) {
-			throw new AppException(ErrorCode.INVALID_QR_CODE);
+
+		OrderTickets anyTicket = order.getOrderTickets().stream().findFirst()
+				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+		ShowTimes showTime = anyTicket.getSeatShowTime().getShowTimes();
+		if (showTime.getEndTime().isBefore(LocalDateTime.now())) {
+			throw new AppException(ErrorCode.SHOWTIME_ALREADY_ENDED);
 		}
+
 		order.setOrderStatus(OrderStatus.USED);
 		orderRepository.save(order);
+
+		List<OrderTickets> tickets = orderTicketRepository.findByOrders_OrderId(orderId);
+		tickets.forEach(t -> t.setTicketStatus(TicketStatus.USED));
+		orderTicketRepository.saveAll(tickets);
 	}
 
 	@Transactional
