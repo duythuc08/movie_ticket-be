@@ -129,7 +129,9 @@ public class PaymentService {
 		cinemaName = cinemaName.length() > 50 ? cinemaName.substring(0, 50) : cinemaName;
 		seats = seats.length() > 50 ? seats.substring(0, 50) + "..." : seats;
 		
-		String bookingCode = order.getQrCode();
+		String bookingCode = String.format("INF-%d-%s",
+				order.getOrderId(),
+				Long.toHexString(System.currentTimeMillis()).toUpperCase().substring(0, 6));
 		String qrCode = String.format("{\"id\":%d,\"code\":\"%s\",\"movie\":\"%s\",\"cinema\":\"%s\",\"time\":\"%s\",\"seats\":\"%s\"}",
 				order.getOrderId(),
 				bookingCode,

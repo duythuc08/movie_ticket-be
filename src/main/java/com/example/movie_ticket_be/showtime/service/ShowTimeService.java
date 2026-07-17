@@ -144,7 +144,7 @@ public class ShowTimeService {
 	@Transactional(readOnly = true)
 	public List<MovieResponse> getNowShowingMoviesForQuickBooking() {
 		LocalDateTime now = LocalDateTime.now();
-		return showTimeRepository.findNowShowingMoviesWithUpcomingSlots(now, List.of(MovieStatus.NOW_SHOWING)).stream()
+		return showTimeRepository.findNowShowingMoviesWithUpcomingSlots(now, List.of(MovieStatus.NOW_SHOWING, MovieStatus.COMING_SOON)).stream()
 				.map(movieMapper::toMovieResponse).toList();
 	}
 
