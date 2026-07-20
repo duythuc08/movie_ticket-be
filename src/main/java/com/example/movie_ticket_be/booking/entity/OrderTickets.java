@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.booking.entity;
 
 import com.example.movie_ticket_be.booking.enums.TicketStatus;
+import com.example.movie_ticket_be.cinema.enums.SeatType;
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.core.entity.BaseEntity;
 import jakarta.persistence.*;
@@ -9,6 +10,7 @@ import lombok.experimental.SuperBuilder;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "order_ticket")
@@ -38,4 +40,15 @@ public class OrderTickets extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "seat_show_time_id")
 	SeatShowTime seatShowTime;
+
+	String snapshotSeatRow;
+	Integer snapshotSeatNumber;
+
+	@Enumerated(EnumType.STRING)
+	SeatType snapshotSeatType;
+
+	LocalDateTime snapshotShowTimeStart;
+	String snapshotMovieTitle;
+	String snapshotRoomName;
+	String snapshotCinemaName;
 }

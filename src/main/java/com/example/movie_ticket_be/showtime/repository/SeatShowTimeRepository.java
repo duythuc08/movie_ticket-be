@@ -26,6 +26,7 @@ public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long
 			       CASE WHEN s.seat_status = 'NORMAL' AND s.entity_status = 'ACTIVE' THEN 'AVAILABLE' ELSE 'BLOCKED' END
 			FROM seat s
 			WHERE s.room_id = :roomId
+			AND s.seat_type != 'AISLE'
 			AND NOT EXISTS (
 			    SELECT 1 FROM seat_show_time ss
 			    WHERE ss.seat_id = s.seat_id
@@ -68,6 +69,15 @@ public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long
 
 	@Query("SELECT COUNT(ss) FROM SeatShowTime ss WHERE ss.seats.rooms.roomId = :roomId AND ss.seatShowTimeStatus = 'SOLD'")
 	long countSoldByRoomId(@Param("roomId") Long roomId);
+
+	@Modifying
+	@Transactional
+	@Query(value = "UPDATE order_ticket SET seat_show_time_id = NULL " +
+			"WHERE seat_show_time_id IN (" +
+			"SELECT sst.seat_show_time_id FROM seat_show_time sst " +
+			"JOIN seat s ON s.seat_id = sst.seat_id WHERE s.room_id = :roomId)",
+			nativeQuery = true)
+	void nullifyOrderTicketReferencesByRoomId(@Param("roomId") Long roomId);
 
 	@Modifying
 	@Transactional

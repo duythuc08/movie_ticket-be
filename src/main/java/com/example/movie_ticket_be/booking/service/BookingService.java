@@ -132,6 +132,16 @@ public class BookingService {
 					.price(price)
 					.ticketStatus(TicketStatus.RESERVED)
 					.createdAt(now)
+					.snapshotSeatRow(seat.getSeats().getSeatRow())
+					.snapshotSeatNumber(seat.getSeats().getSeatNumber())
+					.snapshotSeatType(currentSeatType)
+					.snapshotShowTimeStart(seat.getShowTimes().getStartTime())
+					.snapshotMovieTitle(seat.getShowTimes().getMovies().getTitle())
+					.snapshotRoomName(seat.getShowTimes().getRooms() != null
+							? seat.getShowTimes().getRooms().getName() : null)
+					.snapshotCinemaName(seat.getShowTimes().getRooms() != null
+							&& seat.getShowTimes().getRooms().getCinemas() != null
+							? seat.getShowTimes().getRooms().getCinemas().getName() : null)
 					.build();
 			tickets.add(ticket);
 			totalTicketPrice = totalTicketPrice.add(price);

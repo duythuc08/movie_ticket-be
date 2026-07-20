@@ -123,6 +123,7 @@ public class AdminSeatService {
 			throw new AppException(ErrorCode.ROOM_HAS_SOLD_TICKETS);
 		}
 
+		seatShowTimeRepository.nullifyOrderTicketReferencesByRoomId(roomId);
 		seatShowTimeRepository.deleteAllByRoomId(roomId);
 		seatRepository.deleteAllByRoomId(roomId);
 
@@ -138,18 +139,22 @@ public class AdminSeatService {
 		List<Seats> seats = new ArrayList<>();
 		for (int r = 0; r < totalRows; r++) {
 			for (int c = 0; c < totalCols; c++) {
-				SeatType type = seatTypes[r][c];
-				if (type == null)
-					continue;
+				SeatType type = seatTypes[r][c] != null ? seatTypes[r][c] : SeatType.AISLE;
 
-				double rowDist = (maxRowDist == 0) ? 0.0 : Math.abs(r - idealRow) / maxRowDist;
-				double colDist = (centerCol == 0) ? 0.0 : Math.abs(c - centerCol) / centerCol;
-				double distScore = rowWeight * rowDist + colWeight * colDist;
-				double viewScore = 10.0 - (distScore * 9.0);
+				BigDecimal score;
+				if (type == SeatType.AISLE) {
+					score = BigDecimal.ZERO;
+				} else {
+					double rowDist = (maxRowDist == 0) ? 0.0 : Math.abs(r - idealRow) / maxRowDist;
+					double colDist = (centerCol == 0) ? 0.0 : Math.abs(c - centerCol) / centerCol;
+					double distScore = rowWeight * rowDist + colWeight * colDist;
+					double viewScore = 10.0 - (distScore * 9.0);
+					score = BigDecimal.valueOf(Math.round(viewScore * 100.0) / 100.0);
+				}
 
 				Seats seat = Seats.builder().seatRow(toRowLabel(r)).seatNumber(c + 1).rooms(room).seatType(type)
 						.seatStatus(SeatStatus.NORMAL)
-						.viewQuanlityScore(BigDecimal.valueOf(Math.round(viewScore * 100.0) / 100.0)).build();
+						.viewQuanlityScore(score).build();
 				seat.setEntityStatus(EntityStatus.ACTIVE);
 				seats.add(seat);
 			}
@@ -157,7 +162,8 @@ public class AdminSeatService {
 
 		List<Seats> saved = seatRepository.saveAll(seats);
 
-		room.setCapacity(saved.size());
+		long actualCapacity = saved.stream().filter(s -> s.getSeatType() != SeatType.AISLE).count();
+		room.setCapacity((int) actualCapacity);
 		roomRepository.save(room);
 
 		return saved.stream().map(seatMapper::toSeatResponse).toList();

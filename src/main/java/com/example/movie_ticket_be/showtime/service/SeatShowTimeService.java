@@ -41,7 +41,9 @@ public class SeatShowTimeService {
 	}
 
 	public SeatSelectionResponse getSeatSelectionData(Long showTimeId) {
-		List<SeatShowTimeResponse> seats = getAllSeatShowTimesByShowTime(showTimeId);
+		List<SeatShowTimeResponse> seats = getAllSeatShowTimesByShowTime(showTimeId).stream()
+				.filter(s -> !SeatType.AISLE.name().equals(s.getSeatType()))
+				.toList();
 		Map<SeatType, BigDecimal> pricingMap = showTimePriceService.getPriceMapByShowTime(showTimeId);
 
 		List<SuggestedSeatResponse> suggested = seats.stream()

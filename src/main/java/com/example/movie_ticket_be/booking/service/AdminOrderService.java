@@ -112,8 +112,13 @@ public class AdminOrderService {
 
 		OrderTickets anyTicket = order.getOrderTickets().stream().findFirst()
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-		ShowTimes showTime = anyTicket.getSeatShowTime().getShowTimes();
-		if (showTime.getEndTime().isBefore(LocalDateTime.now())) {
+		if (anyTicket.getSeatShowTime() != null) {
+			ShowTimes showTime = anyTicket.getSeatShowTime().getShowTimes();
+			if (showTime != null && showTime.getEndTime().isBefore(LocalDateTime.now())) {
+				throw new AppException(ErrorCode.SHOWTIME_ALREADY_ENDED);
+			}
+		} else if (anyTicket.getSnapshotShowTimeStart() != null
+				&& anyTicket.getSnapshotShowTimeStart().isBefore(LocalDateTime.now())) {
 			throw new AppException(ErrorCode.SHOWTIME_ALREADY_ENDED);
 		}
 
@@ -142,8 +147,17 @@ public class AdminOrderService {
 		if (order.getOrderTickets() == null || order.getOrderTickets().isEmpty())
 			return null;
 		OrderTickets first = order.getOrderTickets().iterator().next();
-		if (first.getSeatShowTime() == null)
-			return null;
+
+		// fallback sang snapshot nếu seatShowTime đã bị xóa (sau khi reset sơ đồ ghế)
+		if (first.getSeatShowTime() == null) {
+			return ShowTimeInfo.builder()
+					.movieName(first.getSnapshotMovieTitle())
+					.showTime(first.getSnapshotShowTimeStart())
+					.roomName(first.getSnapshotRoomName())
+					.cinemaName(first.getSnapshotCinemaName())
+					.build();
+		}
+
 		ShowTimes st = first.getSeatShowTime().getShowTimes();
 		if (st == null)
 			return null;
@@ -164,13 +178,21 @@ public class AdminOrderService {
 	private List<OrderTicketResponse> buildTicketResponses(Orders order) {
 		if (order.getOrderTickets() == null)
 			return List.of();
-		return order.getOrderTickets().stream()
-				.filter(t -> t.getSeatShowTime() != null && t.getSeatShowTime().getSeats() != null).map(t -> {
-					Seats seat = t.getSeatShowTime().getSeats();
-					return OrderTicketResponse.builder().orderTicketId(t.getOrderTicketId())
-							.seatName(seat.getSeatRow() + seat.getSeatNumber()).seatType(seat.getSeatType())
-							.price(t.getPrice()).build();
-				}).toList();
+		return order.getOrderTickets().stream().map(t -> {
+			if (t.getSeatShowTime() != null && t.getSeatShowTime().getSeats() != null) {
+				Seats seat = t.getSeatShowTime().getSeats();
+				return OrderTicketResponse.builder().orderTicketId(t.getOrderTicketId())
+						.seatName(seat.getSeatRow() + seat.getSeatNumber()).seatType(seat.getSeatType())
+						.price(t.getPrice()).build();
+			}
+			// fallback snapshot
+			String seatName = t.getSnapshotSeatRow() != null
+					? t.getSnapshotSeatRow() + t.getSnapshotSeatNumber()
+					: "---";
+			return OrderTicketResponse.builder().orderTicketId(t.getOrderTicketId())
+					.seatName(seatName).seatType(t.getSnapshotSeatType())
+					.price(t.getPrice()).build();
+		}).toList();
 	}
 
 	private List<OrderFoodResponse> buildFoodResponses(Orders order) {
@@ -204,6 +226,10 @@ public class AdminOrderService {
 					movieName = st.getMovies().getTitle();
 				if (st.getRooms() != null && st.getRooms().getCinemas() != null)
 					cinemaName = st.getRooms().getCinemas().getName();
+			} else {
+				movieName = first.getSnapshotMovieTitle();
+				showTime = first.getSnapshotShowTimeStart();
+				cinemaName = first.getSnapshotCinemaName();
 			}
 		}
 
