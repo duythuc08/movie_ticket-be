@@ -47,6 +47,7 @@ import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.showtime.entity.ShowTimes;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
+import com.example.movie_ticket_be.showtime.service.SeatShowTimeService;
 import com.example.movie_ticket_be.showtime.service.ShowTimePriceService;
 import com.example.movie_ticket_be.user.entity.Users;
 import com.example.movie_ticket_be.user.repository.UserRepository;
@@ -68,6 +69,7 @@ public class BookingService {
 	FoodRepository foodRepository;
 	UserRepository userRepository;
 	ShowTimePriceService showTimePriceService;
+	SeatShowTimeService seatShowTimeService;
 	PromotionRepository promotionRepository;
 	PaymentService paymentService;
 	VNPayService vnPayService;
@@ -167,6 +169,9 @@ public class BookingService {
 						.build())
 				.toList();
 
+		// Push SSE cho tất cả client đang xem sơ đồ ghế của suất chiếu này
+		seatShowTimeService.broadcastSeatUpdate(showTimeId);
+
 		return InitiateBookingResponse.builder()
 				.orderId(order.getOrderId())
 				.totalTicketPrice(totalTicketPrice)
@@ -205,6 +210,12 @@ public class BookingService {
 
 		// JPQL UPDATE — không gọi merge, không cascade vào tickets vừa xoá
 		orderRepository.updateOrderStatus(orderId, OrderStatus.CANCELLED, LocalDateTime.now());
+
+		// Thông báo SSE để FE cập nhật ghế vừa được thả
+		if (!tickets.isEmpty()) {
+			Long showTimeId = tickets.get(0).getSeatShowTime().getShowTimes().getShowTimeId();
+			seatShowTimeService.broadcastSeatUpdate(showTimeId);
+		}
 	}
 
 	// ──────────────────────────────────────────────────────────────────────────

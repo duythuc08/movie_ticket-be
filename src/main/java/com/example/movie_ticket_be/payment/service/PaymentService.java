@@ -35,6 +35,7 @@ import com.example.movie_ticket_be.recommendation.service.UserActivityLogService
 import com.example.movie_ticket_be.showtime.entity.SeatShowTime;
 import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
+import com.example.movie_ticket_be.showtime.service.SeatShowTimeService;
 import com.example.movie_ticket_be.user.entity.LoyaltyPointsHistory;
 import com.example.movie_ticket_be.user.entity.MembershipTier;
 import com.example.movie_ticket_be.user.entity.Users;
@@ -67,6 +68,7 @@ public class PaymentService {
 	EmailService emailService;
 	PromotionRepository promotionRepository;
 	MomoService momoService;
+	SeatShowTimeService seatShowTimeService;
 
 	@Transactional
 	public void createPendingPayment(Long orderId, PaymentType paymentType) {
@@ -165,6 +167,11 @@ public class PaymentService {
 			sendPaymentSuccessMail(order.getUsers(), order, bookingCode, qrBase64);
 		}
 
+		// f. Push SSE — ghế chuyển sang SOLD
+		if (!tickets.isEmpty()) {
+			Long showTimeId = tickets.get(0).getSeatShowTime().getShowTimes().getShowTimeId();
+			seatShowTimeService.broadcastSeatUpdate(showTimeId);
+		}
 	}
 
 	private void logBookTicket(Orders order) {
@@ -251,6 +258,11 @@ public class PaymentService {
 				.ifPresent(movieId -> userActivityLogService.logInternal(
 						ActivityLogRequest.builder().actionType(actionType).movieId(movieId).build(),
 						order.getUsers()));
+
+		// e. Push SSE — ghế vừa được trả về AVAILABLE
+		tickets.stream().findFirst()
+				.map(t -> t.getSeatShowTime().getShowTimes().getShowTimeId())
+				.ifPresent(seatShowTimeService::broadcastSeatUpdate);
 	}
 
 	private void handleUserLoyalty(Orders order) {

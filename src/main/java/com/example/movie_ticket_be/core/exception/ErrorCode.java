@@ -344,6 +344,10 @@ public enum ErrorCode {
 			1081,
 			"You can only review a movie after watching it",
 			HttpStatus.BAD_REQUEST),
+	CANNOT_REVIEW_TICKET_NOT_USED(
+			1083,
+			"You have booked a ticket but have not watched the movie yet",
+			HttpStatus.BAD_REQUEST),
 	REVIEW_NOT_OWNED(
 			1082,
 			"You do not own this review",

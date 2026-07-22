@@ -68,9 +68,15 @@ public class ReviewService {
             throw new AppException(ErrorCode.REVIEW_ALREADY_EXISTS);
         }
 
-        long completedBookings = orderTicketRepository.countCompletedBookingByUserAndMovie(
-                user, movie, LocalDateTime.now(), List.of(OrderStatus.PAID, OrderStatus.USED));
-        if (completedBookings == 0) {
+        LocalDateTime now = LocalDateTime.now();
+        long usedTickets = orderTicketRepository.countCompletedBookingByUserAndMovie(
+                user, movie, now, List.of(OrderStatus.USED));
+        if (usedTickets == 0) {
+            long paidTickets = orderTicketRepository.countCompletedBookingByUserAndMovie(
+                    user, movie, now, List.of(OrderStatus.PAID));
+            if (paidTickets > 0) {
+                throw new AppException(ErrorCode.CANNOT_REVIEW_TICKET_NOT_USED);
+            }
             throw new AppException(ErrorCode.CANNOT_REVIEW_UNFINISHED_SHOWTIME);
         }
 

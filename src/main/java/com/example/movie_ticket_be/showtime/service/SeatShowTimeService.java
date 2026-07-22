@@ -11,6 +11,7 @@ import com.example.movie_ticket_be.showtime.enums.SeatShowTimeStatus;
 import com.example.movie_ticket_be.showtime.mapper.SeatShowTimeMapper;
 import com.example.movie_ticket_be.showtime.repository.SeatShowTimeRepository;
 import com.example.movie_ticket_be.showtime.repository.ShowTimeRepository;
+import com.example.movie_ticket_be.showtime.sse.SeatSseManager;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -31,6 +32,7 @@ public class SeatShowTimeService {
 	SeatShowTimeRepository seatShowTimeRepository;
 	ShowTimeRepository showTimeRepository;
 	ShowTimePriceService showTimePriceService;
+	SeatSseManager seatSseManager;
 
 	public List<SeatShowTimeResponse> getAllSeatShowTimesByShowTime(Long showTimeId) {
 		if (!showTimeRepository.existsByShowTimeId(showTimeId)) {
@@ -57,6 +59,18 @@ public class SeatShowTimeService {
 				.toList();
 
 		return SeatSelectionResponse.builder().seats(seats).pricingMap(pricingMap).suggested(suggested).build();
+	}
+
+	// Gọi sau khi thay đổi trạng thái ghế để push SSE cho tất cả client đang xem.
+	public void broadcastSeatUpdate(Long showTimeId) {
+		try {
+			List<SeatShowTimeResponse> seats = getAllSeatShowTimesByShowTime(showTimeId).stream()
+					.filter(s -> !SeatType.AISLE.name().equals(s.getSeatType()))
+					.toList();
+			seatSseManager.broadcast(showTimeId, seats);
+		} catch (Exception e) {
+			log.warn("SSE broadcast failed for showTime {}: {}", showTimeId, e.getMessage());
+		}
 	}
 
 	public void generateSeatsForShowTime(Long showTimeId, Long roomId) {

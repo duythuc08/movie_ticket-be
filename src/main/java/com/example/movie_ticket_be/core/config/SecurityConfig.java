@@ -28,8 +28,10 @@ public class SecurityConfig {
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-		// Phân quyền hoàn toàn qua @PreAuthorize ở service layer
-		httpSecurity.authorizeHttpRequests(request -> request.anyRequest().permitAll());
+		// SSE endpoint dùng query param token, không gửi được Authorization header → permit riêng
+		httpSecurity.authorizeHttpRequests(request -> request
+				.requestMatchers("/seatShowTimes/*/stream").permitAll()
+				.anyRequest().permitAll());
 
 		httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
 				.jwt(jwtConfigurer -> jwtConfigurer.decoder(customJwtDecoder)
