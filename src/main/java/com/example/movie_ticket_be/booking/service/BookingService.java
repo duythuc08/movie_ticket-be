@@ -301,7 +301,7 @@ public class BookingService {
 	}
 
 	// ──────────────────────────────────────────────────────────────────────────
-	// ENDPOINT 3: Checkout — áp dụng giảm giá, đóng băng đơn, trả VNPay URL
+	// ENDPOINT 3: Checkout — áp dụng giảm giá, đóng băng đơn, trả URL THANH TOÁN
 	// ──────────────────────────────────────────────────────────────────────────
 	@Transactional(rollbackOn = Exception.class)
 	public CheckoutResponse checkout(Long orderId, CheckoutRequest request, HttpServletRequest httpRequest) {

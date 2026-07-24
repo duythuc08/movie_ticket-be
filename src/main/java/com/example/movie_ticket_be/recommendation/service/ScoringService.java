@@ -36,204 +36,211 @@ public class ScoringService {
 
     private final ConcurrentHashMap<ParamName, Double> paramCache = new ConcurrentHashMap<>();
 
-    /** Dùng khi đã pre-load review + logs theo user — không tốn thêm query DB. */
-    public YResult computeYFromPreloaded(Long movieId,
-                                         Map<Long, Reviews> reviewsByMovie,
-                                         Map<Long, List<UserActivityLog>> logsByMovie) {
-        Reviews review = reviewsByMovie.get(movieId);
-        List<UserActivityLog> logs = logsByMovie.getOrDefault(movieId, List.of());
-        boolean hasExplicit = review != null;
-        boolean hasImplicit = !logs.isEmpty();
-        BigDecimal yScore;
-        if (hasExplicit) {
-            yScore = BigDecimal.valueOf(review.getRating());
-        } else {
-            double s = calculateRawScoreFromLogs(logs);
-            double s0 = readParam(ParamName.S0, 1.0);
-            double amplitude = properties.getTanhConversion().getAmplitude();
-            double neutralPoint = properties.getTanhConversion().getNeutralPoint();
-            yScore = BigDecimal.valueOf(neutralPoint + amplitude * Math.tanh(s / s0));
-        }
-        return new YResult(yScore, hasExplicit, hasImplicit);
-    }
 
-    public YResult computeY(String userId, Long movieId) {
-        Optional<Reviews> explicit = reviewRepository.findApprovalReview(userId, movieId);                       // query 1
-        List<UserActivityLog> logs = userActivityLogRepository.findAllByUser_UserIdAndMovie_MovieId(userId, movieId); // query 2
-        boolean hasExplicit = explicit.isPresent();
-        boolean hasImplicit = !logs.isEmpty();
-        BigDecimal yScore;
-        if (hasExplicit) {
-            yScore = BigDecimal.valueOf(explicit.get().getRating());
-        } else {
-            double s = calculateRawScoreFromLogs(logs);
-            double s0 = readParam(ParamName.S0, 1.0);
-            double amplitude = properties.getTanhConversion().getAmplitude();
-            double neutralPoint = properties.getTanhConversion().getNeutralPoint();
-            yScore = BigDecimal.valueOf(neutralPoint + amplitude * Math.tanh(s / s0));
-        }
-        return new YResult(yScore, hasExplicit, hasImplicit);
-    }
+    // ===== TAM NGUNG: cac method tinh Y/implicit score bi comment =====
+    // (theo yeu cau chuyen ve CF thuan bang surprise.KNNWithMeans, khong xoa).
+    // Chi con duoc goi boi ParameterEstimationService (cung da tam ngung job
+    // uoc luong ALPHA/S0). Khong co controller/RecommendationService nao goi
+    // truc tiep cac method nay trong luong chay thuc te.
 
-    //True nếu user đã có đánh giá (review) cho movie -> set has_explicit cho matrix Y
-    public boolean hasExplicitRating(String userId, Long movieId) {
-        return reviewRepository.findApprovalReview(userId, movieId).isPresent();
-    }
+    ///** Dùng khi đã pre-load review + logs theo user — không tốn thêm query DB. */
+    //public YResult computeYFromPreloaded(Long movieId,
+    //                                     Map<Long, Reviews> reviewsByMovie,
+    //                                     Map<Long, List<UserActivityLog>> logsByMovie) {
+    //    Reviews review = reviewsByMovie.get(movieId);
+    //    List<UserActivityLog> logs = logsByMovie.getOrDefault(movieId, List.of());
+    //    boolean hasExplicit = review != null;
+    //    boolean hasImplicit = !logs.isEmpty();
+    //    BigDecimal yScore;
+    //    if (hasExplicit) {
+    //        yScore = BigDecimal.valueOf(review.getRating());
+    //    } else {
+    //        double s = calculateRawScoreFromLogs(logs);
+    //        double s0 = readParam(ParamName.S0, 1.0);
+    //        double amplitude = properties.getTanhConversion().getAmplitude();
+    //        double neutralPoint = properties.getTanhConversion().getNeutralPoint();
+    //        yScore = BigDecimal.valueOf(neutralPoint + amplitude * Math.tanh(s / s0));
+    //    }
+    //    return new YResult(yScore, hasExplicit, hasImplicit);
+    //}
 
-    /**
-     * y_{u,i} cuối cùng theo has_explicit.
-     * TRUE  -> trả thẳng rating thật từ review.
-     * FALSE -> tính S qua calculateRawScore(), áp y = 3 + A * tanh(S / S0).
-     */
-    public BigDecimal calculateY(String userId, Long movieId){
-        Optional<Reviews> explicit = reviewRepository.findApprovalReview(userId, movieId);
-        if(explicit.isPresent()){
-            return BigDecimal.valueOf(explicit.get().getRating());
-        }
+    //public YResult computeY(String userId, Long movieId) {
+    //    Optional<Reviews> explicit = reviewRepository.findApprovalReview(userId, movieId);                       // query 1
+    //    List<UserActivityLog> logs = userActivityLogRepository.findAllByUser_UserIdAndMovie_MovieId(userId, movieId); // query 2
+    //    boolean hasExplicit = explicit.isPresent();
+    //    boolean hasImplicit = !logs.isEmpty();
+    //    BigDecimal yScore;
+    //    if (hasExplicit) {
+    //        yScore = BigDecimal.valueOf(explicit.get().getRating());
+    //    } else {
+    //        double s = calculateRawScoreFromLogs(logs);
+    //        double s0 = readParam(ParamName.S0, 1.0);
+    //        double amplitude = properties.getTanhConversion().getAmplitude();
+    //        double neutralPoint = properties.getTanhConversion().getNeutralPoint();
+    //        yScore = BigDecimal.valueOf(neutralPoint + amplitude * Math.tanh(s / s0));
+    //    }
+    //    return new YResult(yScore, hasExplicit, hasImplicit);
+    //}
 
-        double s = calculateRawScore(userId, movieId);
-        double s0 = readParam(ParamName.S0, 1.0);
-        double amplitude = properties.getTanhConversion().getAmplitude();
-        double neutralPoint = properties.getTanhConversion().getNeutralPoint();
+    ////True nếu user đã có đánh giá (review) cho movie -> set has_explicit cho matrix Y
+    //public boolean hasExplicitRating(String userId, Long movieId) {
+    //    return reviewRepository.findApprovalReview(userId, movieId).isPresent();
+    //}
 
-        double y = neutralPoint + amplitude * Math.tanh(s / s0);
-        return BigDecimal.valueOf(y);
-    }
+    ///**
+    // * y_{u,i} cuối cùng theo has_explicit.
+    // * TRUE  -> trả thẳng rating thật từ review.
+    // * FALSE -> tính S qua calculateRawScore(), áp y = 3 + A * tanh(S / S0).
+    // */
+    //public BigDecimal calculateY(String userId, Long movieId){
+    //    Optional<Reviews> explicit = reviewRepository.findApprovalReview(userId, movieId);
+    //    if(explicit.isPresent()){
+    //        return BigDecimal.valueOf(explicit.get().getRating());
+    //    }
 
-    /**
-     * S_{u,i} thô (trước tanh) — Σ [w(a) × decay(Δt)] qua mọi dòng activity log của cặp (user, movie
-     *   - Nhóm 1: trọng số cố định (VIEW_SHOWTIMES, SEARCH, SKIP_RECOMMENDATION)
-     *   - Nhóm 2: trục Độ sâu, dùng bestValueAt (WATCH_TRAILER, VIEW_DETAILS)
-     *   - Nhóm 3: trục Tần suất, dùng occurrenceCount (BOOK_TICKET, SHARE_MOVIE)
-     */
-    public double calculateRawScore(String userId, Long movieId) {
-        List<UserActivityLog> logs = userActivityLogRepository.findAllByUser_UserIdAndMovie_MovieId(userId, movieId);
-        return calculateRawScoreFromLogs(logs);
-    }
+    //    double s = calculateRawScore(userId, movieId);
+    //    double s0 = readParam(ParamName.S0, 1.0);
+    //    double amplitude = properties.getTanhConversion().getAmplitude();
+    //    double neutralPoint = properties.getTanhConversion().getNeutralPoint();
 
-    private double calculateRawScoreFromLogs(List<UserActivityLog> logs) {
-        double alpha = readParam(ParamName.ALPHA, 0.5);
-        double now = nowEpochDays();
-        double lambda = properties.getDecay().getLambda();
+    //    double y = neutralPoint + amplitude * Math.tanh(s / s0);
+    //    return BigDecimal.valueOf(y);
+    //}
 
-        double total = 0.0;
-        for (UserActivityLog log : logs) {
-            ActionType actionType = log.getUserActivityLogId().getActionType();
-            double w = baseWeight(log, actionType);
-            double decay = decayFactor(log, actionType, now, lambda);
-            double freq = frequencyMultiplier(log, actionType, alpha);
-            total += w * decay * freq;
-        }
-        return total;
-    }
+    ///**
+    // * S_{u,i} thô (trước tanh) — Σ [w(a) × decay(Δt)] qua mọi dòng activity log của cặp (user, movie
+    // *   - Nhóm 1: trọng số cố định (VIEW_SHOWTIMES, SEARCH, SKIP_RECOMMENDATION)
+    // *   - Nhóm 2: trục Độ sâu, dùng bestValueAt (WATCH_TRAILER, VIEW_DETAILS)
+    // *   - Nhóm 3: trục Tần suất, dùng occurrenceCount (BOOK_TICKET, SHARE_MOVIE)
+    // */
+    //public double calculateRawScore(String userId, Long movieId) {
+    //    List<UserActivityLog> logs = userActivityLogRepository.findAllByUser_UserIdAndMovie_MovieId(userId, movieId);
+    //    return calculateRawScoreFromLogs(logs);
+    //}
 
-    private double readParam(ParamName paramName, double fallback){
-        return paramCache.computeIfAbsent(paramName, k ->
-                scoringParamRepository.findById(k)
-                        .map(p -> p.getParamValue().doubleValue())
-                        .orElse(fallback));
-    }
+    //private double calculateRawScoreFromLogs(List<UserActivityLog> logs) {
+    //    double alpha = readParam(ParamName.ALPHA, 0.5);
+    //    double now = nowEpochDays();
+    //    double lambda = properties.getDecay().getLambda();
 
-    /** w_base(a) — tra theo MAX value (trục Độ sâu) hoặc base cố định/Tần suất. */
-    private double baseWeight(UserActivityLog log, ActionType action) {
-        var weights = properties.getWeights();
-        switch (action) {
-            case VIEW_SHOWTIMES:
-                return weights.getViewShowtime();
-            case SEARCH:
-                return weights.getSearch();
-            case SKIP_RECOMMENDATION:
-                return weights.getSkipRecommendation();
-            case WATCH_TRAILER:
-                return watchTrailerWeight(log, weights);
-            case VIEW_DETAILS:
-                return viewDetailWeight(log, weights);
-            case BOOK_TICKET:
-                return weights.getBookTicket().getBase();
-            case SHARE_MOVIE:
-                return weights.getShareMovie().getBase();
-            case CANCEL_PAYMENT:
-                return weights.getCancelPayment();
-            case ABANDON_SEAT_SELECTION:
-                return weights.getAbandonSeatSelection();
-            case TIMEOUT_HOLD_SEATS:
-                return weights.getTimeoutHoldSeat();
-            default:
-                return 0.0;
-        }
-    }
+    //    double total = 0.0;
+    //    for (UserActivityLog log : logs) {
+    //        ActionType actionType = log.getUserActivityLogId().getActionType();
+    //        double w = baseWeight(log, actionType);
+    //        double decay = decayFactor(log, actionType, now, lambda);
+    //        double freq = frequencyMultiplier(log, actionType, alpha);
+    //        total += w * decay * freq;
+    //    }
+    //    return total;
+    //}
 
-    private double watchTrailerWeight(UserActivityLog log, RecommendationProperties.Weights weights) {
-        Object pctObj = log.getMetadata() == null ? null : log.getMetadata().get("watch_pct");
-        double watchPct = toDouble(pctObj, 0.0);
-        var cfg = weights.getWatchTrailer();
-        if (watchPct > cfg.getHighThreshold()) return cfg.getHigh();
-        if (watchPct >= cfg.getMediumThreshold()) return cfg.getMedium();
-        return cfg.getLow();
-    }
+    //private double readParam(ParamName paramName, double fallback){
+    //    return paramCache.computeIfAbsent(paramName, k ->
+    //            scoringParamRepository.findById(k)
+    //                    .map(p -> p.getParamValue().doubleValue())
+    //                    .orElse(fallback));
+    //}
 
-    private double viewDetailWeight(UserActivityLog log, RecommendationProperties.Weights weights) {
-        Object durObj = log.getMetadata() == null ? null : log.getMetadata().get("duration_sec");
-        double durationSec = toDouble(durObj, 0.0);
-        var cfg = weights.getViewDetail();
-        if (durationSec > cfg.getHighThreshold()) return cfg.getHigh();
-        if (durationSec >= cfg.getLowThreshold()) return cfg.getMid();
-        return cfg.getLow();
-    }
+    ///** w_base(a) — tra theo MAX value (trục Độ sâu) hoặc base cố định/Tần suất. */
+    //private double baseWeight(UserActivityLog log, ActionType action) {
+    //    var weights = properties.getWeights();
+    //    switch (action) {
+    //        case VIEW_SHOWTIMES:
+    //            return weights.getViewShowtime();
+    //        case SEARCH:
+    //            return weights.getSearch();
+    //        case SKIP_RECOMMENDATION:
+    //            return weights.getSkipRecommendation();
+    //        case WATCH_TRAILER:
+    //            return watchTrailerWeight(log, weights);
+    //        case VIEW_DETAILS:
+    //            return viewDetailWeight(log, weights);
+    //        case BOOK_TICKET:
+    //            return weights.getBookTicket().getBase();
+    //        case SHARE_MOVIE:
+    //            return weights.getShareMovie().getBase();
+    //        case CANCEL_PAYMENT:
+    //            return weights.getCancelPayment();
+    //        case ABANDON_SEAT_SELECTION:
+    //            return weights.getAbandonSeatSelection();
+    //        case TIMEOUT_HOLD_SEATS:
+    //            return weights.getTimeoutHoldSeat();
+    //        default:
+    //            return 0.0;
+    //    }
+    //}
 
-    /**
-     * decay(Δt) = e^(-lambda × Δt). Δt tính theo bestValueAt cho trục Độ sâu
-     * (mốc thời gian đạt giá trị MAX), theo updatedAt cho trục Tần suất và
-     * nhóm cố định (mốc lần tương tác gần nhất).
-     */
-    private double decayFactor(UserActivityLog log, ActionType action, double nowEpochDays, double lambda) {
-        LocalDateTime referenceTime = isDepthAxis(action)
-                ? (log.getBestValueAt() != null ? log.getBestValueAt() : log.getUpdatedAt())
-                : log.getUpdatedAt();
+    //private double watchTrailerWeight(UserActivityLog log, RecommendationProperties.Weights weights) {
+    //    Object pctObj = log.getMetadata() == null ? null : log.getMetadata().get("watch_pct");
+    //    double watchPct = toDouble(pctObj, 0.0);
+    //    var cfg = weights.getWatchTrailer();
+    //    if (watchPct > cfg.getHighThreshold()) return cfg.getHigh();
+    //    if (watchPct >= cfg.getMediumThreshold()) return cfg.getMedium();
+    //    return cfg.getLow();
+    //}
 
-        if (referenceTime == null) return 1.0; // an toàn nếu thiếu mốc thời gian
-        double deltaDays = nowEpochDays - epochDays(referenceTime);
-        return Math.exp(-lambda * Math.max(deltaDays, 0));
-    }
+    //private double viewDetailWeight(UserActivityLog log, RecommendationProperties.Weights weights) {
+    //    Object durObj = log.getMetadata() == null ? null : log.getMetadata().get("duration_sec");
+    //    double durationSec = toDouble(durObj, 0.0);
+    //    var cfg = weights.getViewDetail();
+    //    if (durationSec > cfg.getHighThreshold()) return cfg.getHigh();
+    //    if (durationSec >= cfg.getLowThreshold()) return cfg.getMid();
+    //    return cfg.getLow();
+    //}
 
-    /**
-     * c(a) = 1 + alpha × occurrenceCount (Hu, Koren, Volinsky 2008) — CHỈ áp
-     * dụng cho trục Tần suất (BOOK_TICKET, SHARE_MOVIE). Nhóm khác trả 1.0
-     * (không khuếch đại theo số lần lặp).
-     */
-    private double frequencyMultiplier(UserActivityLog log, ActionType action, double alpha) {
-        if (!isFrequencyAxis(action)) return 1.0;
-        int count = log.getOccurrenceCount() == null ? 1 : log.getOccurrenceCount();
-        return 1.0 + alpha * count;
-    }
+    ///**
+    // * decay(Δt) = e^(-lambda × Δt). Δt tính theo bestValueAt cho trục Độ sâu
+    // * (mốc thời gian đạt giá trị MAX), theo updatedAt cho trục Tần suất và
+    // * nhóm cố định (mốc lần tương tác gần nhất).
+    // */
+    //private double decayFactor(UserActivityLog log, ActionType action, double nowEpochDays, double lambda) {
+    //    LocalDateTime referenceTime = isDepthAxis(action)
+    //            ? (log.getBestValueAt() != null ? log.getBestValueAt() : log.getUpdatedAt())
+    //            : log.getUpdatedAt();
 
-    private boolean isDepthAxis(ActionType action) {
-        return action == ActionType.WATCH_TRAILER || action == ActionType.VIEW_DETAILS;
-    }
+    //    if (referenceTime == null) return 1.0; // an toàn nếu thiếu mốc thời gian
+    //    double deltaDays = nowEpochDays - epochDays(referenceTime);
+    //    return Math.exp(-lambda * Math.max(deltaDays, 0));
+    //}
 
-    private boolean isFrequencyAxis(ActionType action) {
-        return action == ActionType.BOOK_TICKET
-                || action == ActionType.SHARE_MOVIE;
-    }
+    ///**
+    // * c(a) = 1 + alpha × occurrenceCount (Hu, Koren, Volinsky 2008) — CHỈ áp
+    // * dụng cho trục Tần suất (BOOK_TICKET, SHARE_MOVIE). Nhóm khác trả 1.0
+    // * (không khuếch đại theo số lần lặp).
+    // */
+    //private double frequencyMultiplier(UserActivityLog log, ActionType action, double alpha) {
+    //    if (!isFrequencyAxis(action)) return 1.0;
+    //    int count = log.getOccurrenceCount() == null ? 1 : log.getOccurrenceCount();
+    //    return 1.0 + alpha * count;
+    //}
 
-    private double toDouble(Object value, double fallback) {
-        if (value == null) return fallback;
-        if (value instanceof Number n) return n.doubleValue();
-        try {
-            return Double.parseDouble(value.toString());
-        } catch (NumberFormatException e) {
-            return fallback;
-        }
-    }
+    //private boolean isDepthAxis(ActionType action) {
+    //    return action == ActionType.WATCH_TRAILER || action == ActionType.VIEW_DETAILS;
+    //}
+
+    //private boolean isFrequencyAxis(ActionType action) {
+    //    return action == ActionType.BOOK_TICKET
+    //            || action == ActionType.SHARE_MOVIE;
+    //}
+
+    //private double toDouble(Object value, double fallback) {
+    //    if (value == null) return fallback;
+    //    if (value instanceof Number n) return n.doubleValue();
+    //    try {
+    //        return Double.parseDouble(value.toString());
+    //    } catch (NumberFormatException e) {
+    //        return fallback;
+    //    }
+    //}
 
 
-    private double nowEpochDays() {
-        return epochDays(LocalDateTime.now());
-    }
+    //private double nowEpochDays() {
+    //    return epochDays(LocalDateTime.now());
+    //}
 
-    private double epochDays(LocalDateTime time) {
-        return time.toLocalDate().toEpochDay()
-                + time.toLocalTime().toSecondOfDay() / 86400.0;
-    }
+    //private double epochDays(LocalDateTime time) {
+    //    return time.toLocalDate().toEpochDay()
+    //            + time.toLocalTime().toSecondOfDay() / 86400.0;
+    //}
 
 }

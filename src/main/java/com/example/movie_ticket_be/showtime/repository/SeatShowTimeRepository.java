@@ -40,7 +40,7 @@ public interface SeatShowTimeRepository extends JpaRepository<SeatShowTime, Long
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	List<SeatShowTime> findAllBySeatShowTimeIdIn(Collection<Long> seatShowTimeIds);
 
-	@Modifying
+	@Modifying(clearAutomatically = true)
 	@Transactional
 	@Query("UPDATE SeatShowTime ss SET ss.seatShowTimeStatus = 'RESERVED', ss.users = :user, ss.lockedUntil = :lockedUntil "
 			+ "WHERE ss.seatShowTimeId IN :ids "

@@ -20,7 +20,7 @@ public class VNPayService {
     public String createPaymentUrl(HttpServletRequest request, Long orderId, BigDecimal finalPrice) {
         long amount = finalPrice.multiply(BigDecimal.valueOf(100)).longValue();
 
-        String vnp_TxnRef = String.valueOf(orderId);
+        String vnp_TxnRef = String.valueOf(System.currentTimeMillis()) + orderId;
         String vnp_IpAddr = VnpayConfig.getIpAddress(request);
 
         Map<String, String> vnp_Params = new HashMap<>();

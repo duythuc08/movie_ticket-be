@@ -128,7 +128,9 @@ public class OrderService {
 		if (!orderRepository.existsByUsers_UserIdAndUsers_Username(userId, currentUsername)) {
 			throw new AppException(ErrorCode.UNAUTHORIZED);
 		}
-		return orderRepository.findByUsers_UserIdAndOrderStatus(userId, OrderStatus.PAID).stream()
+		return orderRepository.findByUsers_UserId(userId).stream()
+				.filter(o -> o.getOrderStatus() != OrderStatus.CANCELLED && o.getOrderStatus() != OrderStatus.EXPIRED)
+				.sorted((o1, o2) -> o2.getBookingTime().compareTo(o1.getBookingTime()))
 				.map(orderMapper::toOrderResponse).toList();
 	}
 }

@@ -1,6 +1,7 @@
 package com.example.movie_ticket_be.core.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -26,11 +27,14 @@ public class SecurityConfig {
 	@Autowired
 	private CustomJwtDecoder customJwtDecoder;
 
+	@Value("#{'${ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}'.split(',')}")
+	private List<String> allowedOrigins;
+
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
 		// SSE endpoint dùng query param token, không gửi được Authorization header → permit riêng
 		httpSecurity.authorizeHttpRequests(request -> request
-				.requestMatchers("/seatShowTimes/*/stream").permitAll()
+				.requestMatchers("/seatShowTimes/selection/*/stream").permitAll()
 				.anyRequest().permitAll());
 
 		httpSecurity.oauth2ResourceServer(oauth2 -> oauth2
@@ -56,12 +60,10 @@ public class SecurityConfig {
 	public CorsFilter corsFilter() {
 		CorsConfiguration config = new CorsConfiguration();
 		config.setAllowCredentials(true);
-		config.setAllowedOrigins(List.of("http://localhost:5173", "http://localhost:3000", "http://192.168.7.99",
-				"http://192.168.7.99:8081"));
+		config.setAllowedOrigins(allowedOrigins);
 		config.setAllowedHeaders(List.of("Origin", "Content-Type", "Accept", "Authorization"));
 		config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
 		config.setMaxAge(3600L);
-		config.setAllowCredentials(true);;
 
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", config);

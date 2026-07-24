@@ -29,7 +29,7 @@ public class MomoService {
 
     public String createPaymentUrl(Long orderId, BigDecimal amount) {
         String requestId = momoConfig.getPartnerCode() + System.currentTimeMillis();
-        String orderIdStr = String.valueOf(orderId);
+        String orderIdStr = String.valueOf(System.currentTimeMillis()) + orderId;
         String orderInfo = "Thanh toán đơn hàng #" + orderId;
         String extraData = "";
 

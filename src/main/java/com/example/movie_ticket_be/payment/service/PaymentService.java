@@ -85,8 +85,10 @@ public class PaymentService {
 
 	@Transactional
 	public void deletePendingPayment(Long orderId) {
-		paymentRepository.findByOrder_OrderIdAndPaymentStatus(orderId, PaymentStatus.PENDING)
-				.ifPresent(paymentRepository::delete);
+		List<Payments> pendings = paymentRepository.findByOrder_OrderIdAndPaymentStatus(orderId, PaymentStatus.PENDING);
+		if (!pendings.isEmpty()) {
+			paymentRepository.deleteAll(pendings);
+		}
 	}
 
 	public Payments getExistingPaymentType(Long orderId) {
@@ -106,9 +108,8 @@ public class PaymentService {
 		if (order.getOrderStatus() != OrderStatus.PENDING
 				&& order.getOrderStatus() != OrderStatus.IN_PROGRESS) return;
 		// a. Cập nhật bản ghi PENDING → SUCCESS (hoặc tạo mới nếu không tồn tại)
-		Payments payment = paymentRepository
-				.findByOrder_OrderIdAndPaymentStatus(order.getOrderId(), PaymentStatus.PENDING)
-				.orElse(Payments.builder().order(order).amount(order.getFinalPrice()).build());
+		List<Payments> pendings = paymentRepository.findByOrder_OrderIdAndPaymentStatus(order.getOrderId(), PaymentStatus.PENDING);
+		Payments payment = pendings.isEmpty() ? Payments.builder().order(order).amount(order.getFinalPrice()).build() : pendings.get(0);
 		payment.setPaymentDate(LocalDateTime.now());
 		payment.setTransactionId(request.getTransactionId());
 		payment.setPaymentInfo(request.getPaymentInfo());
@@ -208,12 +209,12 @@ public class PaymentService {
 		orderRepository.save(order);
 
 		// a2. Cập nhật Payment PENDING → FAILED
-		paymentRepository.findByOrder_OrderIdAndPaymentStatus(order.getOrderId(), PaymentStatus.PENDING)
-				.ifPresent(payment -> {
-					payment.setPaymentStatus(PaymentStatus.FAILED);
-					payment.setPaymentDate(LocalDateTime.now());
-					paymentRepository.save(payment);
-				});
+		List<Payments> pendings = paymentRepository.findByOrder_OrderIdAndPaymentStatus(order.getOrderId(), PaymentStatus.PENDING);
+		for (Payments payment : pendings) {
+			payment.setPaymentStatus(PaymentStatus.FAILED);
+			payment.setPaymentDate(LocalDateTime.now());
+		}
+		if (!pendings.isEmpty()) paymentRepository.saveAll(pendings);
 
 		// b. Cập nhật Ticket & TRẢ GHẾ
 		List<OrderTickets> tickets = orderTicketRepository.findByOrders_OrderId(order.getOrderId());
@@ -318,9 +319,17 @@ public class PaymentService {
 		orderTicketRepository.saveAll(tickets);
 	}
 	@Transactional
-	public String retryMomoPayment(Long orderId) {
+	public Orders prepareOrderForRetry(Long orderId, PaymentType paymentType) {
 		Orders order = orderRepository.findByOrderId(orderId)
 				.orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+		if (order.getOrderStatus() == OrderStatus.PENDING || order.getOrderStatus() == OrderStatus.IN_PROGRESS) {
+			deletePendingPayment(orderId);
+			createPendingPayment(orderId, paymentType);
+			order.setOrderStatus(OrderStatus.IN_PROGRESS);
+			orderRepository.save(order);
+			return order;
+		}
 
 		if (order.getOrderStatus() != OrderStatus.CANCELLED) {
 			throw new AppException(ErrorCode.ORDER_NOT_FOUND);
@@ -370,8 +379,13 @@ public class PaymentService {
 		order.setExpiredTime(expiredTime);
 		orderRepository.save(order);
 
-		createPendingPayment(orderId, PaymentType.MOMO);
+		createPendingPayment(orderId, paymentType);
+		return order;
+	}
 
+	@Transactional
+	public String retryMomoPayment(Long orderId) {
+		Orders order = prepareOrderForRetry(orderId, PaymentType.MOMO);
 		return momoService.createPaymentUrl(orderId, order.getFinalPrice());
 	}
 

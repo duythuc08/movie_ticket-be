@@ -38,12 +38,16 @@ public class RecommendationAdminController {
     WeeklyRecommendationEmailService weeklyEmailService;
     UserRepository userRepository;
 
-    @PostMapping("/estimate-parameters")
-    public Map<String, BigDecimal> estimateParameters() {
-        BigDecimal alpha = parameterEstimationService.estimateAlpha();
-        BigDecimal s0 = parameterEstimationService.estimateS0();
-        return Map.of("alpha", alpha, "s0", s0);
-    }
+    // TAM NGUNG: implicit feedback bi comment (theo yeu cau chuyen ve CF
+    // thuan bang surprise.KNNWithMeans, khong xoa). ALPHA/S0 khong con duoc
+    // Python doc khi train (xem model_state.py ben recommend-service), nen
+    // endpoint uoc luong thu cong nay cung tam ngung theo.
+    // @PostMapping("/estimate-parameters")
+    // public Map<String, BigDecimal> estimateParameters() {
+    //     BigDecimal alpha = parameterEstimationService.estimateAlpha();
+    //     BigDecimal s0 = parameterEstimationService.estimateS0();
+    //     return Map.of("alpha", alpha, "s0", s0);
+    // }
 
     /**
      * Trigger train thủ công — dùng khi cần train ngay (demo, seed data mới)

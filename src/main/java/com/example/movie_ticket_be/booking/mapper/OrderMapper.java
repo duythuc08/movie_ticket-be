@@ -23,7 +23,7 @@ public interface OrderMapper {
 	@Mapping(target = "payment", ignore = true)
 	OrderResponse toOrderResponse(Orders orders);
 
-	@Mapping(target = "seatName", expression = "java(orderTickets.getSeatShowTime().getSeats().getSeatRow() + String.valueOf(orderTickets.getSeatShowTime().getSeats().getSeatNumber()))")
+	@Mapping(target = "seatName", expression = "java(getSeatName(orderTickets))")
 	@Mapping(source = "seatShowTime.seats.seatType", target = "seatType")
 	OrderTicketResponse toTicketResponse(OrderTickets orderTickets);
 
@@ -58,5 +58,12 @@ public interface OrderMapper {
 		response.showTimeInfo(ShowTimeInfo.builder()
 				.movieName(st.getMovies() != null ? st.getMovies().getTitle() : null).roomName(roomName)
 				.showTime(st.getStartTime()).cinemaName(cinemaName).cinemaAddress(cinemaAddress).build());
+	}
+
+	default String getSeatName(OrderTickets orderTickets) {
+		if (orderTickets.getSeatShowTime() != null && orderTickets.getSeatShowTime().getSeats() != null) {
+			return orderTickets.getSeatShowTime().getSeats().getSeatRow() + String.valueOf(orderTickets.getSeatShowTime().getSeats().getSeatNumber());
+		}
+		return "---";
 	}
 }

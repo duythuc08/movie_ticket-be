@@ -61,7 +61,8 @@ public class PaymentController {
 	@GetMapping("/vnpay-callback")
 	public RedirectView vnpayCallback(HttpServletRequest request) {
 		String status = request.getParameter("vnp_ResponseCode");
-		String txnRef = request.getParameter("vnp_TxnRef");
+		String rawOrderInfo = request.getParameter("vnp_OrderInfo");
+		String txnRef = rawOrderInfo != null && rawOrderInfo.contains("#") ? rawOrderInfo.split("#")[1] : null;
 
 		Map<String, String> fields = new HashMap<>();
 		for (Enumeration<String> params = request.getParameterNames(); params.hasMoreElements();) {
@@ -120,7 +121,8 @@ public class PaymentController {
 			return new RedirectView("http://localhost:3000/payment-error");
 		}
 
-		String orderId = params.get("orderId");
+		String rawOrderInfo = params.get("orderInfo");
+		String orderId = rawOrderInfo != null && rawOrderInfo.contains("#") ? rawOrderInfo.split("#")[1] : null;
 		String resultCode = params.get("resultCode");
 
 		if ("0".equals(resultCode)) {
@@ -146,7 +148,8 @@ public class PaymentController {
 			return ResponseEntity.ok(Map.of("resultCode", 1, "message", "Invalid signature"));
 		}
 
-		String orderId = params.get("orderId");
+		String rawOrderInfo = params.get("orderInfo");
+		String orderId = rawOrderInfo != null && rawOrderInfo.contains("#") ? rawOrderInfo.split("#")[1] : null;
 		String resultCode = params.get("resultCode");
 
 		if ("0".equals(resultCode)) {
@@ -162,6 +165,20 @@ public class PaymentController {
 		}
 
 		return ResponseEntity.ok(Map.of("resultCode", 0, "message", "OK"));
+	}
+
+	@PostMapping("/retry")
+	public ApiResponse<String> retryPayment(HttpServletRequest request, @RequestParam Long orderId, @RequestParam PaymentType method) {
+		String payUrl = "";
+		if (method == PaymentType.VNPAY) {
+			Orders order = paymentService.prepareOrderForRetry(orderId, PaymentType.VNPAY);
+			payUrl = vnPayService.createPaymentUrl(request, order.getOrderId(), order.getFinalPrice());
+		} else if (method == PaymentType.MOMO) {
+			payUrl = paymentService.retryMomoPayment(orderId);
+		} else {
+			throw new AppException(ErrorCode.INVALID_KEY);
+		}
+		return ApiResponse.<String>builder().result(payUrl).build();
 	}
 
 	@PostMapping("/momo/retry")

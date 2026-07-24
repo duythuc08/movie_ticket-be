@@ -68,4 +68,7 @@ public interface OrderRepository extends JpaRepository<Orders, Long>, JpaSpecifi
 	@Query("SELECT COUNT(o) FROM Orders o WHERE o.orderStatus = :status AND o.bookingTime >= :from AND o.bookingTime <= :to")
 	Long countByStatusAndPeriod(@Param("status") OrderStatus status, @Param("from") LocalDateTime from,
 			@Param("to") LocalDateTime to);
+
+	@Query("SELECT DAY(o.bookingTime), SUM(o.finalPrice), COUNT(o) FROM Orders o WHERE o.orderStatus = :status AND o.bookingTime >= :from AND o.bookingTime <= :to GROUP BY DAY(o.bookingTime)")
+	List<Object[]> sumRevenueAndOrdersPerDay(@Param("status") OrderStatus status, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

@@ -42,11 +42,28 @@ spring:
 
 jwt:
   signerKey: ${JWT_SIGNERKEY}
+  refreshExpiryDays: ${JWT_REFRESH_EXPIRY_DAYS}
 
 cloudinary:
   cloud_name: ${CLOUDINARY_CLOUD_NAME}
   api_key: ${CLOUDINARY_API_KEY}
   api_secret: ${CLOUDINARY_API_SECRET}
+
+momo:
+  partner-code: ${MOMO_PARTNER_CODE}
+  access-key: ${MOMO_ACCESS_KEY}
+  secret-key: ${MOMO_SECRET_KEY}
+  endpoint: ${MOMO_ENDPOINT}
+  redirect-url: ${MOMO_REDIRECT_URL}
+  ipn-url: ${MOMO_IPN_URL}
+
+vnpay:
+  pay-url: ${VNPAY_PAY_URL}
+  return-url: ${VNPAY_RETURN_URL}
+  tmn-code: ${VNPAY_TMN_CODE}
+  secret-key: ${VNPAY_SECRET_KEY}
+  version: ${VNPAY_VERSION}
+  command: ${VNPAY_COMMAND}
 
 recommendation:
   weights:
@@ -113,3 +130,6 @@ recommendation:
   cold-start:
     min-interactions-threshold: 3   # K_u < 3 → kích hoạt fallback, không chạy CF
     popularity-alpha: 0.5           # Score_Popularity(i) = alpha×Norm_Rating + (1-alpha)×Norm_Tickets
+  prediction:
+    top-n: 5                       # số lượng phim gợi ý cho mỗi user
+  python-service-url: ${RECOMMENDATION_PYTHON_SERVICE_URL}   # Python FastAPI recommend-service

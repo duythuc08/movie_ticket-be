@@ -37,3 +37,7 @@ build/
 *.yml
 *.md
 !application.example.yaml
+
+# Env (chứa secret thật, không commit — chỉ .env.example được commit)
+.env
+!.env.example
